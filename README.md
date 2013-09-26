@@ -4,6 +4,7 @@
 
 A successful git branching model - [link](http://nvie.com/posts/a-successful-git-branching-model/) 
 
+JADE tutorial for beginners - [link](http://www.iro.umontreal.ca/~vaucher/Agents/Jade/primer2.html)
 
 ## Game Rules
 
