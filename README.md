@@ -4,9 +4,9 @@
 
 A successful git branching model - [link](http://nvie.com/posts/a-successful-git-branching-model/) 
 
-JADE tutorial for beginners - [link](http://www.iro.umontreal.ca/~vaucher/Agents/Jade/primer2.html)
-
 Running JADE under Eclipse - [link](http://wrjih.wordpress.com/2008/11/29/running-jade-under-eclipse/)
+
+JADE tutorial for beginners - [link](http://jade.tilab.com/papers/JADETutorialIEEE/JADETutorial_Programming.pdf)
 
 ## Game Rules
 
