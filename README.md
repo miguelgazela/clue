@@ -6,6 +6,8 @@ A successful git branching model - [link](http://nvie.com/posts/a-successful-git
 
 JADE tutorial for beginners - [link](http://www.iro.umontreal.ca/~vaucher/Agents/Jade/primer2.html)
 
+Running JADE under Eclipse - [link](http://wrjih.wordpress.com/2008/11/29/running-jade-under-eclipse/)
+
 ## Game Rules
 
 At the beginning of play, three cards — one suspect, one weapon, and one room card — are chosen at random and put into a special envelope, so that no one can see them. These cards represent the facts of the case. The remainder of the cards are distributed among the players.
