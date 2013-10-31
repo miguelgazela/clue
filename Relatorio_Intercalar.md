@@ -16,8 +16,20 @@ Deve incluir as secções referidas no seguinte arquétipo.
 ### Folha de rosto
 
 * Nome da disciplina e ano
+
+		Agentes e Inteligência Artificial Distribuída 
+		2013/2014
+	
 * Título do trabalho
+
+		Cluedo - O Jogo do Detective
+
 * Nome dos elementos do grupo (incluir código de aluno e email)
+
+		Miguel Oliveira - ei10076
+		Afonso Caldas - ei10xxx
+		Rui Monteiro - ei10xxx
+
 
 ### Índice
 
