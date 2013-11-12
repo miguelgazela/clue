@@ -22,16 +22,10 @@ package game_logic;
 		String s;
 		
 		if (args != null) {
-			for (int i = 0; i<args.length; i++) {
+			for (int i = 0; i <args.length; i++) {
 				s = (String) args[i];
 				System.out.println("p" + i + ": " + s);
 			}
-			
-			int i = Integer.parseInt( (String) args[0] );
-			s     = (String) args[1];
-			
-			System.out.println("i*i= " + i*i);
-			System.exit(1);
 		}
 	}
  }
