@@ -1,3 +1,4 @@
+package game_logic;
 // ------------------------------------------------------------
 //   ParamAgent:   An Agent receiving parameters             
 //
@@ -10,9 +11,11 @@
 // ------------------------------------------------------------
 
  import jade.core.Agent;
-
- public class Detective extends Agent 
+ 
+ public class Player extends Agent 
  { 
+	private static final long serialVersionUID = -4614773070990660799L;
+
 	protected void setup() 
 	{ 
 		Object[] args = getArguments();
