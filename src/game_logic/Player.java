@@ -12,7 +12,6 @@ package game_logic;
 
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.domain.introspection.ACLMessage;
  
  public class Player extends Agent 
  { 
@@ -22,12 +21,7 @@ import jade.domain.introspection.ACLMessage;
 		
 		@Override
 		public void action() {
-			ACLMessage msg = myAgent.receive();
-			if (msg != null) {
-				// TODO message received. Process it.
-			} else {
-				block();
-			}
+			
 		}
 
 	}

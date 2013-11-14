@@ -9,6 +9,10 @@ public class GameManagerAgent extends Agent {
 	private static final long serialVersionUID = 5548183532204390248L;
 	private CluedoGameGUI myGui;
 	
+	public GameManagerAgent() {
+		// TODO constructor
+	}
+
 	public void setup() {
 		int numberPlayers = 0;
 		
@@ -19,23 +23,32 @@ public class GameManagerAgent extends Agent {
 		}
 		
 		// create and show the GUI
-		myGui = new CluedoGameGUI();
+		myGui = new CluedoGameGUI(this);
 		myGui.show();
 		
-		AgentContainer container = getContainerController();
 		
-		// creating the players and add them to the main container
-		for(int i = 0; i < numberPlayers; i++) {
-			try {
-				AgentController a = container.createNewAgent(Cluedo.suspects[i], "game_logic.Player", null);
-				a.start();
-				System.out.println("+++ Created player: " + Cluedo.suspects[i]);
-			} catch(Exception e) {
-				// do nothing
-				e.printStackTrace();
-			}
-		}
+//		AgentContainer container = getContainerController();
+//		
+//		// creating the players and add them to the main container
+//		for(int i = 0; i < numberPlayers; i++) {
+//			try {
+//				AgentController a = container.createNewAgent(Cluedo.suspects[i], "game_logic.Player", null);
+//				a.start();
+//				System.out.println("+++ Created player: " + Cluedo.suspects[i]);
+//			} catch(Exception e) {
+//				// do nothing
+//				e.printStackTrace();
+//			}
+//		}
 		
 		System.out.printf("Number of players: %d", numberPlayers);
+	}
+	
+	public void startGame(int numPlayers) {
+		// TODO 
+	}
+
+	protected void endGame() {
+		// TODO this will be called to end the game
 	}
 }
