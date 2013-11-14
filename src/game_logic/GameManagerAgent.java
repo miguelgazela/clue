@@ -24,7 +24,8 @@ public class GameManagerAgent extends Agent {
 		
 		// create and show the GUI
 		myGui = new CluedoGameGUI(this);
-		myGui.show();
+		
+		System.out.println("Here!");
 		
 		
 //		AgentContainer container = getContainerController();
@@ -46,6 +47,7 @@ public class GameManagerAgent extends Agent {
 	
 	public void startGame(int numPlayers) {
 		// TODO 
+		System.out.println("HERE AGAIN");
 	}
 
 	protected void endGame() {
