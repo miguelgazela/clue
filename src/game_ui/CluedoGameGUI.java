@@ -7,6 +7,6 @@ public class CluedoGameGUI {
 	}
 	
 	public void show() {
-		// todo
+		System.out.println("Showing UI");
 	}
 }

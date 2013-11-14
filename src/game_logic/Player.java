@@ -10,11 +10,27 @@ package game_logic;
 //             % java jade.Boot 'fred:ParamAgent(3 "Allo there")'
 // ------------------------------------------------------------
 
- import jade.core.Agent;
+import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.domain.introspection.ACLMessage;
  
  public class Player extends Agent 
  { 
 	private static final long serialVersionUID = -4614773070990660799L;
+	
+	private class PlayerBehaviour extends CyclicBehaviour {
+		
+		@Override
+		public void action() {
+			ACLMessage msg = myAgent.receive();
+			if (msg != null) {
+				// TODO message received. Process it.
+			} else {
+				block();
+			}
+		}
+
+	}
 
 	protected void setup() 
 	{ 
@@ -27,5 +43,8 @@ package game_logic;
 				System.out.println("p" + i + ": " + s);
 			}
 		}
+		
+		// adding behaviour
+		addBehaviour(new PlayerBehaviour());
 	}
  }
