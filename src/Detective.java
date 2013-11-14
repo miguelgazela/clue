@@ -13,6 +13,8 @@
 
  public class Detective extends Agent 
  { 
+	private static final long serialVersionUID = -4614773070990660799L;
+
 	protected void setup() 
 	{ 
 		Object[] args = getArguments();

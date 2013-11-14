@@ -1,41 +1,36 @@
-import java.util.ArrayList;
+import java.util.Vector;
 
 import jade.core.*;
-import jade.core.behaviours.*;
-
-import jade.core.AID;
-import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
+import jade.wrapper.PlatformController;
 
 public class GameControlAgent extends Agent {
 
 	private static final long serialVersionUID = 5548183532204390248L;
 
-	private ArrayList<AgentController> agents = new ArrayList<AgentController>();
+	private Vector<AID> agents = new Vector<AID>();
 	private static String[] character_names = {"Miss Scarlett", "Colonel Mustard", "Mrs. White", "Reverend Green", "Mrs. Peacock", "Professor Plum"};
-	
+
 	public void setup() {
-		int numberPlayers = 0;
+		//TODO
+	}
+
+	public void startGame(int numPlayers) {
+		PlatformController container = getContainerController(); // get a container controller for creating new agents
 		
-		Object[] args = getArguments();
-		if(args != null && args.length > 0) {
-			numberPlayers = Integer.parseInt((String)args[0]);
-		}
-		
-		AgentContainer c = getContainerController();
-		
-		for(int i = 0; i < numberPlayers; i++) {
-			try {
-				AgentController a = c.createNewAgent(character_names[i], "Detective", null);
-				a.start();
-				System.out.println("+++ Created: " + character_names[i]);
-				agents.add(a);
-			} catch(Exception e) {
-				// do nothing
-				e.printStackTrace();
+		// create N player agents
+		try {
+			for (int i = 0;  i < numPlayers;  i++) {
+				// create a new agent
+				AgentController guest = container.createNewAgent(character_names[i], "examples.party.GuestAgent", null);
+				guest.start();
+
+				agents.add( new AID(character_names[i], AID.ISLOCALNAME) );
 			}
 		}
-		
-		System.out.printf("Number of players: %d", numberPlayers);
+		catch (Exception e) {
+			System.err.println( "Exception while adding guests: " + e );
+			e.printStackTrace();
+		}
 	}
 }
