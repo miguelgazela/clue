@@ -50,7 +50,7 @@ public class CluedoGameGUI extends JFrame {
 	private void startGame(ActionEvent e) {
 		gameManagerAgent.addBehaviour(new OneShotBehaviour() {
 			public void action() {
-				((GameManagerAgent)myAgent).startGame(3);
+				((GameManagerAgent)myAgent).createGame(3);
 			}
 		});
 	}

@@ -1,13 +1,17 @@
 package game_logic;
+
 import game_ui.CluedoGameGUI;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.Profile;
+import jade.core.ProfileImpl;
+import jade.core.Runtime;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
-import jade.wrapper.AgentController;
-import jade.wrapper.PlatformController;
+import jade.lang.acl.UnreadableException;
+import jade.wrapper.*;
 
 import java.util.Vector;
 
@@ -15,20 +19,15 @@ public class GameManagerAgent extends Agent {
 
 	private static final long serialVersionUID = 5548183532204390248L;
 
+	private static final int NUM_CONTAINERS = 10;
+
+	
 	private CluedoGameGUI myGui;
 	private Vector<AID> agents = new Vector<AID>();
-	private static String[] character_names = {
-		"Miss Scarlett",
-		"Colonel Mustard",
-		"Mrs. White",
-		"Reverend Green",
-		"Mrs. Peacock",
-		"Professor Plum"
-	};
-
-	public GameManagerAgent() {
-		// TODO constructor
-	}
+	private int playersReady = 0;
+	private int numPlayers = -1;
+	
+	public String READY = "READY";
 
 	public void setup() {
 		// create and show the GUI
@@ -36,21 +35,40 @@ public class GameManagerAgent extends Agent {
 
 		try {
 			System.out.println( getLocalName() + " setting up");
-			
+
 			// create the agent descrption of itself
 			DFAgentDescription dfd = new DFAgentDescription();
 			dfd.setName( getAID() );
 			DFService.register( this, dfd );
-
-			// add a Behaviour to handle messages from players
-			addBehaviour( new CyclicBehaviour( this ) {
-				private static final long serialVersionUID = 1L;
-
+			
+			// add a Behaviour to handle messages from guests
+			addBehaviour( new CyclicBehaviour(this) {
 				public void action() {
 					ACLMessage msg = receive();
+
 					if (msg != null) {
-						System.out.println(msg.getContent());
-					} else {
+						if (READY.equals( msg.getContent() )) {
+							// a player is ready to go
+							playersReady++;
+							System.out.println(msg.getSender().getLocalName()+" is ready");
+							
+							try {
+								Cluedo c2 = (Cluedo) msg.getContentObject();
+								System.out.println(c2);
+							} catch (UnreadableException e) {
+								e.printStackTrace();
+							}
+							
+//							setPartyState( "Inviting guests (" + m_guestCount + " have arrived)" );
+//
+							if (playersReady == agents.size()) {
+								System.out.println( "All players are ready, starting game" );
+								startGame();
+							}
+						}
+					}
+					else {
+						// if no message is arrived, block the behaviour
 						block();
 					}
 				}
@@ -60,25 +78,56 @@ public class GameManagerAgent extends Agent {
 			e.printStackTrace();
 		}
 	}
+	
+	public void startGame() {
+		System.out.println("Starting the game");
+		
+	}
 
-	public void startGame(int numPlayers) {
+	public void createGame(int numPlayers) {
+		this.numPlayers = numPlayers;
+		createGameContainers();
+		createSuspectsAgents(numPlayers);
+	}
+
+	private void createGameContainers() {
+
+		// Get a hold on JADE runtime
+		Runtime rt = Runtime.instance();
+
+		// Create a default profile and set to be non-main container
+		ProfileImpl p = new ProfileImpl();
+		p.setParameter(Profile.MAIN, "false");
+
+		for(int i = 0; i < GameManagerAgent.NUM_CONTAINERS; i++) {
+			try {
+				p.setParameter(Profile.CONTAINER_NAME, Cluedo.rooms[i]);
+				// Create a new non-main container, connecting to the default
+				// main container (i.e. on this host, port 1099)
+				AgentContainer ac = rt.createAgentContainer(p);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void createSuspectsAgents(int numPlayers) {
 		PlatformController container = getContainerController();
 
 		// create N player agents
 		try {
 			for (int i = 0;  i < numPlayers;  i++) {
 				// create a new agent
-				AgentController guest = container.createNewAgent(character_names[i], "game_logic.BotPlayerAgent", null);
+				AgentController guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.BotPlayerAgent", null);
 				guest.start();
 
-				agents.add( new AID(character_names[i], AID.ISLOCALNAME) );
+				agents.add(new AID(Cluedo.suspects[i], AID.ISLOCALNAME));
 			}
 		}
 		catch (Exception e) {
 			System.err.println( "Exception while adding guests: " + e );
 			e.printStackTrace();
 		}
-		System.out.println("Starting the game");
 	}
 
 	protected void endGame() {
