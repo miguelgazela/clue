@@ -44,20 +44,62 @@ public class GameManagerAgent extends Agent {
 			
 			// add a Behaviour to handle messages from guests
 			addBehaviour( new CyclicBehaviour(this) {
+				private static final long serialVersionUID = 1347573303070882850L;
+
 				public void action() {
 					ACLMessage msg = receive();
 
 					if (msg != null) {
-						if (READY.equals( msg.getContent() )) { // a player is ready to go
+
+						Message message;
+						try {
+							message = (Message) msg.getContentObject();
 							
-							playersReady++;
-							System.out.println(msg.getSender().getLocalName()+" is ready");
+							switch (message.getType()) {
+							case "READY":
+								System.out.println(msg.getSender() + " sended Ready message!");
+								break;
+							default:
+								break;
+							}
 							
-							if (playersReady == agents.size()) { // all players ready
-								System.out.println( "All players are ready, starting game." );
+							if (playersReady == agents.size()) {
+								System.out.println( "All players are ready, starting game" );
 								startGame();
 							}
-						}
+						} catch (UnreadableException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}						
+//						
+//						
+//						try {
+//							System.out.println((Cluedo) msg.getContentObject());
+//						} catch (UnreadableException e1) {
+//							// TODO Auto-generated catch block
+//							e1.printStackTrace();
+//						}
+//						
+//						
+//						if (READY.equals( msg.getContent() )) {
+//							// a player is ready to go
+//							playersReady++;
+//							System.out.println(msg.getSender().getLocalName()+" is ready");
+//							
+//							try {
+//								String c = (String) msg.getContentObject();
+//								System.out.println(c.toString());
+//							} catch (UnreadableException e) {
+//								e.printStackTrace();
+//							}
+//							
+////							setPartyState( "Inviting guests (" + m_guestCount + " have arrived)" );
+////
+//							if (playersReady == agents.size()) {
+//								System.out.println( "All players are ready, starting game" );
+//								startGame();
+//							}
+//						}
 					}
 					else { // if no message is arrived, block the behaviour
 						block();
