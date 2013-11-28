@@ -25,7 +25,8 @@ public class GameManagerAgent extends Agent {
 	private CluedoGameGUI myGui;
 	private Vector<AID> agents = new Vector<AID>();
 	private int playersReady = 0;
-	private int numPlayers = -1;
+	private int numPlayers = 0;
+	private Cluedo cluedo;
 	
 	public String READY = "READY";
 
@@ -47,28 +48,18 @@ public class GameManagerAgent extends Agent {
 					ACLMessage msg = receive();
 
 					if (msg != null) {
-						if (READY.equals( msg.getContent() )) {
-							// a player is ready to go
+						if (READY.equals( msg.getContent() )) { // a player is ready to go
+							
 							playersReady++;
 							System.out.println(msg.getSender().getLocalName()+" is ready");
 							
-							try {
-								Cluedo c2 = (Cluedo) msg.getContentObject();
-								System.out.println(c2);
-							} catch (UnreadableException e) {
-								e.printStackTrace();
-							}
-							
-//							setPartyState( "Inviting guests (" + m_guestCount + " have arrived)" );
-//
-							if (playersReady == agents.size()) {
-								System.out.println( "All players are ready, starting game" );
+							if (playersReady == agents.size()) { // all players ready
+								System.out.println( "All players are ready, starting game." );
 								startGame();
 							}
 						}
 					}
-					else {
-						// if no message is arrived, block the behaviour
+					else { // if no message is arrived, block the behaviour
 						block();
 					}
 				}
@@ -79,17 +70,27 @@ public class GameManagerAgent extends Agent {
 		}
 	}
 	
+	/**
+	 * 
+	 */
 	public void startGame() {
 		System.out.println("Starting the game");
-		
+		cluedo = new Cluedo(agents.size());
 	}
 
+	/**
+	 * 
+	 * @param numPlayers
+	 */
 	public void createGame(int numPlayers) {
 		this.numPlayers = numPlayers;
 		createGameContainers();
 		createSuspectsAgents(numPlayers);
 	}
 
+	/**
+	 * 
+	 */
 	private void createGameContainers() {
 
 		// Get a hold on JADE runtime

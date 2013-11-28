@@ -1,5 +1,6 @@
 package game_ui;
 
+import game_logic.Cluedo;
 import game_logic.GameManagerAgent;
 import jade.core.behaviours.OneShotBehaviour;
 

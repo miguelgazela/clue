@@ -57,16 +57,9 @@ import jade.lang.acl.ACLMessage;
 //			}
 //		}
 		
-		Cluedo c = new Cluedo();
-		
 		// notify the game manager agent that we're ready to play
 		ACLMessage ready = new ACLMessage(ACLMessage.INFORM);
 		ready.setContent("READY");
-		try {
-			ready.setContentObject(c);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		ready.addReceiver(new AID("host", AID.ISLOCALNAME));
 		send(ready);
 		

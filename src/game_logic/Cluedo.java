@@ -17,4 +17,6 @@ public class Cluedo implements Serializable{
 	public Cluedo(int numberOfPlayers) {
 		
 	}
+	
+	
 }
