@@ -31,7 +31,6 @@ import jade.lang.acl.ACLMessage;
 		public void action() {
 			
 		}
-
 	}
 
 	protected void setup() 
@@ -58,12 +57,12 @@ import jade.lang.acl.ACLMessage;
 //		}
 		
 		Cluedo c = new Cluedo();
+		Message msg = new Message("READY", c);
 		
 		// notify the game manager agent that we're ready to play
 		ACLMessage ready = new ACLMessage(ACLMessage.INFORM);
-		ready.setContent("READY");
 		try {
-			ready.setContentObject(c);
+			ready.setContentObject(msg);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
