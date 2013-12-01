@@ -56,8 +56,8 @@ import jade.lang.acl.ACLMessage;
 //			}
 //		}
 		
-		Cluedo c = new Cluedo();
-		Message msg = new Message("READY", c);
+		Cluedo c = new Cluedo(3); // TODO temporary
+		GameMessage msg = new GameMessage("READY", c);
 		
 		// notify the game manager agent that we're ready to play
 		ACLMessage ready = new ACLMessage(ACLMessage.INFORM);

@@ -24,12 +24,10 @@ public class Cluedo implements Serializable{
 	}
 	
 	public Cluedo(int numberOfPlayers) {
-		C
-		pickMainCards();
-		
+		pickGameSolution();
 	}
 	
-	private void pickMainCards() {
+	private void pickGameSolution() {
 		murderer = suspects[r.nextInt(suspects.length)];
 		weapon = weapons[r.nextInt(weapons.length)];
 		room = rooms[r.nextInt(rooms.length)];

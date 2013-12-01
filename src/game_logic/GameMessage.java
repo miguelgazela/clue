@@ -2,12 +2,13 @@ package game_logic;
 
 import java.io.Serializable;
 
-public class Message implements Serializable {
+public class GameMessage implements Serializable {
 	private static final long serialVersionUID = -5733727091301695981L;
+	
 	private String type;
 	private Object object;
 	
-	public Message(String type, Object obj) {
+	public GameMessage(String type, Object obj) {
 		setType(type);
 		setObject(obj);
 	}

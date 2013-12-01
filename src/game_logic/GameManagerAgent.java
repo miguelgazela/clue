@@ -51,9 +51,9 @@ public class GameManagerAgent extends Agent {
 
 					if (msg != null) {
 
-						Message message;
+						GameMessage message;
 						try {
-							message = (Message) msg.getContentObject();
+							message = (GameMessage) msg.getContentObject();
 							
 							switch (message.getType()) {
 							case "READY":
