@@ -1,6 +1,9 @@
 package game_logic;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 
 public class Cluedo implements Serializable{
 
@@ -10,12 +13,26 @@ public class Cluedo implements Serializable{
 	public static String[] weapons = {"Candlestick", "Dagger", "Lead pipe", "Revolver", "Rope", "Wrench"};
 	public static String[] rooms = {"Kitchen", "Ballroom", "Conservatory", "Dining Room", "Lounge", "Hall", "Study", "Library", "Billiard Room", "Corridor"};
 	
-	public Cluedo() {
-		// default constructor
+	private ArrayList<String> cards;
+	
+	private String murderer, weapon, room;
+	
+	private Random r = new Random(System.currentTimeMillis());
+	
+	private Cluedo() {
+		
 	}
 	
 	public Cluedo(int numberOfPlayers) {
+		C
+		pickMainCards();
 		
+	}
+	
+	private void pickMainCards() {
+		murderer = suspects[r.nextInt(suspects.length)];
+		weapon = weapons[r.nextInt(weapons.length)];
+		room = rooms[r.nextInt(rooms.length)];
 	}
 	
 	
