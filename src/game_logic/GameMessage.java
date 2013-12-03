@@ -8,6 +8,8 @@ public class GameMessage implements Serializable {
 	
 	public static final String READY_PLAY = "READY_PLAY";
 	public static final String DISTRIBUTE_CARDS = "DISTRIBUTE_CARDS";
+	public static final String ACK_DISTRIBUTE_CARDS = "ACK_DISTRIBUTE_CARDS";
+	public static final String TURN_PLAYER = "TURN_PLAYER";
 	
 	private final String type;
 	private ArrayList<Object> objects = null;

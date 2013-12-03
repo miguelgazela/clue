@@ -525,77 +525,9 @@ public class UIGame extends JFrame {
 			} else {
 				if(!gameIsOver) {
 					if(!showingResetWarning) {
-							UICoord[][] board_positions = uiResourcesLoader.board_positions_coords;
-
-//							for(int i = 0; i < 10; i++) {
-//								for(int j = 0; j < 10; j++) {
-//									UICoord c = board_positions[i][j];
-//									if(x >= c.x && y >= c.y && x <= (c.x + 50) && y <= (c.y + 50)) { //player has clicked in a board position
-//										try {
-//											Coord boardPos = new Coord(j+1, i+1);
-//											Board board = game.getBoard();
-//											
-//											if(game_type == UIResourcesLoader.STRATEGIC_GAME && game_phase == PLACING_PHASE) {
-//												if(game.getBoard().placePiece(boardPos, nextPiece, game.getCurrentPlayer()).intValue() == 0) {
-//													repaint();
-//												}
-//												
-//												if(game.getCurrentPlayer().getPieces().size() == 0) { // no more pieces to place
-//													updateGameTurn();
-//													if(game.getCurrentPlayer().getName().equals("P1")) {
-//														nextPiece = null;
-//														game_phase = MOVING_PHASE;
-//													} else {
-//														nextPiece = game.getCurrentPlayer().getNextPiece();
-//														repaint();
-//													}
-//												} else {
-//													nextPiece = game.getCurrentPlayer().getNextPiece();
-//												}
-//											} else if(hasPieceSelected) { // is picking destination
-//												int moveResult = game.makeMove(new Coord(jPieceselected+1, iPieceSelected+1), new Coord(j+1, i+1)).intValue();
-//												
-//												if(moveResult == 4) { // tried to go to a pos with a piece of his own
-//													Piece piece = board.getPieceAtPosition(boardPos);
-//													if(!piece.getName().equals("BOMB") && !piece.getName().equals("FLAG")) {
-//														iPieceSelected = i;
-//														jPieceselected = j;
-//														repaint();
-//													}
-//												} else if (moveResult == 0) { // the move was valid
-//													if(game.isGameOver()){
-//														gameOver();
-//													} else {													
-//														hasPieceSelected = false;
-//														iPieceSelected = -1;
-//														jPieceselected = - 1;
-//														updateGameTurn();
-//														repaint();
-//													}
-//												}
-//											} else { // it needs to pick piece
-//												
-//												if(!board.isPositionFree(boardPos) && !board.isPositionLake(boardPos)) { // it has a piece on it
-//													Piece piece = board.getPieceAtPosition(boardPos);
-//													
-//													if(piece.getColor().toString() == game.getCurrentPlayer().getColor().toString()) { // it's a player piece
-//														
-//														if(!piece.getName().equals("BOMB") && !piece.getName().equals("FLAG")) {
-//															hasPieceSelected = true;
-//															iPieceSelected = i;
-//															jPieceselected = j;
-//															repaint();
-//														}
-//													}
-//												}
-//											}
-//										} catch (CGException | GameException e1) {
-//											e1.printStackTrace();
-//											System.exit(-1);
-//										}
-//									}
-//								}
-//							}
+							
+						// game loop here!
+						
 					} else { // it's showing the reset warning
 						if(x >= 499 && y >= 407 && x <= 593 && y <= 446) { // yes
 							resetGame();

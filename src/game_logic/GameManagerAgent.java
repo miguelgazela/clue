@@ -61,14 +61,25 @@ public class GameManagerAgent extends Agent {
 		}
 	}
 	
+	private class GameBehaviour extends CyclicBehaviour {
+		private static final long serialVersionUID = 6164848963172508841L;
+
+		@Override
+		public void action() {
+			
+		}
+		
+	}
+	
 	/**
-	 * responsive for handling the pre-game messages to and from players
+	 * responsible for handling the pre-game messages to and from players
 	 * @author migueloliveira
 	 *
 	 */
 	private class PreGameBehaviour extends CyclicBehaviour {
 		private static final long serialVersionUID = -4883662942187754544L;
 		private int playersReady = 0;
+		private int playersThatReceivedCards = 0;
 
 		@Override
 		public void action() {
@@ -86,15 +97,32 @@ public class GameManagerAgent extends Agent {
 							playersReady++;
 							logger.log(msg.getSender().getLocalName()+" is ready to start the game.");
 
-							if(playersReady == agents.size()) {
+							if(playersReady == numPlayers) {
 								logger.log("All players are ready, starting game.");
-								gameState = GameState.Initiating_game;
+								gameState = GameState.Distribution_of_cards;
 								((GameManagerAgent)myAgent).startGame();
 							}
 						}
 					}
 						break;
-
+					case GameMessage.ACK_DISTRIBUTE_CARDS:
+					{
+						if(gameState == GameState.Distribution_of_cards) { // waiting for ack from all players
+							playersThatReceivedCards++;
+							logger.log(msg.getSender().getLocalName()+" has received his cards.");
+							
+							if(playersThatReceivedCards == numPlayers) {
+								logger.log("All players received their cards.");
+								gameState = GameState.Game_started;
+								
+								// add Behaviour to handle in-game messages
+								myAgent.addBehaviour(new GameBehaviour());
+								
+								((GameManagerAgent)myAgent).notifyTurnPlayer();
+							}
+						}
+					}
+						break;
 					default:
 					{
 						// should not get here!!!
@@ -157,6 +185,29 @@ public class GameManagerAgent extends Agent {
 		this.numPlayers = numPlayers;
 		createGameContainers();
 		createSuspectsAgents(numPlayers);
+	}
+	
+	/**
+	 * sends a message to all agents with the name of the turn player
+	 */
+	private void notifyTurnPlayer() {
+		logger.log("Notifying players about this turn's player");
+		
+		for(AID agent: agents) {
+			GameMessage msg = new GameMessage(GameMessage.TURN_PLAYER);
+			msg.addObject(cluedo.getTurnPlayerName());
+
+			// send message with turn player name to agent
+			ACLMessage turn = new ACLMessage(ACLMessage.INFORM);
+			try {
+				turn.setContentObject(msg);
+				turn.addReceiver(agent);
+				send(turn);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
+		}
 	}
 
 	/**

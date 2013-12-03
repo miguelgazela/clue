@@ -21,9 +21,15 @@ public class Cluedo implements Serializable{
 	private ArrayList<CluedoCard> cards;
 	private CluedoCard murderer = null, weapon = null, room = null;
 	private final int numberPlayers;
+	
+	/**
+	 * the index of the player that is playing this turn
+	 */
+	private int turnPlayerIndex = -1;
+	private int diceResult = -1;
 	private CluedoLogger logger;
 	private HashMap<String, ArrayList<CluedoCard>> playerCards;
-
+	private Board board;
 	private Random r = new Random(System.currentTimeMillis());
 	
 	public Cluedo(int numberOfPlayers) throws Exception {
@@ -31,10 +37,12 @@ public class Cluedo implements Serializable{
 			throw new Exception("Invalid number of players. min:3 max: 6");
 		}
 		numberPlayers = numberOfPlayers;
+		board = new Board();
 		logger = CluedoLogger.getInstance();
 		initGameCards();
 		initGameSolution();
 		initPlayersCards();
+		findWhoPlaysFirst();
 	}
 	
 	public CluedoCard getMurderWeapon() {
@@ -131,4 +139,57 @@ public class Cluedo implements Serializable{
 	public ArrayList<CluedoCard> getPlayerCards(String suspectName) {
 		return playerCards.get(suspectName);
 	}
+	
+	/**
+	 * rolls an imaginary dice and saves the result in a variable
+	 * @return
+	 */
+	private int rollDice() {
+		diceResult = r.nextInt(6) + 1;
+		return diceResult;
+	}
+	
+	public String getTurnPlayerName() {
+		return suspects[turnPlayerIndex];
+	}
+	
+	/**
+	 * find which player makes the first play. The player with the higher result
+	 * in the dice roll goes first, then is proceeds clockwise
+	 */
+	private void findWhoPlaysFirst() {
+		boolean hasSingleMax = false;
+		int[] results = new int[numberPlayers];
+		
+		while(!hasSingleMax) {
+			hasSingleMax = true;
+			
+			// roll the dices for every player
+			for(int i = 0; i < numberPlayers; i++) {
+				results[i] = rollDice();
+			}
+			
+			// check if there is a single max result
+			int max = results[0];
+			int occurrences = 1;
+			turnPlayerIndex = 0;
+			
+			for(int i = 1; i < numberPlayers; i++) {
+				if(results[i] > max) {
+					max = results[i];
+					occurrences = 1;
+					turnPlayerIndex = i;
+				} else if(results[i] == max) {
+					occurrences++;
+				}
+			}
+			hasSingleMax = (occurrences == 1);
+		}
+	}
+	
+	// use this to test specific functions without having to run the entire game TODO remove in the end
+//	public static void main(String[] args) throws Exception {
+//		Cluedo cluedo = new Cluedo(3);
+//		System.out.println("Next: "+cluedo.getTurnPlayerName());
+//	}
 }

@@ -29,12 +29,15 @@ import jade.lang.acl.UnreadableException;
 	
 	private CluedoLogger logger;
 	private ArrayList<CluedoCard> myCards = null;
+	private boolean stillInGame;
+	private boolean myTurn;
 
 	protected void setup() 
 	{ 
+		stillInGame = true;
+		myTurn = false;
 		logger = CluedoLogger.getInstance();
 		logger.log("Created agent: "+getLocalName()+" with AID: "+getAID());
-
 
 		try {
 			// create the agent description of itself and register it
@@ -62,6 +65,10 @@ import jade.lang.acl.UnreadableException;
 		addBehaviour(new PlayerBehaviour());
 	}
 	
+	public boolean isStillInGame() {
+		return stillInGame;
+	}
+	
 	private class PlayerBehaviour extends CyclicBehaviour {
 
 		private static final long serialVersionUID = 6875374470516568688L;
@@ -80,12 +87,30 @@ import jade.lang.acl.UnreadableException;
 					{
 						if(myCards == null) {
 							myCards = (ArrayList<CluedoCard>) message.getObject(0);
+							
+							// send ack
+							GameMessage msg_ack = new GameMessage(GameMessage.ACK_DISTRIBUTE_CARDS);
+							ACLMessage ack = new ACLMessage(ACLMessage.INFORM);
+							
+							try {
+								ack.setContentObject(msg_ack);
+								ack.addReceiver(msg.getSender());
+								send(ack);
+							} catch (Exception e) {
+								e.printStackTrace();
+								System.exit(-1);
+							}
+							
 						} else {
 							logger.warning("Receiving cards again.");
 						}
 					}
 					break;
-
+					case GameMessage.TURN_PLAYER: // receiving the name of the current turn's player
+					{
+						logger.log("Player "+myAgent.getLocalName()+" received turn player name: "+message.getObject(0));
+					}
+						break;
 					default:
 					{
 						// should not get here!!!
