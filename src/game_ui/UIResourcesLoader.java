@@ -56,8 +56,8 @@ public class UIResourcesLoader {
 		try {
 			mainmenu_bg = ImageIO.read(new File("images/backgrounds/mainmenu.png"));
 			//about_bg = ImageIO.read(new File("images/backgrounds/about.png"));
-			devteam_bg = ImageIO.read(new File("images/backgrounds/dev_team.png"));
-			newgame_bg = ImageIO.read(new File("images/backgrounds/newgame_bg.png"));
+			//devteam_bg = ImageIO.read(new File("images/backgrounds/dev_team.png"));
+			//newgame_bg = ImageIO.read(new File("images/backgrounds/newgame_bg.png"));
 			game_bg = ImageIO.read(new File("images/backgrounds/game.png"));
 		} catch (IOException e) {
 			e.printStackTrace();

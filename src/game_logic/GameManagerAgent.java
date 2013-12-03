@@ -1,6 +1,7 @@
 package game_logic;
 
 import game_ui.CluedoGameGUI;
+import game_ui.UIGame;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.Profile;
@@ -15,6 +16,8 @@ import jade.wrapper.*;
 
 import java.util.Vector;
 
+import aurelienribon.slidinglayout.SLAnimator;
+
 public class GameManagerAgent extends Agent {
 
 	private static final long serialVersionUID = 5548183532204390248L;
@@ -22,7 +25,7 @@ public class GameManagerAgent extends Agent {
 	private static final int NUM_CONTAINERS = 10;
 
 	
-	private CluedoGameGUI myGui;
+	private UIGame myGui;
 	private Vector<AID> agents = new Vector<AID>();
 	private int playersReady = 0;
 	private int numPlayers = 0;
@@ -32,7 +35,8 @@ public class GameManagerAgent extends Agent {
 
 	public void setup() {
 		// create and show the GUI
-		myGui = new CluedoGameGUI(this);
+		SLAnimator.start();
+		myGui = new UIGame(this);
 
 		try {
 			System.out.println( getLocalName() + " setting up");

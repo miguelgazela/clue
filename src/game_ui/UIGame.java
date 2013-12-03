@@ -1,6 +1,9 @@
 package game_ui;
 
 import game_logic.Board;
+import game_logic.GameManagerAgent;
+
+import jade.core.behaviours.OneShotBehaviour;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -15,6 +18,8 @@ import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
+import org.omg.CORBA.PRIVATE_MEMBER;
 
 import aurelienribon.slidinglayout.SLAnimator;
 import aurelienribon.slidinglayout.SLConfig;
@@ -34,12 +39,15 @@ public class UIGame extends JFrame {
 	private SLConfig mainCfg, AboutCfg, NewGameCfg, DevTeamCfg, GameCfg;
 	protected MenuState currentMenuState;
 	
-	public UIGame() {
+	protected GameManagerAgent gameManagerAgent;
+	
+	public UIGame(GameManagerAgent owner) {
 		super("Cluedo - by Miguel Oliveira, Afonso Caldas & Rui Monteiro");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		panel = new SLPanel();
 		getContentPane().add(panel);
-		currentMenuState = MenuState.Main; 
+		currentMenuState = MenuState.Main;
+		gameManagerAgent = owner;
 		
 		// defining the game menu panel
 		uiMainMenuPanel = new UIMainMenuPanel();
@@ -644,11 +652,14 @@ public class UIGame extends JFrame {
 		}
 
 		@Override
-		public void mouseMoved(MouseEvent e) {
-			if(currentMenuState == MenuState.Main) {
-				//int x = e.getX();
-				//int y = e.getY();
-			}
+		public void mouseMoved(MouseEvent e) {}
+		
+		public void startGame() {
+			gameManagerAgent.addBehaviour(new OneShotBehaviour() {
+				public void action() {
+					((GameManagerAgent)myAgent).createGame(3); // TODO temporary
+				}
+			});
 		}
 		
 		@Override
@@ -659,31 +670,23 @@ public class UIGame extends JFrame {
 				System.out.println("X: "+x+" Y: "+y);
 
 				if (y > 189 && y < 327 && x > 397 && x < 716) { // new game
-					new Runnable() {@Override public void run() {
-						panel.createTransition()
-						.push(new SLKeyframe(NewGameCfg, 1f)
-						.setStartSide(SLSide.RIGHT, uiNewGamePanel)
-						//.setEndSide(SLSide.LEFT, uiMainMenuPanel)
-						.setCallback(new SLKeyframe.Callback() {@Override public void done() {
-							currentMenuState = MenuState.NewGame;
-						}}))
-						.play();
-					}}.run();
-				} 
-//				else if (x > 101 && y > 485 && x < 238 && y < 622) { // settings
+					
+					startGame(); // TODO TEMPORARY!!!
+					
 //					new Runnable() {@Override public void run() {
 //						panel.createTransition()
-//						.push(new SLKeyframe(SettingsCfg, 1f)
-//						.setStartSide(SLSide.LEFT, uiSettingsPanel)
+//						.push(new SLKeyframe(NewGameCfg, 1f)
+//						.setStartSide(SLSide.RIGHT, uiNewGamePanel)
+//						//.setEndSide(SLSide.LEFT, uiMainMenuPanel)
 //						.setCallback(new SLKeyframe.Callback() {@Override public void done() {
-//							currentMenuState = MenuState.Settings;
+//							currentMenuState = MenuState.NewGame;
 //						}}))
 //						.play();
 //					}}.run();
-//				} 
-				else if(x > 249 && y > 485 && x < 386 && y < 622) { // source code
-					WebPage.open("https://github/miguelgazela/stratego");
-				}else if (y > 485 && y < 622 && x > 397 && x < 716) { // exit game
+					
+				} else if(x > 249 && y > 485 && x < 386 && y < 622) { // source code
+					WebPage.open("https://github/miguelgazela/cluedo");
+				} else if (y > 485 && y < 622 && x > 397 && x < 716) { // exit game
 					System.exit(0);
 				} else if (x > 397 && x < 551 && y > 337 && y < 474) { // about info
 					new Runnable() {@Override public void run() {

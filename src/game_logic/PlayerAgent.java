@@ -21,7 +21,7 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
 
- public class Player extends Agent 
+ public class PlayerAgent extends Agent 
  { 
 	private static final long serialVersionUID = -4614773070990660799L;
 
@@ -56,8 +56,7 @@ import jade.lang.acl.ACLMessage;
 //			}
 //		}
 		
-		Cluedo c = new Cluedo(3); // TODO temporary
-		GameMessage msg = new GameMessage("READY", c);
+		//GameMessage msg = new GameMessage("READY", c);
 		
 		// notify the game manager agent that we're ready to play
 		ACLMessage ready = new ACLMessage(ACLMessage.INFORM);

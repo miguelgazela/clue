@@ -1,6 +1,6 @@
 package game_logic;
 
-public class BotPlayerAgent extends Player {
+public class BotPlayerAgent extends PlayerAgent {
 
 	private static final long serialVersionUID = -6042695269335080044L;
 
