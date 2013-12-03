@@ -1,6 +1,5 @@
 package game_logic;
 
-import game_ui.CluedoGameGUI;
 import game_ui.UIGame;
 import jade.core.AID;
 import jade.core.Agent;
@@ -12,9 +11,11 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
-import jade.wrapper.*;
+import jade.wrapper.AgentController;
+import jade.wrapper.PlatformController;
 
-import java.util.Vector;
+import java.io.IOException;
+import java.util.ArrayList;
 
 import aurelienribon.slidinglayout.SLAnimator;
 
@@ -26,90 +27,34 @@ public class GameManagerAgent extends Agent {
 
 	
 	private UIGame myGui;
-	private Vector<AID> agents = new Vector<AID>();
-	private int playersReady = 0;
-	private int numPlayers = 0;
-	private Cluedo cluedo;
 	
-	public String READY = "READY";
-
+	private ArrayList<AID> agents = new ArrayList<AID>();
+	private int numPlayers = 0;
+	private CluedoLogger logger;
+	
+	private Cluedo cluedo;
+	private GameState gameState;
+	
 	public void setup() {
+		
 		// create and show the GUI
 		SLAnimator.start();
 		myGui = new UIGame(this);
+		
+		logger = CluedoLogger.getInstance();
+		gameState = GameState.Waiting_for_players;
+		
 
 		try {
-			System.out.println( getLocalName() + " setting up");
+			logger.log("Setting up GameManager");
 
-			// create the agent descrption of itself
+			// create the agent description of itself
 			DFAgentDescription dfd = new DFAgentDescription();
 			dfd.setName( getAID() );
 			DFService.register( this, dfd );
 			
-			// add a Behaviour to handle messages from guests
-			addBehaviour( new CyclicBehaviour(this) {
-				private static final long serialVersionUID = 1347573303070882850L;
-
-				public void action() {
-					ACLMessage msg = receive();
-
-					if (msg != null) {
-
-						GameMessage message;
-						try {
-							message = (GameMessage) msg.getContentObject();
-							
-							switch (message.getType()) {
-							case "READY":
-								System.out.println(msg.getSender() + " sended Ready message!");
-								break;
-							default:
-								break;
-							}
-							
-							if (playersReady == agents.size()) {
-								System.out.println( "All players are ready, starting game" );
-								startGame();
-							}
-						} catch (UnreadableException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}						
-//						
-//						
-//						try {
-//							System.out.println((Cluedo) msg.getContentObject());
-//						} catch (UnreadableException e1) {
-//							// TODO Auto-generated catch block
-//							e1.printStackTrace();
-//						}
-//						
-//						
-//						if (READY.equals( msg.getContent() )) {
-//							// a player is ready to go
-//							playersReady++;
-//							System.out.println(msg.getSender().getLocalName()+" is ready");
-//							
-//							try {
-//								String c = (String) msg.getContentObject();
-//								System.out.println(c.toString());
-//							} catch (UnreadableException e) {
-//								e.printStackTrace();
-//							}
-//							
-////							setPartyState( "Inviting guests (" + m_guestCount + " have arrived)" );
-////
-//							if (playersReady == agents.size()) {
-//								System.out.println( "All players are ready, starting game" );
-//								startGame();
-//							}
-//						}
-					}
-					else { // if no message is arrived, block the behaviour
-						block();
-					}
-				}
-			} );
+			// add a Bahaviour to handle pre-game messages
+			addBehaviour(new PreGameBehaviour());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -117,15 +62,95 @@ public class GameManagerAgent extends Agent {
 	}
 	
 	/**
-	 * 
+	 * responsive for handling the pre-game messages to and from players
+	 * @author migueloliveira
+	 *
+	 */
+	private class PreGameBehaviour extends CyclicBehaviour {
+		private static final long serialVersionUID = -4883662942187754544L;
+		private int playersReady = 0;
+
+		@Override
+		public void action() {
+			ACLMessage msg = receive();
+			
+			if(msg != null) {
+				try {
+					GameMessage message = (GameMessage) msg.getContentObject();
+					
+					switch (message.getType()) {
+					
+					case GameMessage.READY_PLAY:
+					{
+						if(gameState == GameState.Waiting_for_players) { // READY_PLAY msgs received after game begins are ignored
+							playersReady++;
+							logger.log(msg.getSender().getLocalName()+" is ready to start the game.");
+
+							if(playersReady == agents.size()) {
+								logger.log("All players are ready, starting game.");
+								gameState = GameState.Initiating_game;
+								((GameManagerAgent)myAgent).startGame();
+							}
+						}
+					}
+						break;
+
+					default:
+					{
+						// should not get here!!!
+						System.exit(-1);
+					}
+						break;
+					}
+				} catch (UnreadableException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+				
+			} else { // if no message is arrived, block the behaviour
+				block();
+			}
+		}
+	}
+	
+	/**
+	 * starts the cluedo game
 	 */
 	public void startGame() {
-		System.out.println("Starting the game");
-		cluedo = new Cluedo(agents.size());
+		logger.log("Starting the game");
+		
+		try {
+			cluedo = new Cluedo(agents.size());
+			
+			// send all players their cards
+			for(AID agent: agents) {
+				GameMessage msg = new GameMessage(GameMessage.DISTRIBUTE_CARDS);
+				msg.addObject(cluedo.getPlayerCards(agent.getLocalName()));
+				
+				// send message with cards to agent
+				ACLMessage cards = new ACLMessage(ACLMessage.INFORM);
+				try {
+					cards.setContentObject(msg);
+					cards.addReceiver(agent);
+					send(cards);
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
+	protected void endGame() {
+		// TODO this will be called to end the game
 	}
 
 	/**
-	 * 
+	 * initiates the agents and containers needed to play the game
 	 * @param numPlayers
 	 */
 	public void createGame(int numPlayers) {
@@ -135,7 +160,7 @@ public class GameManagerAgent extends Agent {
 	}
 
 	/**
-	 * 
+	 * creates the containers needed to the game
 	 */
 	private void createGameContainers() {
 
@@ -151,7 +176,7 @@ public class GameManagerAgent extends Agent {
 				p.setParameter(Profile.CONTAINER_NAME, Cluedo.rooms[i]);
 				// Create a new non-main container, connecting to the default
 				// main container (i.e. on this host, port 1099)
-				AgentContainer ac = rt.createAgentContainer(p);
+				rt.createAgentContainer(p);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -161,11 +186,10 @@ public class GameManagerAgent extends Agent {
 	private void createSuspectsAgents(int numPlayers) {
 		PlatformController container = getContainerController();
 
-		// create N player agents
 		try {
 			for (int i = 0;  i < numPlayers;  i++) {
 				// create a new agent
-				AgentController guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.BotPlayerAgent", null);
+				AgentController guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.PlayerAgent", null);
 				guest.start();
 
 				agents.add(new AID(Cluedo.suspects[i], AID.ISLOCALNAME));
@@ -175,9 +199,5 @@ public class GameManagerAgent extends Agent {
 			System.err.println( "Exception while adding guests: " + e );
 			e.printStackTrace();
 		}
-	}
-
-	protected void endGame() {
-		// TODO this will be called to end the game
 	}
 }

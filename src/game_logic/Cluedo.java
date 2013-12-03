@@ -104,6 +104,7 @@ public class Cluedo implements Serializable{
 	private void initPlayersCards() {
 		playerCards = new HashMap<>();
 		
+		// adds a new arraylist to the hashmap with the suspect's name as key
 		for(int i = 0; i < numberPlayers; i++) {
 			logger.log("Initiating cards for player: "+suspects[i]);
 			playerCards.put(suspects[i], new ArrayList<CluedoCard>());
@@ -130,9 +131,4 @@ public class Cluedo implements Serializable{
 	public ArrayList<CluedoCard> getPlayerCards(String suspectName) {
 		return playerCards.get(suspectName);
 	}
-	
-	public static void main(String[] args) throws Exception{
-		Cluedo cluedo = new Cluedo(3);
-	}
-	
 }

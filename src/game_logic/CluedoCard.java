@@ -1,6 +1,8 @@
 package game_logic;
 
-public class CluedoCard {
+import java.io.Serializable;
+
+public class CluedoCard implements Serializable {
 	
 	public static final int SUSPECT = 1;
 	public static final int WEAPON = 2;
