@@ -28,9 +28,9 @@ public class Cluedo implements Serializable{
 	private int turnPlayerIndex = -1;
 	private int diceResult = -1;
 	private CluedoLogger logger;
-	private HashMap<String, ArrayList<CluedoCard>> playerCards;
+	private ArrayList<CluedoPlayer> players;
 	private Board board;
-	private Random r = new Random(System.currentTimeMillis());
+	private Random r;
 	
 	public Cluedo(int numberOfPlayers) throws Exception {
 		if(numberOfPlayers < 3 || numberOfPlayers > 6) {
@@ -39,9 +39,11 @@ public class Cluedo implements Serializable{
 		numberPlayers = numberOfPlayers;
 		board = new Board();
 		logger = CluedoLogger.getInstance();
+		r = new Random();
+		
 		initGameCards();
 		initGameSolution();
-		initPlayersCards();
+		initPlayers();
 		findWhoPlaysFirst();
 	}
 	
@@ -61,6 +63,12 @@ public class Cluedo implements Serializable{
 		return numberPlayers;
 	}
 	
+	/**
+	 * returns the board of the game
+	 */
+	public Board getBoard() {
+		return board;
+	}
 	/**
 	 * picks a solution for this instance of the game.
 	 */
@@ -109,22 +117,21 @@ public class Cluedo implements Serializable{
 	/**
 	 * distributes the remaining 19 cards for the players playing.
 	 */
-	private void initPlayersCards() {
-		playerCards = new HashMap<>();
+	private void initPlayers() {
+		players = new ArrayList<CluedoPlayer>();
 		
-		// adds a new arraylist to the hashmap with the suspect's name as key
+		// adds players to arraylist
 		for(int i = 0; i < numberPlayers; i++) {
-			logger.log("Initiating cards for player: "+suspects[i]);
-			playerCards.put(suspects[i], new ArrayList<CluedoCard>());
+			logger.log("Initiating player: "+suspects[i]);
+			players.add(new CluedoPlayer(suspects[i]));
 		}
 		
+		// give one card to each player while there's still cards in the deck
 		while(cards.size() > 0) {
-			
-			// give one card to each player while there's still cards in the deck
 			for(int i = 0; i < numberPlayers; i++) {
 				if(cards.size() > 0) {
 					int randomIndex = r.nextInt(cards.size());
-					playerCards.get(suspects[i]).add(cards.get(randomIndex));
+					players.get(i).addCard(cards.get(randomIndex));
 					cards.remove(randomIndex);
 				}
 			}
@@ -137,7 +144,12 @@ public class Cluedo implements Serializable{
 	 * @param args
 	 */
 	public ArrayList<CluedoCard> getPlayerCards(String suspectName) {
-		return playerCards.get(suspectName);
+		for(CluedoPlayer player : players) {
+			if(player.getName().equals(suspectName)) {
+				return player.getCards();
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -147,6 +159,14 @@ public class Cluedo implements Serializable{
 	private int rollDice() {
 		diceResult = r.nextInt(6) + 1;
 		return diceResult;
+	}
+	
+	public void updateTurnPlayer() {
+		if(turnPlayerIndex == (numberPlayers - 1)) {
+			turnPlayerIndex = 0;
+		} else {
+			turnPlayerIndex++;
+		}
 	}
 	
 	public String getTurnPlayerName() {
@@ -185,11 +205,13 @@ public class Cluedo implements Serializable{
 			}
 			hasSingleMax = (occurrences == 1);
 		}
+		
+		logger.log("Player that goes first: "+suspects[turnPlayerIndex]);
 	}
 	
-	// use this to test specific functions without having to run the entire game TODO remove in the end
+//	//use this to test specific functions without having to run the entire game TODO remove in the end
 //	public static void main(String[] args) throws Exception {
-//		Cluedo cluedo = new Cluedo(3);
+//		Cluedo cluedo = new Cluedo(6);
 //		System.out.println("Next: "+cluedo.getTurnPlayerName());
 //	}
 }

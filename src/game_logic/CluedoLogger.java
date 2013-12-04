@@ -31,6 +31,12 @@ public class CluedoLogger {
 			}
 		}
 		
+		public void log(String player, String msg) {
+			if(logging && logLevel <= LOGS) {
+				System.out.println(player+" says: "+msg);
+			}
+		}
+		
 		public void warning(String msg) {
 			if(logging && logLevel <= WARNINGS) {
 				System.out.println(msg);

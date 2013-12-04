@@ -1,6 +1,7 @@
 package game_logic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Board {
@@ -20,6 +21,7 @@ public class Board {
 	
 	// instance variables
 	private List<List<Tile>> tiles;
+	private HashMap<String, Coordinates> playersStartingPos;
 	
 	/**
 	 * Board constructor
@@ -36,6 +38,7 @@ public class Board {
 		}
 		setInvalid();
 		setNeighbours();
+		initPlayersPositions();
 	}
 
 	/**
@@ -53,38 +56,53 @@ public class Board {
 		
 		for(int i = 0; i < Board.BOARD_HEIGHT; i++) {			
 			for(int j = 0; j < Board.BOARD_WIDTH; j++) {
-				if(i==8 && j==4) { // TODO remove this
-					System.out.print("[A]");
-				} else if(tiles.get(8).get(4).getNeighbours().contains(tiles.get(i).get(j).getCoordinates())) {
-					System.out.print("[N]");
-				} else {
+//				if(i==8 && j==4) { // TODO remove this
+//					System.out.print("[A]");
+//				} else if(tiles.get(8).get(4).getNeighbours().contains(tiles.get(i).get(j).getCoordinates())) {
+//					System.out.print("[N]");
+//				} else {
 					tiles.get(i).get(j).printTile();
-				}
+//				}
 			}
-			System.out.println("\n");
+			System.out.println("");
 		}
+	}
+	
+	
+	/**
+	 * initiates the players starting positions. Adds them to a hashmap mapped with the name
+	 * of the player
+	 */
+	private void initPlayersPositions() {
+		playersStartingPos = new HashMap<>();
+		
+		playersStartingPos.put("Miss Scarlett", new Coordinates(7, 24));
+		playersStartingPos.put("Colonel Mustard", new Coordinates(0, 17));
+		playersStartingPos.put("Mrs. White", new Coordinates(9, 0));
+		playersStartingPos.put("Reverend Green", new Coordinates(14, 0));
+		playersStartingPos.put("Mrs. Peacock", new Coordinates(23, 6));
+		playersStartingPos.put("Professor Plum", new Coordinates(23, 19));
+	}
+	
+	/**
+	 * returns the starting position of the player or null if the player doesn't exists
+	 * @param player
+	 * @return
+	 */
+	public Coordinates getPlayerStartingPos(String player) {
+		return playersStartingPos.get(player);
 	}
 	
 	/**
 	 * 
 	 */
 	private void setInvalid() {
-		for(int i = 0; i < Board.BOARD_HEIGHT; i++) {			
-			tiles.get(i).get(0).setValid(false);
-			tiles.get(i).get(23).setValid(false);
-		}
-		for(int i = 0; i < Board.BOARD_WIDTH; i++) {			
-			tiles.get(0).get(i).setValid(false);
-			tiles.get(24).get(i).setValid(false);
-		}
 		
 		//starting points
 		// TODO change to players
 		tiles.get(0).get(9).setValid(true);
 		tiles.get(0).get(14).setValid(true);
 		tiles.get(24).get(7).setValid(true);
-		tiles.get(24).get(16).setValid(true);
-		tiles.get(7).get(0).setValid(true);
 		tiles.get(17).get(0).setValid(true);
 		tiles.get(19).get(23).setValid(true);
 		tiles.get(6).get(23).setValid(true);
@@ -92,62 +110,71 @@ public class Board {
 		//rooms
 		
 		//kitchen
-		setRoom(1, 6, 1, 5);
-		tiles.get(1).get(6).setValid(false);
+		setRoom(0, 5, 1, 5);
+		setRoom(1, 5, 6, 6);
 		tiles.get(6).get(4).setDoor(KITCHEN);
 		
 		//dining room
-		for(int i = 1; i < 5; i++) {
-			tiles.get(9).get(i).setValid(false);
-		}
-		setRoom(10, 15, 1, 7);
+		setRoom(0, 4, 9, 9);
+		setRoom(0, 7, 10, 15);
 		tiles.get(15).get(6).setDoor(DINING);
 		tiles.get(12).get(7).setDoor(DINING);
 		
 		//lounge
-		setRoom(19, 24, 1, 6);
+		setRoom(0, 6, 19, 24);
 		tiles.get(19).get(6).setDoor(LOUNGE);
 		
 		//hall
-		setRoom(18, 24, 9, 14);
+		setRoom(9, 14, 18, 24);
 		tiles.get(18).get(11).setDoor(HALL);
 		tiles.get(18).get(12).setDoor(HALL);
 		tiles.get(20).get(14).setDoor(HALL);
 		
 		//study
-		setRoom(21, 23, 17, 22);
+		setRoom(17, 23, 21, 24);
 		tiles.get(21).get(17).setDoor(STUDY);
 		
 		//library
-		setRoom(14, 18, 18, 22);
-		tiles.get(15).get(17).setValid(false);
+		setRoom(18, 23, 14, 18);
+		setRoom(17, 17, 15, 17);
 		tiles.get(16).get(17).setDoor(LIBRARY);
-		tiles.get(17).get(17).setValid(false);
-		tiles.get(14).get(21).setDoor(LIBRARY);
+		tiles.get(14).get(20).setDoor(LIBRARY);
 		
 		//billiard room
-		setRoom(8, 12, 18, 22);
+		setRoom(18, 23, 8, 12);
 		tiles.get(9).get(18).setDoor(BILLIARD_ROOM);
 		
 		//conservatory
-		setRoom(1, 5, 18, 22);
-		tiles.get(5).get(18).setValid(true);
+		setRoom(18, 23, 0, 4);
+		setRoom(19, 23, 5, 5);
+		setRoom(18, 18, 0, 4);
+		setRoom(17, 17, 0, 1);
+		setRoom(15, 16, 0, 0);
 		tiles.get(4).get(18).setDoor(CONVERVATORY);
-		tiles.get(1).get(17).setValid(false);
 		
 		//ball room
-		setRoom(2, 7, 8, 15);	
-		tiles.get(1).get(10).setValid(false);
-		tiles.get(1).get(11).setValid(false);
-		tiles.get(1).get(12).setValid(false);
-		tiles.get(1).get(13).setValid(false);
+		setRoom(10, 13, 0, 1);
+		setRoom(8, 15, 2, 7);
 		tiles.get(7).get(9).setDoor(BALLROOM);
 		tiles.get(7).get(14).setDoor(BALLROOM);
 		tiles.get(5).get(8).setDoor(BALLROOM);
 		tiles.get(5).get(15).setDoor(BALLROOM);
 		
 		//middle
-		setRoom(10, 16, 10, 14);		
+		setRoom(10, 14, 10, 16);
+		
+		// others
+		setRoom(0, 8, 0, 0);
+		tiles.get(1).get(6).setValid(false);
+		tiles.get(6).get(0).setValid(false);
+		tiles.get(8).get(0).setValid(false);
+		tiles.get(16).get(0).setValid(false);
+		tiles.get(18).get(0).setValid(false);
+		tiles.get(24).get(8).setValid(false);
+		tiles.get(24).get(15).setValid(false);
+		tiles.get(7).get(23).setValid(false);
+		tiles.get(13).get(23).setValid(false);
+		tiles.get(20).get(23).setValid(false);
 	}
 
 	/**
@@ -158,8 +185,8 @@ public class Board {
 	 * @param finalY
 	 */
 	private void setRoom(int initialX, int finalX, int initialY, int finalY) {
-		for(int i = initialX; i <= finalX; i++) {
-			for(int j = initialY; j <= finalY; j++) {
+		for(int i = initialY; i <= finalY; i++) {
+			for(int j = initialX; j <= finalX; j++) {
 				tiles.get(i).get(j).setValid(false);
 			}
 		}
@@ -187,5 +214,11 @@ public class Board {
 				}
 			}
 		}
+	}
+	
+//	//use this to test specific functions without having to run the entire game TODO remove in the end
+	public static void main(String[] args) throws Exception {
+		Board board = new Board();
+		board.printBoard();
 	}
 }

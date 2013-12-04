@@ -43,6 +43,8 @@ public class UIGame extends JFrame {
 	
 	public UIGame(GameManagerAgent owner) {
 		super("Cluedo - by Miguel Oliveira, Afonso Caldas & Rui Monteiro");
+		System.out.println("Creating GUI");
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		panel = new SLPanel();
 		getContentPane().add(panel);

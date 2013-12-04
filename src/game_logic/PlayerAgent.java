@@ -31,13 +31,14 @@ import jade.lang.acl.UnreadableException;
 	private ArrayList<CluedoCard> myCards = null;
 	private boolean stillInGame;
 	private boolean myTurn;
+	private Coordinates posOnBoard;
 
 	protected void setup() 
 	{ 
 		stillInGame = true;
 		myTurn = false;
 		logger = CluedoLogger.getInstance();
-		logger.log("Created agent: "+getLocalName()+" with AID: "+getAID());
+		logger.log(getLocalName(), "ready to play, sending READY msg.");
 
 		try {
 			// create the agent description of itself and register it
@@ -83,10 +84,11 @@ import jade.lang.acl.UnreadableException;
 
 					switch (message.getType()) {
 
-					case GameMessage.DISTRIBUTE_CARDS: // receiving this players cards
+					case GameMessage.DISTRIBUTE_CARDS_AND_POS: // receiving this players cards and initial position
 					{
 						if(myCards == null) {
 							myCards = (ArrayList<CluedoCard>) message.getObject(0);
+							posOnBoard = (Coordinates) message.getObject(1);
 							
 							// send ack
 							GameMessage msg_ack = new GameMessage(GameMessage.ACK_DISTRIBUTE_CARDS);
@@ -102,13 +104,19 @@ import jade.lang.acl.UnreadableException;
 							}
 							
 						} else {
-							logger.warning("Receiving cards again.");
+							logger.warning("Receiving cards and initial position again.");
 						}
 					}
 					break;
 					case GameMessage.TURN_PLAYER: // receiving the name of the current turn's player
 					{
-						logger.log("Player "+myAgent.getLocalName()+" received turn player name: "+message.getObject(0));
+						String turnPlayerName = (String) message.getObject(0);
+						logger.log(myAgent.getLocalName(), "received turn player name"+turnPlayerName);
+						
+						if(turnPlayerName.equals(myAgent.getLocalName())) {
+							logger.log(myAgent.getLocalName(), "it's my turn!");
+						}
+						
 					}
 						break;
 					default:

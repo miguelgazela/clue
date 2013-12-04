@@ -150,10 +150,11 @@ public class GameManagerAgent extends Agent {
 		try {
 			cluedo = new Cluedo(agents.size());
 			
-			// send all players their cards
+			// send all players their cards and initial pos
 			for(AID agent: agents) {
-				GameMessage msg = new GameMessage(GameMessage.DISTRIBUTE_CARDS);
+				GameMessage msg = new GameMessage(GameMessage.DISTRIBUTE_CARDS_AND_POS);
 				msg.addObject(cluedo.getPlayerCards(agent.getLocalName()));
+				msg.addObject(cluedo.getBoard().getPlayerStartingPos(agent.getLocalName()));
 				
 				// send message with cards to agent
 				ACLMessage cards = new ACLMessage(ACLMessage.INFORM);
