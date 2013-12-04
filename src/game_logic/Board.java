@@ -68,7 +68,6 @@ public class Board {
 		}
 	}
 	
-	
 	/**
 	 * initiates the players starting positions. Adds them to a hashmap mapped with the name
 	 * of the player
@@ -217,8 +216,8 @@ public class Board {
 	}
 	
 //	//use this to test specific functions without having to run the entire game TODO remove in the end
-	public static void main(String[] args) throws Exception {
-		Board board = new Board();
-		board.printBoard();
-	}
+//	public static void main(String[] args) throws Exception {
+//		Board board = new Board();
+//		board.printBoard();
+//	}
 }

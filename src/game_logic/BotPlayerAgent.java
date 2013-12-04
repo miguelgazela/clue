@@ -6,6 +6,5 @@ public class BotPlayerAgent extends PlayerAgent {
 
 	public void setup() {
 		super.setup();
-		// TODO
 	}
 }

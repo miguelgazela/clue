@@ -64,6 +64,14 @@ public class Cluedo implements Serializable{
 	}
 	
 	/**
+	 * returns the array with the players of this game
+	 * @return
+	 */
+	public ArrayList<CluedoPlayer> getPlayers() {
+		return players;
+	}
+	
+	/**
 	 * returns the board of the game
 	 */
 	public Board getBoard() {
@@ -123,7 +131,7 @@ public class Cluedo implements Serializable{
 		// adds players to arraylist
 		for(int i = 0; i < numberPlayers; i++) {
 			logger.log("Initiating player: "+suspects[i]);
-			players.add(new CluedoPlayer(suspects[i]));
+			players.add(new CluedoPlayer(suspects[i], board.getPlayerStartingPos(suspects[i])));
 		}
 		
 		// give one card to each player while there's still cards in the deck
@@ -156,11 +164,14 @@ public class Cluedo implements Serializable{
 	 * rolls an imaginary dice and saves the result in a variable
 	 * @return
 	 */
-	private int rollDice() {
+	public int rollDice() {
 		diceResult = r.nextInt(6) + 1;
 		return diceResult;
 	}
 	
+	/**
+	 * updates the turn player, clockwise
+	 */
 	public void updateTurnPlayer() {
 		if(turnPlayerIndex == (numberPlayers - 1)) {
 			turnPlayerIndex = 0;
@@ -169,6 +180,10 @@ public class Cluedo implements Serializable{
 		}
 	}
 	
+	/**
+	 * returns the name of the player that must play
+	 * @return
+	 */
 	public String getTurnPlayerName() {
 		return suspects[turnPlayerIndex];
 	}

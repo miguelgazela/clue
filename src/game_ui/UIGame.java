@@ -1,6 +1,8 @@
 package game_ui;
 
 import game_logic.Board;
+import game_logic.CluedoPlayer;
+import game_logic.Coordinates;
 import game_logic.GameManagerAgent;
 
 import jade.core.behaviours.OneShotBehaviour;
@@ -14,8 +16,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.security.auth.x500.X500Principal;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -35,6 +39,7 @@ public class UIGame extends JFrame {
 	private UINewGamePanel uiNewGamePanel;
 	private UIDevTeamPanel uiDevTeamPanel;
 	private UIGamePanel uiGamePanel;
+	public boolean hasGameRunning = false;
 	
 	private SLConfig mainCfg, AboutCfg, NewGameCfg, DevTeamCfg, GameCfg;
 	protected MenuState currentMenuState;
@@ -254,6 +259,8 @@ public class UIGame extends JFrame {
 			if (background != null) {
 				graphics.drawImage(background, 0, 0, this);
 				
+				drawStartGameBtn();
+				
 				// draw game type
 //				if(game_type != -1) {
 //					GameImage selected_game_type_btn = uiResourcesLoader.getSelectedNewGameBtn(game_type);
@@ -287,31 +294,31 @@ public class UIGame extends JFrame {
 						.play();
 					}}.run();
 				} else if(x >= 373 && y >= 646 && x <= 417 && y <= 691) { // start game
-					boolean startGame = false;
+					boolean startGame = true; // TODO temporary
 					
 //					if(game_type == UIResourcesLoader.RANDOM_GAME || game_type == UIResourcesLoader.STRATEGIC_GAME) {
 //						startGame = true;
 //					}
 //					
-//					if(startGame) {
-//						uiGamePanel.clearPossibleGame();
-//						uiGamePanel.startGame(game_type);
-//						
-//						new Runnable() {@Override public void run() {
-//							panel.createTransition()
-//							.push(new SLKeyframe(GameCfg, 1f)
-//							.setStartSide(SLSide.RIGHT, uiGamePanel)
-//							.setEndSide(SLSide.LEFT, uiMainMenuPanel)
-//							.setEndSide(SLSide.RIGHT, uiNewGamePanel)
-//							.setDelay(1.0f, uiNewGamePanel)
-//							.setDelay(0.3f, uiMainMenuPanel)
-//							.setCallback(new SLKeyframe.Callback() {@Override public void done() {
-//								currentMenuState = MenuState.Game;
-////								uiGamePanel.startGame(game_type);
-//							}}))
-//							.play();
-//						}}.run();
-//					}
+					if(startGame) {
+						uiGamePanel.clearPossibleGame();
+						uiGamePanel.startGame();
+						
+						new Runnable() {@Override public void run() {
+							panel.createTransition()
+							.push(new SLKeyframe(GameCfg, 1f)
+							.setStartSide(SLSide.RIGHT, uiGamePanel)
+							.setEndSide(SLSide.LEFT, uiMainMenuPanel)
+							.setEndSide(SLSide.RIGHT, uiNewGamePanel)
+							.setDelay(1.0f, uiNewGamePanel)
+							.setDelay(0.3f, uiMainMenuPanel)
+							.setCallback(new SLKeyframe.Callback() {@Override public void done() {
+								currentMenuState = MenuState.Game;
+//								uiGamePanel.startGame(game_type);
+							}}))
+							.play();
+						}}.run();
+					}
 				} else {
 					UICoord[] coords = uiResourcesLoader.new_game_btns_coords;
 					
@@ -339,13 +346,9 @@ public class UIGame extends JFrame {
 
 		private static final long serialVersionUID = -7973208111694509132L;
 		
-		private static final int PLACING_PHASE = 1;
-		private static final int MOVING_PHASE = 2;
-		
 		private UIResourcesLoader uiResourcesLoader;
 		private BufferedImage background;
 		private Graphics graphics;
-		public boolean hasGameRunning = false;
 		private boolean gameIsOver = false;
 		private boolean showingResetWarning = false;
 		private int game_type = -1;
@@ -357,25 +360,18 @@ public class UIGame extends JFrame {
 			background = uiResourcesLoader.game_bg;
 		}
 		
-		public void startGame(int gameType) {
-			game_type = gameType;
-			
-//			try {
-//				game = new Stratego();
-//				turnPlayer = uiResourcesLoader.getPlayerTurn(game.getCurrentPlayer().getName());
-//				
-//				if(game_type == UIResourcesLoader.RANDOM_GAME) {
-//					game.placeInitialPieces();
-//				} else {
-//					game_phase = PLACING_PHASE;
-//					nextPiece = game.getCurrentPlayer().getNextPiece();
-//				}
-//				hasGameRunning = true;
-//				repaint();
-//			} catch (CGException | GameException e) { 
-//				e.printStackTrace(); 
-//				System.exit(-1);
-//			}
+		public void startGame() {
+			gameManagerAgent.addBehaviour(new OneShotBehaviour() {
+				private static final long serialVersionUID = -6359608569382445808L;
+				public void action() {
+					((GameManagerAgent)myAgent).createGame(3); // TODO temporary
+				}
+			});
+//			game_type = gameType;
+		}
+		
+		public void gameHasStarted() {
+			hasGameRunning = true;
 		}
 		
 		public void clearPossibleGame() {
@@ -444,10 +440,19 @@ public class UIGame extends JFrame {
 //						}
 //					}
 					
-//					// draw current turn player token
-//					if(turnPlayer != null) {
-//						graphics.drawImage(turnPlayer.image, turnPlayer.coord.x, turnPlayer.coord.y, this);
-//					}
+					// draw players on board
+					ArrayList<CluedoPlayer> players = gameManagerAgent.getCluedo().getPlayers();
+					for(int i = 0; i < players.size(); i++) {
+						UICoord c = uiResourcesLoader.getSourceCoord();
+						Coordinates pos = players.get(i).getPosOnBoard();
+						
+						graphics.drawImage(
+								uiResourcesLoader.getPlayerToken(i), 
+								c.x + pos.getX()*uiResourcesLoader.BOARD_POS_DIF, 
+								c.y + pos.getY()*uiResourcesLoader.BOARD_POS_DIF,
+								this
+						);
+					}
 					
 					if(showingResetWarning) {
 						GameImage reset = uiResourcesLoader.confirmReset;
@@ -501,7 +506,7 @@ public class UIGame extends JFrame {
 		private void resetGame() {
 			int temp_game_type = game_type;
 			clearPossibleGame();
-			startGame(temp_game_type);
+			startGame();
 		}
 		
 		private void gameOver() {
@@ -578,7 +583,7 @@ public class UIGame extends JFrame {
 			if (background != null) {
 				graphics.drawImage(background, 0, 0, this);
 				
-				if(uiGamePanel.hasGameRunning) {
+				if(hasGameRunning) {
 					GameImage returnToGameBtn = uiResourcesLoader.returnToGameBtn;
 					graphics.drawImage(returnToGameBtn.image, returnToGameBtn.coord.x, returnToGameBtn.coord.y, this);
 				}
@@ -588,14 +593,6 @@ public class UIGame extends JFrame {
 		@Override
 		public void mouseMoved(MouseEvent e) {}
 		
-		public void startGame() {
-			gameManagerAgent.addBehaviour(new OneShotBehaviour() {
-				public void action() {
-					((GameManagerAgent)myAgent).createGame(3); // TODO temporary
-				}
-			});
-		}
-		
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			if(currentMenuState == MenuState.Main) {
@@ -604,19 +601,16 @@ public class UIGame extends JFrame {
 				System.out.println("X: "+x+" Y: "+y);
 
 				if (y > 189 && y < 327 && x > 397 && x < 716) { // new game
-					
-					startGame(); // TODO TEMPORARY!!!
-					
-//					new Runnable() {@Override public void run() {
-//						panel.createTransition()
-//						.push(new SLKeyframe(NewGameCfg, 1f)
-//						.setStartSide(SLSide.RIGHT, uiNewGamePanel)
-//						//.setEndSide(SLSide.LEFT, uiMainMenuPanel)
-//						.setCallback(new SLKeyframe.Callback() {@Override public void done() {
-//							currentMenuState = MenuState.NewGame;
-//						}}))
-//						.play();
-//					}}.run();
+					new Runnable() {@Override public void run() {
+						panel.createTransition()
+						.push(new SLKeyframe(NewGameCfg, 1f)
+						.setStartSide(SLSide.RIGHT, uiNewGamePanel)
+						//.setEndSide(SLSide.LEFT, uiMainMenuPanel)
+						.setCallback(new SLKeyframe.Callback() {@Override public void done() {
+							currentMenuState = MenuState.NewGame;
+						}}))
+						.play();
+					}}.run();
 					
 				} else if(x > 249 && y > 485 && x < 386 && y < 622) { // source code
 					WebPage.open("https://github/miguelgazela/cluedo");

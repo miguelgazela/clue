@@ -2,14 +2,17 @@ package game_logic;
 
 import java.util.ArrayList;
 
+import javax.swing.text.Position;
+
 public class CluedoPlayer {
 	
 		private String name;
 		private Coordinates posOnBoard;
 		private ArrayList<CluedoCard> cards;
 
-		public CluedoPlayer(String name) {
+		public CluedoPlayer(String name, Coordinates initialPos) {
 			this.name = name;
+			posOnBoard = initialPos;
 			cards = new ArrayList<>();
 		}
 		

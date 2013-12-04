@@ -43,7 +43,6 @@ public class GameManagerAgent extends Agent {
 		
 		logger = CluedoLogger.getInstance();
 		gameState = GameState.Waiting_for_players;
-		
 
 		try {
 			logger.log("Setting up GameManager");
@@ -66,7 +65,51 @@ public class GameManagerAgent extends Agent {
 
 		@Override
 		public void action() {
+			ACLMessage msg = receive();
 			
+			if(msg != null) {
+				try {
+					GameMessage message = (GameMessage) msg.getContentObject();
+					
+					switch (message.getType()) {
+
+					case GameMessage.ASK_DICE_ROLL:
+					{
+						if(gameState == GameState.Waiting_for_play) {
+							if(msg.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) { // confirm it's this players turn
+								int diceResult = cluedo.rollDice();
+								
+								// send reply with result
+								GameMessage diceResultMsg = new GameMessage(GameMessage.RSLT_DICE_ROLL);
+								diceResultMsg.addObject(new Integer(diceResult));
+								ACLMessage amsg = new ACLMessage(ACLMessage.INFORM);
+								
+								try {
+									amsg.setContentObject(diceResultMsg);
+									amsg.addReceiver(msg.getSender());
+									send(amsg);
+								} catch (Exception e) {
+									e.printStackTrace();
+									System.exit(-1);
+								}
+							}
+						}
+					}
+					break;
+					default:
+					{
+						// should not get here!!!
+						System.exit(-1);
+					}
+					break;
+					}
+				} catch(UnreadableException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			} else {
+				block();
+			}
 		}
 		
 	}
@@ -113,7 +156,7 @@ public class GameManagerAgent extends Agent {
 							
 							if(playersThatReceivedCards == numPlayers) {
 								logger.log("All players received their cards.");
-								gameState = GameState.Game_started;
+								gameState = GameState.Waiting_for_play;
 								
 								// add Behaviour to handle in-game messages
 								myAgent.addBehaviour(new GameBehaviour());
@@ -166,8 +209,9 @@ public class GameManagerAgent extends Agent {
 					e.printStackTrace();
 					System.exit(-1);
 				}
+				
+				myGui.hasGameRunning = true;
 			}
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -186,6 +230,10 @@ public class GameManagerAgent extends Agent {
 		this.numPlayers = numPlayers;
 		createGameContainers();
 		createSuspectsAgents(numPlayers);
+	}
+	
+	public Cluedo getCluedo() {
+		return cluedo;
 	}
 	
 	/**

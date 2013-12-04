@@ -12,6 +12,8 @@ public class UIResourcesLoader {
 	static public final int RANDOM_GAME = 0;
 	static public final int STRATEGIC_GAME = 1;
 	
+	static public final int BOARD_POS_DIF = 23;
+	
 	static public final String P1 = "P1";
 	static public final String P2 = "P2";
 	
@@ -24,20 +26,17 @@ public class UIResourcesLoader {
 	public BufferedImage game_bg;
 	
 	public UICoord[] new_game_btns_coords;
-	public UICoord[][] board_positions_coords;
 	
 	public UICoord turn_coord;
 	public UICoord game_status_coord;
 	public UICoord nextPiece_coord;
+	public UICoord board_source_coord;
 	
 	private GameImage[] v_unselectedNewGameBtn;
 	private GameImage[] v_selectedNewGameBtn;
 	
-	private Image[] v_piecesP1;
-	private Image[] v_piecesP2;
-	
-	private Image[] v_selectedPieces;
-	private Image[] v_hiddenPieces;
+	private Image[] v_players_tokens;
+	private Image[] v_selected_tokens;
 	
 	private GameImage[] v_turns;
 	private Image[] v_gameStatus;
@@ -46,18 +45,18 @@ public class UIResourcesLoader {
 	public GameImage confirmReset;
 	
 	private UIResourcesLoader() {
-//		initPieces();
+		initPieces();
 //		initImages();
-//		initBtns();
+		initBtns();
 //		initStrings();
-//		initCoords();
+		initCoords();
 		
 		// initialize backgrounds
 		try {
 			mainmenu_bg = ImageIO.read(new File("images/backgrounds/mainmenu.png"));
 			//about_bg = ImageIO.read(new File("images/backgrounds/about.png"));
-			//devteam_bg = ImageIO.read(new File("images/backgrounds/dev_team.png"));
-			//newgame_bg = ImageIO.read(new File("images/backgrounds/newgame_bg.png"));
+			devteam_bg = ImageIO.read(new File("images/backgrounds/dev_team.png"));
+			newgame_bg = ImageIO.read(new File("images/backgrounds/newgame.png"));
 			game_bg = ImageIO.read(new File("images/backgrounds/game.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -95,7 +94,7 @@ public class UIResourcesLoader {
 //		confirmReset = new GameImage("images/backgrounds/confirmReset.png", 0, 0);
 //	}
 	
-//	private void initBtns() {
+	private void initBtns() {
 //		v_unselectedNewGameBtn = new GameImage[2];
 //		v_selectedNewGameBtn = new GameImage[2];
 //		
@@ -103,53 +102,32 @@ public class UIResourcesLoader {
 //		v_unselectedNewGameBtn[STRATEGIC_GAME] = new GameImage("images/buttons/strategic-uns.png", 105, 375);
 //		v_selectedNewGameBtn[RANDOM_GAME] = new GameImage("images/buttons/random-sel.png", 105, 260);
 //		v_selectedNewGameBtn[STRATEGIC_GAME] = new GameImage("images/buttons/strategic-sel.png", 105, 375);
-//		
-//		returnToGameBtn = new GameImage("images/buttons/return_game.png", 993, 663);
-//		startGameBtn = new GameImage("images/buttons/start_game.png", 272, 640);
-//	}
+		
+		returnToGameBtn = new GameImage("images/buttons/return_game.png", 993, 663);
+		startGameBtn = new GameImage("images/buttons/start_game.png", 272, 640);
+	}
 	
-//	private void initCoords() {
-//		new_game_btns_coords = new UICoord[2];
-//		new_game_btns_coords[RANDOM_GAME] = new UICoord(105, 260);
-//		new_game_btns_coords[STRATEGIC_GAME] = new UICoord(105, 375);
-//		
-//		nextPiece_coord = new UICoord(875, 660);
-//		
-//		board_positions_coords = new UICoord[10][10];
-//		int x = 379;
-//		int y = 56;
-//		
-//		for(int i = 0; i < 10; i++) {
-//			for(int j = 0; j < 10; j++) {
-//				board_positions_coords[i][j] = new UICoord(x+j*54, y+i*54);
-//			}
-//		}
-//		game_status_coord = new UICoord(363, 668);
-//	}
+	private void initCoords() {
+		new_game_btns_coords = new UICoord[2];
+		board_source_coord = new UICoord(210, 21);
+		game_status_coord = new UICoord(363, 668);
+	}
 	
-//	private void initPieces() {
-//		try {
-//			v_piecesP1 = new Image[12];
-//			v_piecesP2 = new Image[12];
+	private void initPieces() {
+		try {
+			v_players_tokens = new Image[6];
 //			v_selectedPieces = new Image[2];
 //			v_hiddenPieces = new Image[2];
-//			
-//			for(int i = 0; i < 12; i++) {
-//				v_piecesP1[i] = ImageIO.read(new File("images/pieces/pieceP1-"+i+".png"));
-//				v_piecesP2[i] = ImageIO.read(new File("images/pieces/pieceP2-"+i+".png"));
-//			}			
-//			v_selectedPieces[0] = ImageIO.read(new File("images/pieces/pieceP1-sel.png"));
-//			v_selectedPieces[1] = ImageIO.read(new File("images/pieces/pieceP2-sel.png"));
-//			
-//			v_hiddenPieces[0] = ImageIO.read(new File("images/pieces/pieceP1-hidden.png"));
-//			v_hiddenPieces[1] = ImageIO.read(new File("images/pieces/pieceP2-hidden.png"));
-//			
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			System.out.println("Resources missing");
-//			System.exit(-1);
-//		}
-//	}
+			
+			for(int i = 0; i < 6; i++) {
+				v_players_tokens[i] = ImageIO.read(new File("images/players/"+i+".png"));
+			}			
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println("Resources missing");
+			System.exit(-1);
+		}
+	}
 	
 //	public Image getGameStatus(String str) {
 //		switch (str) {
@@ -167,6 +145,13 @@ public class UIResourcesLoader {
 //			return null;
 //		}
 //	}
+	public UICoord getSourceCoord() {
+		return board_source_coord;
+	}
+	
+	public Image getPlayerToken(int index) {
+		return v_players_tokens[index];
+	}
 	
 //	public GameImage getPlayerTurn(String player) throws GameException {
 //		if(!player.equals(P1) && !player.equals(P2)) {

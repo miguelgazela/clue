@@ -70,6 +70,23 @@ import jade.lang.acl.UnreadableException;
 		return stillInGame;
 	}
 	
+	/**
+	 * sends the game manager a msg asking for a dice roll result
+	 */
+	protected void askDiceRoll() {
+		GameMessage msg = new GameMessage(GameMessage.ASK_DICE_ROLL);
+		ACLMessage diceRollRequest = new ACLMessage(ACLMessage.INFORM);
+		
+		try {
+			diceRollRequest.setContentObject(msg);
+			diceRollRequest.addReceiver(new AID("host", AID.ISLOCALNAME));
+			send(diceRollRequest);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
 	private class PlayerBehaviour extends CyclicBehaviour {
 
 		private static final long serialVersionUID = 6875374470516568688L;
@@ -89,11 +106,11 @@ import jade.lang.acl.UnreadableException;
 						if(myCards == null) {
 							myCards = (ArrayList<CluedoCard>) message.getObject(0);
 							posOnBoard = (Coordinates) message.getObject(1);
-							
+
 							// send ack
 							GameMessage msg_ack = new GameMessage(GameMessage.ACK_DISTRIBUTE_CARDS);
 							ACLMessage ack = new ACLMessage(ACLMessage.INFORM);
-							
+
 							try {
 								ack.setContentObject(msg_ack);
 								ack.addReceiver(msg.getSender());
@@ -102,7 +119,7 @@ import jade.lang.acl.UnreadableException;
 								e.printStackTrace();
 								System.exit(-1);
 							}
-							
+
 						} else {
 							logger.warning("Receiving cards and initial position again.");
 						}
@@ -111,12 +128,22 @@ import jade.lang.acl.UnreadableException;
 					case GameMessage.TURN_PLAYER: // receiving the name of the current turn's player
 					{
 						String turnPlayerName = (String) message.getObject(0);
-						logger.log(myAgent.getLocalName(), "received turn player name"+turnPlayerName);
-						
+						logger.log(myAgent.getLocalName(), "received turn player name "+turnPlayerName);
+
 						if(turnPlayerName.equals(myAgent.getLocalName())) {
+							myTurn = true;
 							logger.log(myAgent.getLocalName(), "it's my turn!");
+
+							// can do different things here!
+							((PlayerAgent)myAgent).askDiceRoll();
 						}
-						
+
+					}
+					break;
+					case GameMessage.RSLT_DICE_ROLL: // receiving the name of the current turn's player
+					{
+						int diceResult = ((Integer) message.getObject(0)).intValue();
+						logger.log(myAgent.getLocalName(), " rolled the dice and got: "+diceResult);
 					}
 						break;
 					default:
