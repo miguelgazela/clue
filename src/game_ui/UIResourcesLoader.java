@@ -29,13 +29,14 @@ public class UIResourcesLoader {
 	
 	public UICoord turn_coord;
 	public UICoord game_status_coord;
-	public UICoord nextPiece_coord;
 	public UICoord board_source_coord;
+	public UICoord sidebar_name_coord;
 	
 	private GameImage[] v_unselectedNewGameBtn;
 	private GameImage[] v_selectedNewGameBtn;
 	
 	private Image[] v_players_tokens;
+	public Image[] v_players_sidebar_names;
 	private Image[] v_selected_tokens;
 	
 	private GameImage[] v_turns;
@@ -111,16 +112,19 @@ public class UIResourcesLoader {
 		new_game_btns_coords = new UICoord[2];
 		board_source_coord = new UICoord(210, 21);
 		game_status_coord = new UICoord(363, 668);
+		sidebar_name_coord = new UICoord(0, 176);
 	}
 	
 	private void initPieces() {
 		try {
 			v_players_tokens = new Image[6];
+			v_players_sidebar_names = new Image[6];
 //			v_selectedPieces = new Image[2];
 //			v_hiddenPieces = new Image[2];
 			
 			for(int i = 0; i < 6; i++) {
 				v_players_tokens[i] = ImageIO.read(new File("images/players/"+i+".png"));
+				v_players_sidebar_names[i] = ImageIO.read(new File("images/players/"+i+"_name.png"));
 			}			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -151,6 +155,10 @@ public class UIResourcesLoader {
 	
 	public Image getPlayerToken(int index) {
 		return v_players_tokens[index];
+	}
+	
+	public Image getPlayerSidebarName(int index) {
+		return v_players_sidebar_names[index];
 	}
 	
 //	public GameImage getPlayerTurn(String player) throws GameException {

@@ -27,7 +27,7 @@ public class Cluedo implements Serializable{
 	 */
 	private int turnPlayerIndex = -1;
 	private int diceResult = -1;
-	private CluedoLogger logger;
+	private Logger myLogger = Logger.getMyLogger(getClass().getName());
 	private ArrayList<CluedoPlayer> players;
 	private Board board;
 	private Random r;
@@ -38,7 +38,6 @@ public class Cluedo implements Serializable{
 		}
 		numberPlayers = numberOfPlayers;
 		board = new Board();
-		logger = CluedoLogger.getInstance();
 		r = new Random();
 		
 		initGameCards();
@@ -95,9 +94,9 @@ public class Cluedo implements Serializable{
 				cards.remove(card);
 			}
 		}
-		logger.log("The murderer is: "+murderer.getName());
-		logger.log("The weapon used was: "+weapon.getName());
-		logger.log("The room was: "+room.getName());
+		myLogger.log(Logger.INFO, "Cluedo - The murderer is: "+murderer.getName());
+		myLogger.log(Logger.INFO, "Cluedo - The weapon used was: "+weapon.getName());
+		myLogger.log(Logger.INFO, "Cluedo - The room was: "+room.getName());
 	}
 	
 	/**
@@ -130,7 +129,7 @@ public class Cluedo implements Serializable{
 		
 		// adds players to arraylist
 		for(int i = 0; i < numberPlayers; i++) {
-			logger.log("Initiating player: "+suspects[i]);
+			myLogger.log(Logger.INFO, "Cluedo - Initiating player: "+suspects[i]);
 			players.add(new CluedoPlayer(suspects[i], board.getPlayerStartingPos(suspects[i])));
 		}
 		
@@ -144,7 +143,7 @@ public class Cluedo implements Serializable{
 				}
 			}
 		}
-		logger.log("All cards were distributed among the "+numberPlayers+" players");
+		myLogger.log(Logger.INFO, "Cluedo - All cards were distributed among the "+numberPlayers+" players");
 	}
 	
 	/**
@@ -220,8 +219,7 @@ public class Cluedo implements Serializable{
 			}
 			hasSingleMax = (occurrences == 1);
 		}
-		
-		logger.log("Player that goes first: "+suspects[turnPlayerIndex]);
+		myLogger.log(Logger.INFO, "Cluedo - Player that goes first: "+suspects[turnPlayerIndex]);
 	}
 	
 //	//use this to test specific functions without having to run the entire game TODO remove in the end

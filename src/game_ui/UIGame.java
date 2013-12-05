@@ -452,6 +452,15 @@ public class UIGame extends JFrame {
 								c.y + pos.getY()*uiResourcesLoader.BOARD_POS_DIF,
 								this
 						);
+						
+						// draw sidebar names
+						c = uiResourcesLoader.sidebar_name_coord;
+						graphics.drawImage(
+								uiResourcesLoader.getPlayerSidebarName(i), 
+								c.x, 
+								c.y + i*50,
+								this
+						);
 					}
 					
 					if(showingResetWarning) {

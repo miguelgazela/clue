@@ -11,6 +11,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
+import jade.util.Logger;
 import jade.wrapper.AgentController;
 import jade.wrapper.PlatformController;
 
@@ -30,7 +31,7 @@ public class GameManagerAgent extends Agent {
 	
 	private ArrayList<AID> agents = new ArrayList<AID>();
 	private int numPlayers = 0;
-	private CluedoLogger logger;
+	private Logger myLogger = Logger.getMyLogger(getClass().getName());
 	
 	private Cluedo cluedo;
 	private GameState gameState;
@@ -41,11 +42,10 @@ public class GameManagerAgent extends Agent {
 		SLAnimator.start();
 		myGui = new UIGame(this);
 		
-		logger = CluedoLogger.getInstance();
 		gameState = GameState.Waiting_for_players;
 
 		try {
-			logger.log("Setting up GameManager");
+			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Setting up GameManager");
 
 			// create the agent description of itself
 			DFAgentDescription dfd = new DFAgentDescription();
@@ -53,7 +53,7 @@ public class GameManagerAgent extends Agent {
 			DFService.register( this, dfd );
 			
 			// add a Bahaviour to handle pre-game messages
-			addBehaviour(new PreGameBehaviour());
+			addBehaviour(new GameBehaviour());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -62,65 +62,7 @@ public class GameManagerAgent extends Agent {
 	
 	private class GameBehaviour extends CyclicBehaviour {
 		private static final long serialVersionUID = 6164848963172508841L;
-
-		@Override
-		public void action() {
-			ACLMessage msg = receive();
-			
-			if(msg != null) {
-				try {
-					GameMessage message = (GameMessage) msg.getContentObject();
-					
-					switch (message.getType()) {
-
-					case GameMessage.ASK_DICE_ROLL:
-					{
-						if(gameState == GameState.Waiting_for_play) {
-							if(msg.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) { // confirm it's this players turn
-								int diceResult = cluedo.rollDice();
-								
-								// send reply with result
-								GameMessage diceResultMsg = new GameMessage(GameMessage.RSLT_DICE_ROLL);
-								diceResultMsg.addObject(new Integer(diceResult));
-								ACLMessage amsg = new ACLMessage(ACLMessage.INFORM);
-								
-								try {
-									amsg.setContentObject(diceResultMsg);
-									amsg.addReceiver(msg.getSender());
-									send(amsg);
-								} catch (Exception e) {
-									e.printStackTrace();
-									System.exit(-1);
-								}
-							}
-						}
-					}
-					break;
-					default:
-					{
-						// should not get here!!!
-						System.exit(-1);
-					}
-					break;
-					}
-				} catch(UnreadableException e) {
-					e.printStackTrace();
-					System.exit(-1);
-				}
-			} else {
-				block();
-			}
-		}
 		
-	}
-	
-	/**
-	 * responsible for handling the pre-game messages to and from players
-	 * @author migueloliveira
-	 *
-	 */
-	private class PreGameBehaviour extends CyclicBehaviour {
-		private static final long serialVersionUID = -4883662942187754544L;
 		private int playersReady = 0;
 		private int playersThatReceivedCards = 0;
 
@@ -138,34 +80,37 @@ public class GameManagerAgent extends Agent {
 					{
 						if(gameState == GameState.Waiting_for_players) { // READY_PLAY msgs received after game begins are ignored
 							playersReady++;
-							logger.log(msg.getSender().getLocalName()+" is ready to start the game.");
+							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - "+msg.getSender().getLocalName()+" is ready to start the game.");
 
 							if(playersReady == numPlayers) {
-								logger.log("All players are ready, starting game.");
+								myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - All players are ready, starting game.");
 								gameState = GameState.Distribution_of_cards;
 								((GameManagerAgent)myAgent).startGame();
 							}
 						}
 					}
-						break;
+					break;
 					case GameMessage.ACK_DISTRIBUTE_CARDS:
 					{
 						if(gameState == GameState.Distribution_of_cards) { // waiting for ack from all players
 							playersThatReceivedCards++;
-							logger.log(msg.getSender().getLocalName()+" has received his cards.");
-							
+							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - "+msg.getSender().getLocalName()+" has received his cards.");
+
 							if(playersThatReceivedCards == numPlayers) {
-								logger.log("All players received their cards.");
+								myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - All players received their cards.");
 								gameState = GameState.Waiting_for_play;
-								
-								// add Behaviour to handle in-game messages
-								myAgent.addBehaviour(new GameBehaviour());
-								
 								((GameManagerAgent)myAgent).notifyTurnPlayer();
 							}
 						}
 					}
-						break;
+					break;
+					case GameMessage.ASK_DICE_ROLL:
+					{
+						if(gameState == GameState.Waiting_for_play) { // waiting for ack from all players
+							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - receiving request for dice roll.");
+						}
+					}
+					break;
 					default:
 					{
 						// should not get here!!!
@@ -177,18 +122,18 @@ public class GameManagerAgent extends Agent {
 					e.printStackTrace();
 					System.exit(-1);
 				}
-				
-			} else { // if no message is arrived, block the behaviour
+			} else {
 				block();
 			}
 		}
+		
 	}
 	
 	/**
 	 * starts the cluedo game
 	 */
 	public void startGame() {
-		logger.log("Starting the game");
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Starting the game.");
 		
 		try {
 			cluedo = new Cluedo(agents.size());
@@ -240,7 +185,7 @@ public class GameManagerAgent extends Agent {
 	 * sends a message to all agents with the name of the turn player
 	 */
 	private void notifyTurnPlayer() {
-		logger.log("Notifying players about this turn's player");
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Notifying players about this turn's player");
 		
 		for(AID agent: agents) {
 			GameMessage msg = new GameMessage(GameMessage.TURN_PLAYER);

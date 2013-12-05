@@ -11,7 +11,6 @@ package game_logic;
 // ------------------------------------------------------------
 
 import java.io.IOException;
-import java.rmi.activation.ActivationID;
 import java.util.ArrayList;
 
 import jade.core.AID;
@@ -22,12 +21,13 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
+import jade.util.Logger;
 
  public class PlayerAgent extends Agent 
  { 
 	private static final long serialVersionUID = -4614773070990660799L;
 	
-	private CluedoLogger logger;
+	private Logger myLogger = Logger.getMyLogger(getClass().getName());
 	private ArrayList<CluedoCard> myCards = null;
 	private boolean stillInGame;
 	private boolean myTurn;
@@ -37,8 +37,7 @@ import jade.lang.acl.UnreadableException;
 	{ 
 		stillInGame = true;
 		myTurn = false;
-		logger = CluedoLogger.getInstance();
-		logger.log(getLocalName(), "ready to play, sending READY msg.");
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - ready to play, sending READY msg.");
 
 		try {
 			// create the agent description of itself and register it
@@ -73,7 +72,8 @@ import jade.lang.acl.UnreadableException;
 	/**
 	 * sends the game manager a msg asking for a dice roll result
 	 */
-	protected void askDiceRoll() {
+	public void askDiceRoll() {
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending request for a dice roll.");
 		GameMessage msg = new GameMessage(GameMessage.ASK_DICE_ROLL);
 		ACLMessage diceRollRequest = new ACLMessage(ACLMessage.INFORM);
 		
@@ -121,18 +121,18 @@ import jade.lang.acl.UnreadableException;
 							}
 
 						} else {
-							logger.warning("Receiving cards and initial position again.");
+							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Receiving cards and initial position again.");
 						}
 					}
 					break;
 					case GameMessage.TURN_PLAYER: // receiving the name of the current turn's player
 					{
 						String turnPlayerName = (String) message.getObject(0);
-						logger.log(myAgent.getLocalName(), "received turn player name "+turnPlayerName);
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received turn player name "+turnPlayerName);
 
 						if(turnPlayerName.equals(myAgent.getLocalName())) {
 							myTurn = true;
-							logger.log(myAgent.getLocalName(), "it's my turn!");
+							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - it's my turn!");
 
 							// can do different things here!
 							((PlayerAgent)myAgent).askDiceRoll();
@@ -143,7 +143,7 @@ import jade.lang.acl.UnreadableException;
 					case GameMessage.RSLT_DICE_ROLL: // receiving the name of the current turn's player
 					{
 						int diceResult = ((Integer) message.getObject(0)).intValue();
-						logger.log(myAgent.getLocalName(), " rolled the dice and got: "+diceResult);
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - rolled the dice and got "+diceResult);
 					}
 						break;
 					default:
