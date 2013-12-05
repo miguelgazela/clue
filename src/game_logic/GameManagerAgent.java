@@ -108,6 +108,24 @@ public class GameManagerAgent extends Agent {
 					{
 						if(gameState == GameState.Waiting_for_play) { // waiting for ack from all players
 							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - receiving request for dice roll.");
+							
+							// check if it's this player's turn
+							if(msg.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
+								
+								// send dice result
+								GameMessage diceResult = new GameMessage(GameMessage.RSLT_DICE_ROLL);
+								diceResult.addObject(new Integer(cluedo.rollDice()));
+								ACLMessage aclmsg = new ACLMessage(ACLMessage.INFORM);
+
+								try {
+									aclmsg.setContentObject(diceResult);
+									aclmsg.addReceiver(msg.getSender());
+									send(aclmsg);
+								} catch (Exception e) {
+									e.printStackTrace();
+									System.exit(-1);
+								}
+							}
 						}
 					}
 					break;

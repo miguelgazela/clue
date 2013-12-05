@@ -31,6 +31,7 @@ import jade.util.Logger;
 	private ArrayList<CluedoCard> myCards = null;
 	private boolean stillInGame;
 	private boolean myTurn;
+	private boolean waitingForDiceResult = false;
 	private Coordinates posOnBoard;
 
 	protected void setup() 
@@ -81,6 +82,7 @@ import jade.util.Logger;
 			diceRollRequest.setContentObject(msg);
 			diceRollRequest.addReceiver(new AID("host", AID.ISLOCALNAME));
 			send(diceRollRequest);
+			waitingForDiceResult = true;
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -142,8 +144,10 @@ import jade.util.Logger;
 					break;
 					case GameMessage.RSLT_DICE_ROLL: // receiving the name of the current turn's player
 					{
-						int diceResult = ((Integer) message.getObject(0)).intValue();
-						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - rolled the dice and got "+diceResult);
+						if(waitingForDiceResult) {
+							int diceResult = ((Integer) message.getObject(0)).intValue();
+							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - rolled the dice and got "+diceResult);
+						}
 					}
 						break;
 					default:
