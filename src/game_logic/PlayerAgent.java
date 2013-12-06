@@ -11,6 +11,7 @@ package game_logic;
 // ------------------------------------------------------------
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.ArrayList;
 
 import jade.core.AID;
@@ -24,16 +25,16 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.util.Logger;
 
- public class PlayerAgent extends Agent 
+ public abstract class PlayerAgent extends Agent 
  { 
 	private static final long serialVersionUID = -4614773070990660799L;
 	
-	private Logger myLogger = Logger.getMyLogger(getClass().getName());
-	private ArrayList<CluedoCard> myCards = null;
-	private boolean stillInGame;
-	private boolean myTurn;
-	private boolean waitingForDiceResult = false;
-	private Coordinates posOnBoard;
+	protected Logger myLogger = Logger.getMyLogger(getClass().getName());
+	protected ArrayList<CluedoCard> myCards = null;
+	protected boolean stillInGame;
+	protected boolean myTurn;
+	protected boolean waitingForDiceResult = false;
+	protected Coordinates posOnBoard;
 
 	protected void setup() 
 	{ 
@@ -53,16 +54,7 @@ import jade.util.Logger;
 		
 		// notify the game manager agent that this player is ready to play
 		GameMessage msg = new GameMessage(GameMessage.READY_PLAY);
-		ACLMessage ready = new ACLMessage(ACLMessage.INFORM);
-		
-		try {
-			ready.setContentObject(msg);
-			ready.addReceiver(new AID("host", AID.ISLOCALNAME));
-			send(ready);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(-1);
-		}
+		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME));
 		
 		// move to the corridor container
 		ContainerID cid = new ContainerID("Corridor", null);
@@ -78,21 +70,31 @@ import jade.util.Logger;
 	/**
 	 * sends the game manager a msg asking for a dice roll result
 	 */
-	public void askDiceRoll() {
+	protected void askDiceRoll() {
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending request for a dice roll.");
 		GameMessage msg = new GameMessage(GameMessage.ASK_DICE_ROLL);
-		ACLMessage diceRollRequest = new ACLMessage(ACLMessage.INFORM);
+		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME));
+		try {
+			wait(5000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected void sendGameMessage(GameMessage gameMsg, AID receiver) {
+		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 		
 		try {
-			diceRollRequest.setContentObject(msg);
-			diceRollRequest.addReceiver(new AID("host", AID.ISLOCALNAME));
-			send(diceRollRequest);
-			waitingForDiceResult = true;
+			msg.setContentObject(gameMsg);
+			msg.addReceiver(receiver);
+			send(msg);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
 		}
 	}
+	
+	protected abstract void makePlay();
 	
 	private class PlayerBehaviour extends CyclicBehaviour {
 
@@ -116,17 +118,8 @@ import jade.util.Logger;
 
 							// send ack
 							GameMessage msg_ack = new GameMessage(GameMessage.ACK_DISTRIBUTE_CARDS);
-							ACLMessage ack = new ACLMessage(ACLMessage.INFORM);
-
-							try {
-								ack.setContentObject(msg_ack);
-								ack.addReceiver(msg.getSender());
-								send(ack);
-							} catch (Exception e) {
-								e.printStackTrace();
-								System.exit(-1);
-							}
-
+							sendGameMessage(msg_ack, new AID("host", AID.ISLOCALNAME));
+							
 						} else {
 							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Receiving cards and initial position again.");
 						}
@@ -141,24 +134,13 @@ import jade.util.Logger;
 							myTurn = true;
 							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - it's my turn!");
 
-							// can do different things here!
-							((PlayerAgent)myAgent).askDiceRoll();
-						}
-
-					}
-					break;
-					case GameMessage.RSLT_DICE_ROLL: // receiving the name of the current turn's player
-					{
-						if(waitingForDiceResult) {
-							int diceResult = ((Integer) message.getObject(0)).intValue();
-							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - rolled the dice and got "+diceResult);
+							makePlay();
 						}
 					}
-						break;
 					default:
 					{
 						// should not get here!!!
-						System.exit(-1);
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - unrecognized message.");
 					}
 					break;
 					}

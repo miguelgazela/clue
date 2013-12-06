@@ -3,7 +3,7 @@ package game_ui;
 import game_logic.CluedoPlayer;
 import game_logic.Coordinates;
 import game_logic.GameManagerAgent;
-import jade.core.behaviours.OneShotBehaviour;
+import jade.core.Agent;
 import jade.gui.GuiEvent;
 
 import java.awt.Dimension;
@@ -37,6 +37,7 @@ public class UIGame extends JFrame implements ActionListener {
 	private UIDevTeamPanel uiDevTeamPanel;
 	private UIGamePanel uiGamePanel;
 	public boolean hasGameRunning = false;
+	protected Agent turnPlayer = null;
 	
 	private SLConfig mainCfg, AboutCfg, NewGameCfg, DevTeamCfg, GameCfg;
 	protected MenuState currentMenuState;
@@ -332,7 +333,8 @@ public class UIGame extends JFrame implements ActionListener {
 		
 		public void startGame() {
 			GuiEvent ge = new GuiEvent(this, GameManagerAgent.CREATE_GAME);
-			ge.addParameter(new Integer(4)); // TODO temporary number of players
+			ge.addParameter(new Integer(1)); // TODO temporary number of human players
+			ge.addParameter(new Integer(3)); // TODO temporary number of bot players
 			gameManagerAgent.postGuiEvent(ge);
 		}
 		
@@ -367,6 +369,7 @@ public class UIGame extends JFrame implements ActionListener {
 					
 					// draw players on board
 					ArrayList<CluedoPlayer> players = gameManagerAgent.getCluedo().getPlayers();
+					
 					for(int i = 0; i < players.size(); i++) {
 						UICoord c = uiResourcesLoader.getSourceCoord();
 						Coordinates pos = players.get(i).getPosOnBoard();
@@ -386,6 +389,11 @@ public class UIGame extends JFrame implements ActionListener {
 								c.y + i*50,
 								this
 						);
+					}
+					
+					// draw turn player stuff
+					if(turnPlayer != null) {
+						System.out.println("turn player is not null");
 					}
 					
 					if(showingResetWarning) {

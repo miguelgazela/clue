@@ -37,7 +37,6 @@ public class GameManagerAgent extends GuiAgent {
 	private ArrayList<AID> agents = new ArrayList<AID>();
 	private int numPlayers = 0;
 	private Logger myLogger = Logger.getMyLogger(getClass().getName());
-	private Map locations = new HashMap();
 	
 	private Cluedo cluedo;
 	private GameState gameState;
@@ -120,7 +119,7 @@ public class GameManagerAgent extends GuiAgent {
 					default:
 					{
 						// should not get here!!!
-						System.exit(-1);
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - unrecognized message.");
 					}
 						break;
 					}
@@ -192,9 +191,8 @@ public class GameManagerAgent extends GuiAgent {
 					e.printStackTrace();
 					System.exit(-1);
 				}
-				
-				myGui.hasGameRunning = true;
 			}
+			myGui.hasGameRunning = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -209,10 +207,10 @@ public class GameManagerAgent extends GuiAgent {
 	 * initiates the agents and containers needed to play the game
 	 * @param numPlayers
 	 */
-	public void createGame(int numPlayers) {
-		this.numPlayers = numPlayers;
+	public void createGame(int numHumanPlayers, int numBotPlayers) {
+		this.numPlayers = numHumanPlayers + numBotPlayers;
 		createGameContainers();
-		createSuspectsAgents(numPlayers);
+		createSuspectsAgents(numHumanPlayers, numBotPlayers);
 	}
 	
 	public Cluedo getCluedo() {
@@ -227,7 +225,8 @@ public class GameManagerAgent extends GuiAgent {
 		
 		for(AID agent: agents) {
 			GameMessage msg = new GameMessage(GameMessage.TURN_PLAYER);
-			msg.addObject(cluedo.getTurnPlayerName());
+//			msg.addObject(cluedo.getTurnPlayerName());
+			msg.addObject("Miss Scarlett");
 
 			// send message with turn player name to agent
 			ACLMessage turn = new ACLMessage(ACLMessage.INFORM);
@@ -271,19 +270,26 @@ public class GameManagerAgent extends GuiAgent {
 	 * creates all the agents that will be in the game
 	 * @param numPlayers
 	 */
-	private void createSuspectsAgents(int numPlayers) {
+	private void createSuspectsAgents(int numHumPlayers, int numBotPlayers) {
 		PlatformController container = getContainerController();
-		
-		
 
 		try {
-			for (int i = 0;  i < numPlayers;  i++) {
-				// create a new agent
-				AgentController guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.PlayerAgent", null);
+			// create human players
+			// create bot players
+			for (int i = 0;  i < (numHumPlayers + numBotPlayers);  i++) {
+				AgentController guest = null;
+				
+				if(i < numHumPlayers) {
+					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - creating Human player");
+					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.HumanPlayerAgent", null);
+				} else {
+					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - creating Bot player");
+					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.BotPlayerAgent", null);
+				}
+				
 				guest.start();
 				AID aid = new AID(Cluedo.suspects[i], AID.ISLOCALNAME);
 				agents.add(aid);
-				
 			}
 		}
 		catch (Exception e) {
@@ -303,8 +309,9 @@ public class GameManagerAgent extends GuiAgent {
 		switch (command) {
 		case CREATE_GAME:
 		{
-			int numberPlayers = ((Integer)ev.getParameter(0)).intValue();
-			createGame(numberPlayers);
+			int numHumPlayers = ((Integer)ev.getParameter(0)).intValue();
+			int numBotPlayers = ((Integer)ev.getParameter(1)).intValue();
+			createGame(numHumPlayers, numBotPlayers);
 		}
 		break;
 

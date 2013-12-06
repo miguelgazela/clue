@@ -24,6 +24,7 @@ public class UIResourcesLoader {
 	public BufferedImage devteam_bg;
 	public BufferedImage newgame_bg;
 	public BufferedImage game_bg;
+	public BufferedImage player_bg;
 	
 	public UICoord[] new_game_btns_coords;
 	
@@ -59,6 +60,7 @@ public class UIResourcesLoader {
 			devteam_bg = ImageIO.read(new File("images/backgrounds/dev_team.png"));
 			newgame_bg = ImageIO.read(new File("images/backgrounds/newgame.png"));
 			game_bg = ImageIO.read(new File("images/backgrounds/game.png"));
+			player_bg = ImageIO.read(new File("images/backgrounds/newgame.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Background Resources Missing");
