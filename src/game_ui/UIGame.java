@@ -1,15 +1,16 @@
 package game_ui;
 
-import game_logic.Board;
 import game_logic.CluedoPlayer;
 import game_logic.Coordinates;
 import game_logic.GameManagerAgent;
-
 import jade.core.behaviours.OneShotBehaviour;
+import jade.gui.GuiEvent;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -17,13 +18,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.List;
 
-import javax.security.auth.x500.X500Principal;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
-import org.omg.CORBA.PRIVATE_MEMBER;
 
 import aurelienribon.slidinglayout.SLAnimator;
 import aurelienribon.slidinglayout.SLConfig;
@@ -31,7 +28,7 @@ import aurelienribon.slidinglayout.SLKeyframe;
 import aurelienribon.slidinglayout.SLPanel;
 import aurelienribon.slidinglayout.SLSide;
 
-public class UIGame extends JFrame {
+public class UIGame extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -5256114500541984237L;
 	private SLPanel panel;
 	private final UIMainMenuPanel uiMainMenuPanel;
@@ -43,7 +40,6 @@ public class UIGame extends JFrame {
 	
 	private SLConfig mainCfg, AboutCfg, NewGameCfg, DevTeamCfg, GameCfg;
 	protected MenuState currentMenuState;
-	
 	protected GameManagerAgent gameManagerAgent;
 	
 	public UIGame(GameManagerAgent owner) {
@@ -234,7 +230,6 @@ public class UIGame extends JFrame {
 		private UIResourcesLoader uiResourcesLoader;
 		private Graphics graphics;
 		private BufferedImage background;
-//		public int game_type = -1;
 		
 		public UINewGamePanel() {
 			uiResourcesLoader = UIResourcesLoader.getInstanceLoader();
@@ -258,15 +253,7 @@ public class UIGame extends JFrame {
 			// draws the game elements
 			if (background != null) {
 				graphics.drawImage(background, 0, 0, this);
-				
 				drawStartGameBtn();
-				
-				// draw game type
-//				if(game_type != -1) {
-//					GameImage selected_game_type_btn = uiResourcesLoader.getSelectedNewGameBtn(game_type);
-//					graphics.drawImage(selected_game_type_btn.image, selected_game_type_btn.coord.x, selected_game_type_btn.coord.y, this);
-//					drawStartGameBtn();
-//				}
 			}
 		}
 		
@@ -280,7 +267,6 @@ public class UIGame extends JFrame {
 			if(currentMenuState == MenuState.NewGame) {
 				int x = e.getX();
 				int y = e.getY();
-				//System.out.println("X: "+x+" Y: "+y);
 				
 				if(x > 30 && y > 643 && x < 79 && y < 690) { // back to main menu
 					new Runnable() {@Override public void run() {
@@ -296,10 +282,6 @@ public class UIGame extends JFrame {
 				} else if(x >= 373 && y >= 646 && x <= 417 && y <= 691) { // start game
 					boolean startGame = true; // TODO temporary
 					
-//					if(game_type == UIResourcesLoader.RANDOM_GAME || game_type == UIResourcesLoader.STRATEGIC_GAME) {
-//						startGame = true;
-//					}
-//					
 					if(startGame) {
 						uiGamePanel.clearPossibleGame();
 						uiGamePanel.startGame();
@@ -314,22 +296,12 @@ public class UIGame extends JFrame {
 							.setDelay(0.3f, uiMainMenuPanel)
 							.setCallback(new SLKeyframe.Callback() {@Override public void done() {
 								currentMenuState = MenuState.Game;
-//								uiGamePanel.startGame(game_type);
 							}}))
 							.play();
 						}}.run();
 					}
 				} else {
 					UICoord[] coords = uiResourcesLoader.new_game_btns_coords;
-					
-//					for(int i = 0; i < coords.length; i++) {
-//						UICoord c = coords[i];
-//						
-//						if(x >= c.x && y >= c.y && x < (c.x + 215) && y < (c.y + 100)) { // a btn was pressed
-//							game_type = i;
-//							repaint();
-//						}
-//					}
 				}
 			}
 		}
@@ -352,8 +324,6 @@ public class UIGame extends JFrame {
 		private boolean gameIsOver = false;
 		private boolean showingResetWarning = false;
 		private int game_type = -1;
-//		private Stratego game = null;
-//		private GameImage turnPlayer = null;
 		
 		public UIGamePanel() {
 			uiResourcesLoader = UIResourcesLoader.getInstanceLoader();
@@ -361,13 +331,9 @@ public class UIGame extends JFrame {
 		}
 		
 		public void startGame() {
-			gameManagerAgent.addBehaviour(new OneShotBehaviour() {
-				private static final long serialVersionUID = -6359608569382445808L;
-				public void action() {
-					((GameManagerAgent)myAgent).createGame(3); // TODO temporary
-				}
-			});
-//			game_type = gameType;
+			GuiEvent ge = new GuiEvent(this, GameManagerAgent.CREATE_GAME);
+			ge.addParameter(new Integer(4)); // TODO temporary number of players
+			gameManagerAgent.postGuiEvent(ge);
 		}
 		
 		public void gameHasStarted() {
@@ -381,12 +347,6 @@ public class UIGame extends JFrame {
 			game_type = -1;
 		}
 
-//		private void updateGameTurn() throws GameException, CGException {
-//			game.updateTurn();
-//			turnPlayer = uiResourcesLoader.getPlayerTurn(game.getCurrentPlayer().getName());
-//			repaint();
-//		}
-		
 		@Override
 		public Dimension getPreferredSize() {
 			if (background != null) {
@@ -404,41 +364,6 @@ public class UIGame extends JFrame {
 				graphics.drawImage(background, 0, 0, this);
 				
 				if(hasGameRunning) {
-					
-					// draw board
-//					if(game != null) {
-//						try {
-//							List gameBoard = ((Board)game.getBoard()).getBoard();
-//
-//							for(int i = 0; i < gameBoard.size(); i++) {
-//								List row = ((List)gameBoard.get(i));
-//
-//								for(int j = 0; j < row.size(); j++) {
-//									Object piece = row.get(j);
-//
-//									if(piece != null) {
-//										UICoord c = uiResourcesLoader.board_positions_coords[i][j];
-//										
-//										if(((Piece)piece).isHidden() && (((Piece)piece).getColor().toString() != game.getCurrentPlayer().getColor().toString())) {
-//											Image pieceImage = uiResourcesLoader.getHiddenPiece((Piece)piece);
-//											graphics.drawImage(pieceImage, c.x, c.y, this);
-//										} else {
-//											Image pieceImage = uiResourcesLoader.getUnselectedPiece((Piece)piece);
-//											graphics.drawImage(pieceImage, c.x, c.y, this);
-//										}
-//										
-//										if(hasPieceSelected && i == iPieceSelected && j == jPieceselected) {
-//											Image pieceImage = uiResourcesLoader.getSelectedPiece((Piece)piece);
-//											graphics.drawImage(pieceImage, c.x, c.y, this);
-//										}
-//									} 
-//								}
-//							}
-//						} catch (CGException | GameException e) {
-//							e.printStackTrace();
-//							System.exit(-1);
-//						}
-//					}
 					
 					// draw players on board
 					ArrayList<CluedoPlayer> players = gameManagerAgent.getCluedo().getPlayers();
@@ -471,29 +396,6 @@ public class UIGame extends JFrame {
 					// draw game status
 					UICoord c = uiResourcesLoader.game_status_coord;
 					Image status = null;
-					
-//					if(gameIsOver) {
-//						try {
-//							status = uiResourcesLoader.getGameStatus(game.getCurrentPlayer().getName());
-//							graphics.drawImage(status, c.x, c.y, this);
-//						} catch (CGException e) {
-//							e.printStackTrace();
-//							System.exit(-1);
-//						}
-//					} else {
-//						if(game_phase == PLACING_PHASE) {
-//							status = uiResourcesLoader.getGameStatus("place");
-//							Image pieceImage = uiResourcesLoader.getUnselectedPiece(nextPiece);
-//							
-//							UICoord c2 = uiResourcesLoader.nextPiece_coord;
-//							graphics.drawImage(pieceImage, c2.x, c2.y, this);
-//							
-//						} else if(hasPieceSelected) {
-//							status = uiResourcesLoader.getGameStatus("move");
-//						} else {
-//							status = uiResourcesLoader.getGameStatus("select");
-//						}
-//					}
 					graphics.drawImage(status, c.x, c.y, this);
 				}
 			}
@@ -513,16 +415,10 @@ public class UIGame extends JFrame {
 		}
 		
 		private void resetGame() {
-			int temp_game_type = game_type;
 			clearPossibleGame();
 			startGame();
 		}
 		
-		private void gameOver() {
-			gameIsOver = true;
-			repaint();
-		}
-
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			int x = e.getX();
@@ -671,5 +567,11 @@ public class UIGame extends JFrame {
 		@Override public void keyPressed(KeyEvent e) {}
 		@Override public void keyReleased(KeyEvent e) {}
 		@Override public void mouseDragged(MouseEvent e) {}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent ae) {
+		// TODO Auto-generated method stub
+		
 	}
 }

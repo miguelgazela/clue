@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.ContainerID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -62,6 +63,10 @@ import jade.util.Logger;
 			e.printStackTrace();
 			System.exit(-1);
 		}
+		
+		// move to the corridor container
+		ContainerID cid = new ContainerID("Corridor", null);
+		doMove(cid);
 		
 		addBehaviour(new PlayerBehaviour());
 	}

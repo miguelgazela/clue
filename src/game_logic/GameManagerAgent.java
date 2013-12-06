@@ -7,8 +7,11 @@ import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.gui.GuiAgent;
+import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.util.Logger;
@@ -17,21 +20,24 @@ import jade.wrapper.PlatformController;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import aurelienribon.slidinglayout.SLAnimator;
 
-public class GameManagerAgent extends Agent {
+public class GameManagerAgent extends GuiAgent {
 
 	private static final long serialVersionUID = 5548183532204390248L;
-
 	private static final int NUM_CONTAINERS = 10;
 
+	public static final int CREATE_GAME = 1;
 	
 	private UIGame myGui;
 	
 	private ArrayList<AID> agents = new ArrayList<AID>();
 	private int numPlayers = 0;
 	private Logger myLogger = Logger.getMyLogger(getClass().getName());
+	private Map locations = new HashMap();
 	
 	private Cluedo cluedo;
 	private GameState gameState;
@@ -106,26 +112,8 @@ public class GameManagerAgent extends Agent {
 					break;
 					case GameMessage.ASK_DICE_ROLL:
 					{
-						if(gameState == GameState.Waiting_for_play) { // waiting for ack from all players
-							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - receiving request for dice roll.");
-							
-							// check if it's this player's turn
-							if(msg.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
-								
-								// send dice result
-								GameMessage diceResult = new GameMessage(GameMessage.RSLT_DICE_ROLL);
-								diceResult.addObject(new Integer(cluedo.rollDice()));
-								ACLMessage aclmsg = new ACLMessage(ACLMessage.INFORM);
-
-								try {
-									aclmsg.setContentObject(diceResult);
-									aclmsg.addReceiver(msg.getSender());
-									send(aclmsg);
-								} catch (Exception e) {
-									e.printStackTrace();
-									System.exit(-1);
-								}
-							}
+						if(gameState == GameState.Waiting_for_play) { // waiting for a player to do something
+							addBehaviour(new HandleDiceRollRequest(myAgent, msg));
 						}
 					}
 					break;
@@ -143,8 +131,40 @@ public class GameManagerAgent extends Agent {
 			} else {
 				block();
 			}
+		}	
+	}
+	
+	private class HandleDiceRollRequest extends OneShotBehaviour {
+		private static final long serialVersionUID = -5340646074128914622L;
+		ACLMessage request;
+		
+		public HandleDiceRollRequest(Agent a, ACLMessage request) {
+			super(a);
+			this.request = request;
 		}
 		
+		@Override
+		public void action() {
+			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - receiving request for dice roll.");
+			
+			// check if it's this player's turn
+			if(request.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
+				
+				// send dice result
+				GameMessage diceResult = new GameMessage(GameMessage.RSLT_DICE_ROLL);
+				diceResult.addObject(new Integer(cluedo.rollDice()));
+				ACLMessage aclmsg = new ACLMessage(ACLMessage.INFORM);
+
+				try {
+					aclmsg.setContentObject(diceResult);
+					aclmsg.addReceiver(request.getSender());
+					send(aclmsg);
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}
+		}
 	}
 	
 	/**
@@ -229,6 +249,7 @@ public class GameManagerAgent extends Agent {
 
 		// Get a hold on JADE runtime
 		Runtime rt = Runtime.instance();
+		
 
 		// Create a default profile and set to be non-main container
 		ProfileImpl p = new ProfileImpl();
@@ -246,21 +267,50 @@ public class GameManagerAgent extends Agent {
 		}
 	}
 
+	/**
+	 * creates all the agents that will be in the game
+	 * @param numPlayers
+	 */
 	private void createSuspectsAgents(int numPlayers) {
 		PlatformController container = getContainerController();
+		
+		
 
 		try {
 			for (int i = 0;  i < numPlayers;  i++) {
 				// create a new agent
 				AgentController guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.PlayerAgent", null);
 				guest.start();
-
-				agents.add(new AID(Cluedo.suspects[i], AID.ISLOCALNAME));
+				AID aid = new AID(Cluedo.suspects[i], AID.ISLOCALNAME);
+				agents.add(aid);
+				
 			}
 		}
 		catch (Exception e) {
 			System.err.println( "Exception while adding guests: " + e );
 			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * processes events given by the GUI
+	 */
+	@Override
+	protected void onGuiEvent(GuiEvent ev) {
+		
+		int command = ev.getType();
+		
+		switch (command) {
+		case CREATE_GAME:
+		{
+			int numberPlayers = ((Integer)ev.getParameter(0)).intValue();
+			createGame(numberPlayers);
+		}
+		break;
+
+		default:
+			// should not get here
+			break;
 		}
 	}
 }
