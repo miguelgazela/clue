@@ -280,10 +280,8 @@ public class GameManagerAgent extends GuiAgent {
 				AgentController guest = null;
 				
 				if(i < numHumPlayers) {
-					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - creating Human player");
 					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.HumanPlayerAgent", null);
 				} else {
-					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - creating Bot player");
 					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.BotPlayerAgent", null);
 				}
 				

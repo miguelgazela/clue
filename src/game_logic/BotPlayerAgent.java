@@ -1,5 +1,8 @@
 package game_logic;
 
+import java.util.ArrayList;
+
+import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
@@ -11,6 +14,7 @@ public class BotPlayerAgent extends PlayerAgent {
 
 	public void setup() {
 		super.setup();
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - new human player.");
 		addBehaviour(new BotPlayerBehaviour());
 	}
 	
@@ -26,6 +30,34 @@ public class BotPlayerAgent extends PlayerAgent {
 					GameMessage message = (GameMessage) msg.getContentObject();
 
 					switch (message.getType()) {
+					case GameMessage.DISTRIBUTE_CARDS_AND_POS: // receiving this players cards and initial position
+					{
+						if(myCards == null) {
+							myCards = (ArrayList<CluedoCard>) message.getObject(0);
+							posOnBoard = (Coordinates) message.getObject(1);
+
+							// send ack
+							GameMessage msg_ack = new GameMessage(GameMessage.ACK_DISTRIBUTE_CARDS);
+							sendGameMessage(msg_ack, new AID("host", AID.ISLOCALNAME));
+							
+						} else {
+							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Receiving cards and initial position again.");
+						}
+					}
+					break;
+					case GameMessage.TURN_PLAYER: // receiving the name of the current turn's player
+					{
+						String turnPlayerName = (String) message.getObject(0);
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received turn player name "+turnPlayerName);
+
+						if(turnPlayerName.equals(myAgent.getLocalName())) {
+							myTurn = true;
+							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - it's my turn!");
+
+							makePlay();
+						}
+					}
+					break;
 					case GameMessage.RSLT_DICE_ROLL: // receiving the result of the dice roll
 					{
 						if(waitingForDiceResult) {
@@ -33,7 +65,7 @@ public class BotPlayerAgent extends PlayerAgent {
 							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - rolled the dice and got "+diceResult);
 						}
 					}
-						break;
+					break;
 					default:
 					{
 						// should not get here!!!

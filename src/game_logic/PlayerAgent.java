@@ -60,7 +60,7 @@ import jade.util.Logger;
 		ContainerID cid = new ContainerID("Corridor", null);
 		doMove(cid);
 		
-		addBehaviour(new PlayerBehaviour());
+		//addBehaviour(new PlayerBehaviour()); TODO it doesn't work, why??
 	}
 	
 	public boolean isStillInGame() {
@@ -71,14 +71,10 @@ import jade.util.Logger;
 	 * sends the game manager a msg asking for a dice roll result
 	 */
 	protected void askDiceRoll() {
+		waitingForDiceResult = true;
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending request for a dice roll.");
 		GameMessage msg = new GameMessage(GameMessage.ASK_DICE_ROLL);
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME));
-		try {
-			wait(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	protected void sendGameMessage(GameMessage gameMsg, AID receiver) {
@@ -102,12 +98,14 @@ import jade.util.Logger;
 
 		@Override
 		public void action() {
-			ACLMessage msg = receive();
-
+			ACLMessage msg = myAgent.receive();
+			
 			if(msg != null) {
 				try {
 					GameMessage message = (GameMessage) msg.getContentObject();
 
+					System.out.println("PLAYERAGENT: "+message.getType());
+					
 					switch (message.getType()) {
 
 					case GameMessage.DISTRIBUTE_CARDS_AND_POS: // receiving this players cards and initial position
@@ -125,18 +123,19 @@ import jade.util.Logger;
 						}
 					}
 					break;
-					case GameMessage.TURN_PLAYER: // receiving the name of the current turn's player
-					{
-						String turnPlayerName = (String) message.getObject(0);
-						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received turn player name "+turnPlayerName);
-
-						if(turnPlayerName.equals(myAgent.getLocalName())) {
-							myTurn = true;
-							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - it's my turn!");
-
-							makePlay();
-						}
-					}
+//					case GameMessage.TURN_PLAYER: // receiving the name of the current turn's player
+//					{
+//						String turnPlayerName = (String) message.getObject(0);
+//						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received turn player name "+turnPlayerName);
+//
+//						if(turnPlayerName.equals(myAgent.getLocalName())) {
+//							myTurn = true;
+//							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - it's my turn!");
+//
+//							makePlay();
+//						}
+//					}
+//					break;
 					default:
 					{
 						// should not get here!!!
