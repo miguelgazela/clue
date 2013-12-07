@@ -17,7 +17,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 	public void setup() {
 		super.setup();
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - new human player.");
-		//myGui = new UIHumanPlayer(this, getLocalName());
+		myGui = new UIHumanPlayer(this, getLocalName());
 		addBehaviour(new HumanPlayerBehaviour());
 	}
 	

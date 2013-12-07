@@ -1,19 +1,20 @@
 package game_ui;
 
-import game_logic.CluedoPlayer;
-import game_logic.Coordinates;
 import game_logic.HumanPlayerAgent;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -41,14 +42,22 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 	private class UIPlayerPanel extends JPanel implements MouseListener {
 
 		private static final long serialVersionUID = 1035949055614632990L;
-		private UIResourcesLoader uiResourcesLoader;
-		private BufferedImage background;
-		private Graphics graphics;
+		transient private BufferedImage background;
 		
 		public UIPlayerPanel() {
-			uiResourcesLoader = UIResourcesLoader.getInstanceLoader();
+			UIResourcesLoader uiResourcesLoader = UIResourcesLoader.getInstanceLoader();
 			background = uiResourcesLoader.player_bg;
 		}
+		
+		private void writeObject(ObjectOutputStream out) throws IOException {
+	        out.defaultWriteObject();
+	        ImageIO.write(background, "png", out);
+	    }
+
+	    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+	        in.defaultReadObject();
+	        background = ImageIO.read(in);
+	    }
 		
 		@Override
 		public Dimension getPreferredSize() {
@@ -62,9 +71,9 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 		
 		@Override
 		protected void paintComponent(Graphics g) {
-			super.paintComponent(graphics = g); // clear off-screen bitmap
+			super.paintComponent(g); // clear off-screen bitmap
 			if (background != null) {
-				graphics.drawImage(background, 0, 0, this);
+				g.drawImage(background, 0, 0, this);
 			}
 		}
 		

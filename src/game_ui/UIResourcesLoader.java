@@ -7,7 +7,9 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class UIResourcesLoader {
+public class UIResourcesLoader{
+	
+	private static final long serialVersionUID = -6253717236840388878L;
 	
 	static public final int RANDOM_GAME = 0;
 	static public final int STRATEGIC_GAME = 1;
