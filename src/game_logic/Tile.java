@@ -16,18 +16,13 @@ public class Tile implements Serializable {
 	private int x;
 	private int y;
 	
-	private List<Coordinates> validNeighbours;
+	private List<Tile> validNeighbours;
 	private String playerOccupying;
 	private boolean isOccupied;
 	private boolean valid;
 	private boolean isDoor;
 	private String room;
 	
-	/**
-	 * 
-	 * @param xPos
-	 * @param yPos
-	 */
 	public Tile(int xPos, int yPos) {
 		x = xPos;
 		y = yPos;
@@ -36,112 +31,74 @@ public class Tile implements Serializable {
 		isOccupied=false;
 		isDoor = false;
 		room = "";
-		validNeighbours = new ArrayList<Coordinates>();
+		validNeighbours = new ArrayList<Tile>();
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
 	public Coordinates getCoordinates() {
 		return new Coordinates(x,y);
 	}
-	
-	/**
-	 * 
-	 * @return
-	 */
 	public boolean isOccupied() {
 		return isOccupied;
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
 	public String getPlayerOccupying() {
 		return playerOccupying;
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
 	public boolean isValid() {
 		return valid;
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
 	public String getRoom() {
 		return room;
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
-	public List<Coordinates> getNeighbours() {
+	public List<Tile> getNeighbours() {
 		return validNeighbours;
 	}
-	
-	/**
-	 * 
-	 * @param state
-	 */
 	public void setValid(boolean state) {
 		valid = state;
 	}
-	
-	/**
-	 * 
-	 * @param player
-	 */
 	public void setOccupied(String player) {
 		playerOccupying = player;
 		isOccupied = true;
 	}
 	
-	/**
-	 * 
-	 */
 	public void removePlayer() {
 		playerOccupying = "";
 		isOccupied = false;
 	}
 	
-	/**
-	 * 
-	 * @param room
-	 */
 	public void setDoor(String room) {
 		valid = true;
 		isDoor=true;
 		this.room = room;
 	}
 	
-	/**
-	 * 
-	 * @param coord
-	 */
-	public void addNeighbour(Coordinates coord) {
-		validNeighbours.add(coord);
+	public void addNeighbour(Tile tile) {
+		validNeighbours.add(tile);
 	}
 	
-	/**
-	 * 
-	 */
 	public void printTile() {
 		String type = " ";
-		
-		if(valid == false) {
+		if(valid == false)
 			type = "X";
-		} else if(isDoor==true) {
+		else if(isDoor==true)
 			type = "^";
-		}
 		
 		System.out.print("["+type+"]");
+	}
+	
+	@Override
+	public int hashCode() {
+		return (x * 31) ^ y;
+	}
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof Tile) {
+			Tile other = (Tile) o;
+			return (x == other.getCoordinates().getX() && y == other.getCoordinates().getY());
+		}
+		return false;
 	}
 }
