@@ -55,6 +55,13 @@ public class Board implements Serializable {
 	public List<List<Tile>> getTiles() {
 		return tiles;
 	}
+	
+	/**
+	 * 
+	 */
+	public boolean moveIsValid(Coordinates currentPos, Coordinates dest, int dicesResult) {
+		return (getDistance(currentPos, dest) <= dicesResult);
+	}
 
 	/**
 	 * 
@@ -286,12 +293,12 @@ public class Board implements Serializable {
 		}
 	}
 	//	//use this to test specific functions without having to run the entire game TODO remove in the end
-	public static void main(String[] args) throws Exception {
-		Board board = new Board();
-		board.printBoard();
-
-		System.out.println("Turnos: " + (board.closestPath(new Coordinates(7,0), new Coordinates(19,23)).size()-1));
-		board.printPath(board.closestPath(new Coordinates(7,0), new Coordinates(19,23)), new Coordinates(7, 0), new Coordinates(19,23));
-
-	}
+//	public static void main(String[] args) throws Exception {
+//		Board board = new Board();
+//		board.printBoard();
+//
+//		System.out.println("Turnos: " + (board.closestPath(new Coordinates(7,0), new Coordinates(19,23)).size()-1));
+//		board.printPath(board.closestPath(new Coordinates(7,0), new Coordinates(19,23)), new Coordinates(7, 0), new Coordinates(19,23));
+//
+//	}
 }

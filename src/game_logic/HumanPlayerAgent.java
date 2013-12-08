@@ -82,6 +82,35 @@ public class HumanPlayerAgent extends PlayerAgent {
 						}
 					}
 					break;
+					case GameMessage.VALID_MOVE:
+					{
+						if(waitingForMoveConfirmation) {
+							// our move has been done
+							gameState = (Cluedo.GameState) message.getObject(0);
+							myGui.setGameState(gameState);
+							myGui.repaint();
+							
+							waitingForMoveConfirmation = false;
+							myTurn = false;
+							myGui.setVisible(false);
+						}
+					}
+					break;
+					case GameMessage.INVALID_MOVE:
+					{
+						if(waitingForMoveConfirmation) {
+							waitingForMoveConfirmation = false;
+							pickingBoardMove = true;
+						}
+					}
+					break;
+					case GameMessage.GAME_STATE_UPDATE:
+					{
+						gameState = (Cluedo.GameState) message.getObject(0);
+						myGui.setGameState(gameState);
+						myGui.repaint();
+					}
+					break;
 					default:
 					{
 						// should not get here!!!

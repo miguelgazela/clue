@@ -103,6 +103,27 @@ public class Cluedo implements Serializable{
 	public Board getBoard() {
 		return board;
 	}
+	
+	/**
+	 * checks if the move to the position received is valid for the current turn player
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	
+	public boolean moveIsValid(Coordinates dest) {
+		CluedoPlayer turnPlayer = players.get(turnPlayerIndex);
+		Coordinates currentPos = turnPlayer.getPosOnBoard();
+		
+		// TODO needs to see if some door is occupied by another player
+		return board.moveIsValid(currentPos, dest, dicesResult);
+	}
+	
+	public void makeMove(Coordinates dest) {
+		CluedoPlayer turnPlayer = players.get(turnPlayerIndex);
+		turnPlayer.setPosOnBoard(dest);
+	}
+	
 	/**
 	 * picks a solution for this instance of the game.
 	 */

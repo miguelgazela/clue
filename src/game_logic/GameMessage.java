@@ -13,6 +13,9 @@ public class GameMessage implements Serializable {
 	public static final String ASK_DICE_ROLL = "ASK_DICE_ROLL";
 	public static final String RSLT_DICE_ROLL = "RSLT_DICE_ROLL";
 	public static final String MAKE_MOVE = "MAKE_MOVE";
+	public static final String VALID_MOVE = "VALID_MOVE";
+	public static final String INVALID_MOVE = "INVALID_MOVE";
+	public static final String GAME_STATE_UPDATE = "GAME_STATE_UPDATE";
 	
 	private final String type;
 	private ArrayList<Object> objects = null;

@@ -173,10 +173,47 @@ public class GameManagerAgent extends GuiAgent {
 			// check if it's this player's turn
 			if(request.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
 
-				// check if move is valid
-//				GameMessage diceResult = new GameMessage(GameMessage.RSLT_DICE_ROLL);
-//				diceResult.addObject(new Integer(cluedo.rollDices()));
-//				sendGameMessage(diceResult, request.getSender(), ACLMessage.INFORM);
+				GameMessage message;
+				try {
+					message = (GameMessage) request.getContentObject();
+					int x = ((Integer)message.getObject(0)).intValue();
+					int y = ((Integer)message.getObject(1)).intValue();
+					
+					GameMessage msg = null;
+					
+					// check if move is valid
+					if(cluedo.moveIsValid(new Coordinates(x, y))) {
+						cluedo.makeMove(new Coordinates(x, y));
+						msg = new GameMessage(GameMessage.VALID_MOVE);
+						msg.addObject(cluedo.getGameState());
+						
+						myAgent.addBehaviour(new UpdateGameStateOfAllAgents());
+						cluedo.updateTurnPlayer();
+						notifyTurnPlayer();
+						
+					} else {
+						msg = new GameMessage(GameMessage.INVALID_MOVE);
+						// TODO maybe add the reason to why the move is invalid?
+					}
+					sendGameMessage(msg, request.getSender(), ACLMessage.INFORM);
+					
+				} catch (UnreadableException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}
+		}
+	}
+	
+	private class UpdateGameStateOfAllAgents extends OneShotBehaviour {
+
+		@Override
+		public void action() {
+			GameMessage update = new GameMessage(GameMessage.GAME_STATE_UPDATE);
+			update.addObject(cluedo.getGameState());
+			
+			for(AID agent: agents) {
+				sendGameMessage(update, agent, ACLMessage.INFORM);
 			}
 		}
 	}

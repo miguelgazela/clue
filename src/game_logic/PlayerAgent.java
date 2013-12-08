@@ -94,7 +94,11 @@ import jade.util.Logger;
 	protected void makeMove(int x, int y) {
 		pickingBoardMove = false;
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending request for making a move.");
+		
 		GameMessage msg = new GameMessage(GameMessage.MAKE_MOVE);
+		msg.addObject(new Integer(x));
+		msg.addObject(new Integer(y));
+		
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 		waitingForMoveConfirmation = true;
 	}
