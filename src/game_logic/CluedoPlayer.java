@@ -1,43 +1,44 @@
 package game_logic;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-import javax.swing.text.Position;
+public class CluedoPlayer implements Serializable{
 
-public class CluedoPlayer {
-	
-		private String name;
-		private Coordinates posOnBoard;
-		private ArrayList<CluedoCard> cards;
+	private static final long serialVersionUID = 7184916309544098886L;
 
-		public CluedoPlayer(String name, Coordinates initialPos) {
-			this.name = name;
-			posOnBoard = initialPos;
-			cards = new ArrayList<>();
-		}
-		
-		public String getName() {
-			return name;
-		}
+	private String name;
+	private Coordinates posOnBoard;
+	private ArrayList<CluedoCard> cards;
 
-		public void setName(String name) {
-			this.name = name;
-		}
+	public CluedoPlayer(String name, Coordinates initialPos) {
+		this.name = name;
+		posOnBoard = initialPos;
+		cards = new ArrayList<>();
+	}
 
-		public Coordinates getPosOnBoard() {
-			return posOnBoard;
-		}
+	public String getName() {
+		return name;
+	}
 
-		public void setPosOnBoard(Coordinates posOnBoard) {
-			this.posOnBoard = posOnBoard;
-		}
-		
-		public ArrayList<CluedoCard> getCards() {
-			return cards;
-		}
-		
-		public void addCard(CluedoCard card) {
-			cards.add(card);
-		}
-		
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Coordinates getPosOnBoard() {
+		return posOnBoard;
+	}
+
+	public void setPosOnBoard(Coordinates posOnBoard) {
+		this.posOnBoard = posOnBoard;
+	}
+
+	public ArrayList<CluedoCard> getCards() {
+		return cards;
+	}
+
+	public void addCard(CluedoCard card) {
+		cards.add(card);
+	}
+
 }

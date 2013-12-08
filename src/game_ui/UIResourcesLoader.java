@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
@@ -26,21 +27,25 @@ public class UIResourcesLoader{
 	public BufferedImage devteam_bg;
 	public BufferedImage newgame_bg;
 	public BufferedImage game_bg;
-	public BufferedImage player_bg;
+	public BufferedImage player_interface;
 	
 	public UICoord[] new_game_btns_coords;
+	public HashMap<String, UICoord> notebook_card_coords;
 	
 	public UICoord turn_coord;
 	public UICoord game_status_coord;
-	public UICoord board_source_coord;
+	public UICoord board_source_coord_main_ui;
+	public UICoord board_source_coord_player_interface;
 	public UICoord sidebar_name_coord;
+	public UICoord player_dashboard;
 	
 	private GameImage[] v_unselectedNewGameBtn;
 	private GameImage[] v_selectedNewGameBtn;
 	
 	private Image[] v_players_tokens;
 	public Image[] v_players_sidebar_names;
-	private Image[] v_selected_tokens;
+	private Image[] v_players_dashboards;
+	private Image[] v_cards_note_status;
 	
 	private GameImage[] v_turns;
 	private Image[] v_gameStatus;
@@ -50,7 +55,7 @@ public class UIResourcesLoader{
 	
 	private UIResourcesLoader() {
 		initPieces();
-//		initImages();
+		initImages();
 		initBtns();
 //		initStrings();
 		initCoords();
@@ -62,7 +67,7 @@ public class UIResourcesLoader{
 			devteam_bg = ImageIO.read(new File("images/backgrounds/dev_team.png"));
 			newgame_bg = ImageIO.read(new File("images/backgrounds/newgame.png"));
 			game_bg = ImageIO.read(new File("images/backgrounds/game.png"));
-			player_bg = ImageIO.read(new File("images/backgrounds/newgame.png"));
+			player_interface = ImageIO.read(new File("images/backgrounds/player_interface.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Background Resources Missing");
@@ -92,12 +97,21 @@ public class UIResourcesLoader{
 //		}
 //	}
 	
-//	private void initImages() {
-//		v_turns = new GameImage[2];
-//		v_turns[0] = new GameImage("images/pieces/turnP1.png", 272, 671);
-//		v_turns[1] = new GameImage("images/pieces/turnP2.png", 272, 671);
-//		confirmReset = new GameImage("images/backgrounds/confirmReset.png", 0, 0);
-//	}
+	private void initImages() {
+		v_cards_note_status = new Image[3];
+		try {
+			v_cards_note_status[0] = ImageIO.read(new File("images/players/has_card.png"));
+			v_cards_note_status[1] = ImageIO.read(new File("images/players/not_solution.png"));
+			v_cards_note_status[2] = ImageIO.read(new File("images/players/possible_solution.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
+	
+	public Image getCardNoteStatus(int status) {
+		return v_cards_note_status[status];
+	}
 	
 	private void initBtns() {
 //		v_unselectedNewGameBtn = new GameImage[2];
@@ -114,21 +128,55 @@ public class UIResourcesLoader{
 	
 	private void initCoords() {
 		new_game_btns_coords = new UICoord[2];
-		board_source_coord = new UICoord(210, 21);
+		board_source_coord_main_ui = new UICoord(210, 21);
+		board_source_coord_player_interface = new UICoord(14, 12);
 		game_status_coord = new UICoord(363, 668);
 		sidebar_name_coord = new UICoord(0, 176);
+		player_dashboard = new UICoord(574, 9);
+		
+		notebook_card_coords = new HashMap<>();
+		notebook_card_coords.put("Miss Scarlett", new UICoord(616, 225));
+		notebook_card_coords.put("Colonel Mustard", new UICoord(616, 246));
+		notebook_card_coords.put("Mrs. White", new UICoord(616, 267));
+		notebook_card_coords.put("Reverend Green", new UICoord(767, 225));
+		notebook_card_coords.put("Mrs. Peacock", new UICoord(767, 246));
+		notebook_card_coords.put("Professor Plum", new UICoord(767, 267));
+		
+		notebook_card_coords.put("Candlestick", new UICoord(616, 342));
+		notebook_card_coords.put("Dagger", new UICoord(616, 363));
+		notebook_card_coords.put("Lead pipe", new UICoord(616, 384));
+		notebook_card_coords.put("Revolver", new UICoord(767, 342));
+		notebook_card_coords.put("Rope", new UICoord(767, 363));
+		notebook_card_coords.put("Wrench", new UICoord(767, 384));
+		
+		notebook_card_coords.put("Kitchen", new UICoord(616, 459));
+		notebook_card_coords.put("Ballroom", new UICoord(616, 480));
+		notebook_card_coords.put("Conservatory", new UICoord(616, 501));
+		notebook_card_coords.put("Dining Room", new UICoord(616, 522));
+		notebook_card_coords.put("Lounge", new UICoord(616, 543));
+		notebook_card_coords.put("Hall", new UICoord(767, 459));
+		notebook_card_coords.put("Study", new UICoord(767, 480));
+		notebook_card_coords.put("Library", new UICoord(767, 501));
+		notebook_card_coords.put("Billiard Room", new UICoord(767, 522));
+	}
+	
+	public UICoord getNotebookCardStateCoord(String card) {
+		return notebook_card_coords.get(card);
 	}
 	
 	private void initPieces() {
 		try {
 			v_players_tokens = new Image[6];
 			v_players_sidebar_names = new Image[6];
+			v_players_dashboards = new Image[6];
+			
 //			v_selectedPieces = new Image[2];
 //			v_hiddenPieces = new Image[2];
 			
 			for(int i = 0; i < 6; i++) {
 				v_players_tokens[i] = ImageIO.read(new File("images/players/"+i+".png"));
 				v_players_sidebar_names[i] = ImageIO.read(new File("images/players/"+i+"_name.png"));
+				v_players_dashboards[i] = ImageIO.read(new File("images/players/"+i+"_dash.png"));
 			}			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -153,9 +201,6 @@ public class UIResourcesLoader{
 //			return null;
 //		}
 //	}
-	public UICoord getSourceCoord() {
-		return board_source_coord;
-	}
 	
 	public Image getPlayerToken(int index) {
 		return v_players_tokens[index];
@@ -163,6 +208,10 @@ public class UIResourcesLoader{
 	
 	public Image getPlayerSidebarName(int index) {
 		return v_players_sidebar_names[index];
+	}
+	
+	public Image getPlayerDashBoard(int index) {
+		return v_players_dashboards[index];
 	}
 	
 //	public GameImage getPlayerTurn(String player) throws GameException {

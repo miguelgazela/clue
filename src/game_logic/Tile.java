@@ -1,5 +1,6 @@
 package game_logic;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,9 @@ import java.util.List;
  * 
  *
  */
-public class Tile {
+public class Tile implements Serializable {
+	
+	private static final long serialVersionUID = 1010908308279299799L;
 	
 	//instance variables
 	private int x;

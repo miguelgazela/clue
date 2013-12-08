@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.event.HyperlinkEvent;
+
 import aurelienribon.slidinglayout.SLAnimator;
 
 public class GameManagerAgent extends GuiAgent {
@@ -31,10 +33,13 @@ public class GameManagerAgent extends GuiAgent {
 	private static final int NUM_CONTAINERS = 10;
 
 	public static final int CREATE_GAME = 1;
+	public static final int HUMAN = 2;
+	public static final int BOT = 3;
 	
 	private UIGame myGui;
 	
 	private ArrayList<AID> agents = new ArrayList<AID>();
+	private HashMap<String, Integer> agentType = new HashMap<>();
 	private int numPlayers = 0;
 	private Logger myLogger = Logger.getMyLogger(getClass().getName());
 	
@@ -62,6 +67,19 @@ public class GameManagerAgent extends GuiAgent {
 		}
 		catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	protected void sendGameMessage(GameMessage gameMsg, AID receiver, int performative) {
+		ACLMessage msg = new ACLMessage(performative);
+		
+		try {
+			msg.setContentObject(gameMsg);
+			msg.addReceiver(receiver);
+			send(msg);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 	
@@ -116,6 +134,13 @@ public class GameManagerAgent extends GuiAgent {
 						}
 					}
 					break;
+					case GameMessage.MAKE_MOVE:
+					{
+						if(gameState == GameState.Waiting_for_play) {
+							addBehaviour(new HandleMakeMoveRequest(myAgent, msg));
+						}
+					}
+					break;
 					default:
 					{
 						// should not get here!!!
@@ -131,6 +156,29 @@ public class GameManagerAgent extends GuiAgent {
 				block();
 			}
 		}	
+	}
+	
+	private class HandleMakeMoveRequest extends OneShotBehaviour {
+
+		private static final long serialVersionUID = -750399125759169861L;
+		ACLMessage request;
+		
+		public HandleMakeMoveRequest(Agent a, ACLMessage request) {
+			super(a);
+			this.request = request;
+		}
+		
+		@Override
+		public void action() {
+			// check if it's this player's turn
+			if(request.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
+
+				// check if move is valid
+//				GameMessage diceResult = new GameMessage(GameMessage.RSLT_DICE_ROLL);
+//				diceResult.addObject(new Integer(cluedo.rollDices()));
+//				sendGameMessage(diceResult, request.getSender(), ACLMessage.INFORM);
+			}
+		}
 	}
 	
 	private class HandleDiceRollRequest extends OneShotBehaviour {
@@ -151,17 +199,8 @@ public class GameManagerAgent extends GuiAgent {
 				
 				// send dice result
 				GameMessage diceResult = new GameMessage(GameMessage.RSLT_DICE_ROLL);
-				diceResult.addObject(new Integer(cluedo.rollDice()));
-				ACLMessage aclmsg = new ACLMessage(ACLMessage.INFORM);
-
-				try {
-					aclmsg.setContentObject(diceResult);
-					aclmsg.addReceiver(request.getSender());
-					send(aclmsg);
-				} catch (Exception e) {
-					e.printStackTrace();
-					System.exit(-1);
-				}
+				diceResult.addObject(new Integer(cluedo.rollDices()));
+				sendGameMessage(diceResult, request.getSender(), ACLMessage.INFORM);
 			}
 		}
 	}
@@ -175,22 +214,12 @@ public class GameManagerAgent extends GuiAgent {
 		try {
 			cluedo = new Cluedo(agents.size());
 			
-			// send all players their cards and initial pos
+			// send all players their cards and initial game state
 			for(AID agent: agents) {
-				GameMessage msg = new GameMessage(GameMessage.DISTRIBUTE_CARDS_AND_POS);
+				GameMessage msg = new GameMessage(GameMessage.DISTRIBUTE_CARDS);
 				msg.addObject(cluedo.getPlayerCards(agent.getLocalName()));
-				msg.addObject(cluedo.getBoard().getPlayerStartingPos(agent.getLocalName()));
-				
-				// send message with cards to agent
-				ACLMessage cards = new ACLMessage(ACLMessage.INFORM);
-				try {
-					cards.setContentObject(msg);
-					cards.addReceiver(agent);
-					send(cards);
-				} catch (IOException e) {
-					e.printStackTrace();
-					System.exit(-1);
-				}
+				msg.addObject(cluedo.getGameState());
+				sendGameMessage(msg, agent, ACLMessage.INFORM);
 			}
 			myGui.hasGameRunning = true;
 		} catch (Exception e) {
@@ -206,8 +235,12 @@ public class GameManagerAgent extends GuiAgent {
 	/**
 	 * initiates the agents and containers needed to play the game
 	 * @param numPlayers
+	 * @throws Exception 
 	 */
-	public void createGame(int numHumanPlayers, int numBotPlayers) {
+	public void createGame(int numHumanPlayers, int numBotPlayers) throws Exception {
+		if(numHumanPlayers + numBotPlayers < 3) {
+			throw new Exception("Invalid number of players. min: 3 max: 6");
+		}
 		this.numPlayers = numHumanPlayers + numBotPlayers;
 		createGameContainers();
 		createSuspectsAgents(numHumanPlayers, numBotPlayers);
@@ -222,23 +255,19 @@ public class GameManagerAgent extends GuiAgent {
 	 */
 	private void notifyTurnPlayer() {
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Notifying players about this turn's player");
+		String currentTurnPlayer = cluedo.getTurnPlayerName();
 		
-		for(AID agent: agents) {
+		for(int i = 0; i < agents.size(); i++) {
 			GameMessage msg = new GameMessage(GameMessage.TURN_PLAYER);
-//			msg.addObject(cluedo.getTurnPlayerName());
-			msg.addObject("Miss Scarlett");
-
-			// send message with turn player name to agent
-			ACLMessage turn = new ACLMessage(ACLMessage.INFORM);
-			try {
-				turn.setContentObject(msg);
-				turn.addReceiver(agent);
-				send(turn);
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(-1);
-			}
+			msg.addObject(currentTurnPlayer);
+			sendGameMessage(msg, agents.get(i), ACLMessage.INFORM);
 		}
+		
+		// update gui TODO should not be here
+		int type = agentType.get(currentTurnPlayer).intValue();
+		myGui.humanPlayer = (type == HUMAN);
+		myGui.turnPlayer = currentTurnPlayer;
+		myGui.playerIndex = cluedo.getTurnPlayerIndex();
 	}
 
 	/**
@@ -281,8 +310,10 @@ public class GameManagerAgent extends GuiAgent {
 				
 				if(i < numHumPlayers) {
 					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.HumanPlayerAgent", null);
+					agentType.put(Cluedo.suspects[i], new Integer(HUMAN));
 				} else {
 					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.BotPlayerAgent", null);
+					agentType.put(Cluedo.suspects[i], new Integer(BOT));
 				}
 				
 				guest.start();
@@ -309,7 +340,12 @@ public class GameManagerAgent extends GuiAgent {
 		{
 			int numHumPlayers = ((Integer)ev.getParameter(0)).intValue();
 			int numBotPlayers = ((Integer)ev.getParameter(1)).intValue();
-			createGame(numHumPlayers, numBotPlayers);
+			try {
+				createGame(numHumPlayers, numBotPlayers);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(-1);
+			}
 		}
 		break;
 

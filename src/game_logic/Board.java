@@ -1,10 +1,13 @@
 package game_logic;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Board {
+public class Board implements Serializable {
+	
+	private static final long serialVersionUID = 4371088632882334921L;
 	
 	public static final int BOARD_HEIGHT = 25;
 	public static final int BOARD_WIDTH = 24;

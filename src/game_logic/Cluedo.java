@@ -26,7 +26,7 @@ public class Cluedo implements Serializable{
 	 * the index of the player that is playing this turn
 	 */
 	private int turnPlayerIndex = -1;
-	private int diceResult = -1;
+	private int dicesResult = -1;
 	private Logger myLogger = Logger.getMyLogger(getClass().getName());
 	private ArrayList<CluedoPlayer> players;
 	private Board board;
@@ -34,7 +34,7 @@ public class Cluedo implements Serializable{
 	
 	public Cluedo(int numberOfPlayers) throws Exception {
 		if(numberOfPlayers < 3 || numberOfPlayers > 6) {
-			throw new Exception("Invalid number of players. min:3 max: 6");
+			throw new Exception("Invalid number of players. min: 3 max: 6");
 		}
 		numberPlayers = numberOfPlayers;
 		board = new Board();
@@ -44,6 +44,25 @@ public class Cluedo implements Serializable{
 		initGameSolution();
 		initPlayers();
 		findWhoPlaysFirst();
+	}
+	
+	public class GameState implements Serializable {
+		private static final long serialVersionUID = -7446685256646116162L;
+		
+		public int numberPlayers;
+		public int turnPlayerIndex;
+		public ArrayList<CluedoPlayer> players;
+		
+		public GameState(int nP, int tPI, ArrayList<CluedoPlayer> players_) {
+			this.numberPlayers = nP;
+			this.turnPlayerIndex = tPI;
+			
+			this.players = new ArrayList<CluedoPlayer>();
+			
+			for(CluedoPlayer player: players_) {
+				this.players.add(new CluedoPlayer(player.getName(), player.getPosOnBoard()));
+			}
+		}
 	}
 	
 	public CluedoCard getMurderWeapon() {
@@ -60,6 +79,14 @@ public class Cluedo implements Serializable{
 	
 	public int getNumberPlayers() {
 		return numberPlayers;
+	}
+	
+	public int getTurnPlayerIndex() {
+		return turnPlayerIndex;
+	}
+	
+	public GameState getGameState() {
+		return new GameState(numberPlayers, turnPlayerIndex, players);
 	}
 	
 	/**
@@ -163,9 +190,9 @@ public class Cluedo implements Serializable{
 	 * rolls an imaginary dice and saves the result in a variable
 	 * @return
 	 */
-	public int rollDice() {
-		diceResult = r.nextInt(6) + 1;
-		return diceResult;
+	public int rollDices() {
+		dicesResult = (r.nextInt(6) + 1) + (r.nextInt(6) + 1);
+		return dicesResult;
 	}
 	
 	/**
@@ -200,7 +227,7 @@ public class Cluedo implements Serializable{
 			
 			// roll the dices for every player
 			for(int i = 0; i < numberPlayers; i++) {
-				results[i] = rollDice();
+				results[i] = rollDices();
 			}
 			
 			// check if there is a single max result

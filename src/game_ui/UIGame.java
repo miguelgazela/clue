@@ -4,7 +4,9 @@ import game_logic.CluedoPlayer;
 import game_logic.Coordinates;
 import game_logic.GameManagerAgent;
 import jade.core.Agent;
+import jade.core.Runtime;
 import jade.gui.GuiEvent;
+import jade.wrapper.AgentController;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -36,8 +38,12 @@ public class UIGame extends JFrame implements ActionListener {
 	private UINewGamePanel uiNewGamePanel;
 	private UIDevTeamPanel uiDevTeamPanel;
 	private UIGamePanel uiGamePanel;
+	
+	// game related instance variables
 	public boolean hasGameRunning = false;
-	protected Agent turnPlayer = null;
+	public boolean humanPlayer = false;
+	public int playerIndex = -1;
+	public String turnPlayer = null;
 	
 	private SLConfig mainCfg, AboutCfg, NewGameCfg, DevTeamCfg, GameCfg;
 	protected MenuState currentMenuState;
@@ -333,13 +339,9 @@ public class UIGame extends JFrame implements ActionListener {
 		
 		public void startGame() {
 			GuiEvent ge = new GuiEvent(this, GameManagerAgent.CREATE_GAME);
-			ge.addParameter(new Integer(1)); // TODO temporary number of human players
-			ge.addParameter(new Integer(3)); // TODO temporary number of bot players
+			ge.addParameter(new Integer(3)); // TODO temporary number of human players
+			ge.addParameter(new Integer(0)); // TODO temporary number of bot players
 			gameManagerAgent.postGuiEvent(ge);
-		}
-		
-		public void gameHasStarted() {
-			hasGameRunning = true;
 		}
 		
 		public void clearPossibleGame() {
@@ -371,7 +373,7 @@ public class UIGame extends JFrame implements ActionListener {
 					ArrayList<CluedoPlayer> players = gameManagerAgent.getCluedo().getPlayers();
 					
 					for(int i = 0; i < players.size(); i++) {
-						UICoord c = uiResourcesLoader.getSourceCoord();
+						UICoord c = uiResourcesLoader.board_source_coord_main_ui;
 						Coordinates pos = players.get(i).getPosOnBoard();
 						
 						graphics.drawImage(
@@ -393,7 +395,7 @@ public class UIGame extends JFrame implements ActionListener {
 					
 					// draw turn player stuff
 					if(turnPlayer != null) {
-						System.out.println("turn player is not null");
+						
 					}
 					
 					if(showingResetWarning) {
@@ -446,6 +448,10 @@ public class UIGame extends JFrame implements ActionListener {
 				if(!gameIsOver) {
 					if(!showingResetWarning) {
 							
+						
+						if(x >= 829 && y >= 20 && x <= 1221 && y <= 595) { // player dashboard
+							
+						}
 						// game loop here!
 						
 					} else { // it's showing the reset warning
@@ -579,7 +585,6 @@ public class UIGame extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent ae) {
-		// TODO Auto-generated method stub
 		
 	}
 }

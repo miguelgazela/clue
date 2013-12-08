@@ -30,15 +30,15 @@ public class BotPlayerAgent extends PlayerAgent {
 					GameMessage message = (GameMessage) msg.getContentObject();
 
 					switch (message.getType()) {
-					case GameMessage.DISTRIBUTE_CARDS_AND_POS: // receiving this players cards and initial position
+					case GameMessage.DISTRIBUTE_CARDS: // receiving this players cards and initial position
 					{
 						if(myCards == null) {
 							myCards = (ArrayList<CluedoCard>) message.getObject(0);
-							posOnBoard = (Coordinates) message.getObject(1);
+							gameState = (Cluedo.GameState) message.getObject(1);
 
 							// send ack
 							GameMessage msg_ack = new GameMessage(GameMessage.ACK_DISTRIBUTE_CARDS);
-							sendGameMessage(msg_ack, new AID("host", AID.ISLOCALNAME));
+							sendGameMessage(msg_ack, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 							
 						} else {
 							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Receiving cards and initial position again.");

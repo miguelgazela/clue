@@ -10,6 +10,9 @@ package game_logic;
 //             % java jade.Boot 'fred:ParamAgent(3 "Allo there")'
 // ------------------------------------------------------------
 
+import game_logic.Cluedo.GameState;
+import game_ui.UIGame;
+
 import java.io.IOException;
 import java.sql.Time;
 import java.util.ArrayList;
@@ -31,9 +34,15 @@ import jade.util.Logger;
 	
 	protected Logger myLogger = Logger.getMyLogger(getClass().getName());
 	protected ArrayList<CluedoCard> myCards = null;
+	
 	protected boolean stillInGame;
 	protected boolean myTurn;
 	protected boolean waitingForDiceResult = false;
+	protected boolean pickingBoardMove = false;
+	protected boolean waitingForMoveConfirmation = false;
+	protected int diceResult = -1;
+	
+	protected GameState gameState = null; 
 	protected Coordinates posOnBoard;
 
 	protected void setup() 
@@ -41,7 +50,7 @@ import jade.util.Logger;
 		stillInGame = true;
 		myTurn = false;
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - ready to play, sending READY msg.");
-
+		
 		try {
 			// create the agent description of itself and register it
 			DFAgentDescription dfd = new DFAgentDescription();
@@ -54,7 +63,7 @@ import jade.util.Logger;
 		
 		// notify the game manager agent that this player is ready to play
 		GameMessage msg = new GameMessage(GameMessage.READY_PLAY);
-		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME));
+		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 		
 		// move to the corridor container
 		ContainerID cid = new ContainerID("Corridor", null);
@@ -74,11 +83,24 @@ import jade.util.Logger;
 		waitingForDiceResult = true;
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending request for a dice roll.");
 		GameMessage msg = new GameMessage(GameMessage.ASK_DICE_ROLL);
-		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME));
+		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 	}
 	
-	protected void sendGameMessage(GameMessage gameMsg, AID receiver) {
-		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+	/**
+	 * sends the game manager a msg asking to move to this board location
+	 * @param x
+	 * @param y
+	 */
+	protected void makeMove(int x, int y) {
+		pickingBoardMove = false;
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending request for making a move.");
+		GameMessage msg = new GameMessage(GameMessage.MAKE_MOVE);
+		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
+		waitingForMoveConfirmation = true;
+	}
+	
+	protected void sendGameMessage(GameMessage gameMsg, AID receiver, int performative) {
+		ACLMessage msg = new ACLMessage(performative);
 		
 		try {
 			msg.setContentObject(gameMsg);
@@ -108,7 +130,7 @@ import jade.util.Logger;
 					
 					switch (message.getType()) {
 
-					case GameMessage.DISTRIBUTE_CARDS_AND_POS: // receiving this players cards and initial position
+					case GameMessage.DISTRIBUTE_CARDS: // receiving this players cards and initial position
 					{
 						if(myCards == null) {
 							myCards = (ArrayList<CluedoCard>) message.getObject(0);
@@ -116,7 +138,7 @@ import jade.util.Logger;
 
 							// send ack
 							GameMessage msg_ack = new GameMessage(GameMessage.ACK_DISTRIBUTE_CARDS);
-							sendGameMessage(msg_ack, new AID("host", AID.ISLOCALNAME));
+							sendGameMessage(msg_ack, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 							
 						} else {
 							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Receiving cards and initial position again.");
