@@ -17,6 +17,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 	
 	public static final int ROLL_DICE = 1;
 	public static final int MAKE_MOVE = 2;
+	public static final int END_TURN = 3;
 	
 	protected UIHumanPlayer myGui;
 
@@ -91,8 +92,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 							myGui.repaint();
 							
 							waitingForMoveConfirmation = false;
-							myTurn = false;
-							myGui.setVisible(false);
+							madeBoardMove = true;
 						}
 					}
 					break;
@@ -151,6 +151,15 @@ public class HumanPlayerAgent extends PlayerAgent {
 				int x = ((Integer)ge.getParameter(0)).intValue();
 				int y = ((Integer)ge.getParameter(1)).intValue();
 				makeMove(x, y);
+			}
+		}
+		break;
+		case END_TURN:
+		{
+			if(madeBoardMove) { // TODO needs to check other stuff
+				madeBoardMove = false;
+				endMyTurn();
+				myGui.setVisible(false);
 			}
 		}
 		break;

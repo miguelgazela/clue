@@ -40,6 +40,7 @@ import jade.util.Logger;
 	protected boolean waitingForDiceResult = false;
 	protected boolean pickingBoardMove = false;
 	protected boolean waitingForMoveConfirmation = false;
+	protected boolean madeBoardMove = false;
 	protected int diceResult = -1;
 	
 	protected GameState gameState = null; 
@@ -101,6 +102,15 @@ import jade.util.Logger;
 		
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 		waitingForMoveConfirmation = true;
+	}
+	
+	/**
+	 * ends this players turn
+	 */
+	protected void endMyTurn() {
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - ending this agents turn.");
+		GameMessage msg = new GameMessage(GameMessage.END_TURN);
+		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 	}
 	
 	protected void sendGameMessage(GameMessage gameMsg, AID receiver, int performative) {

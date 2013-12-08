@@ -158,7 +158,8 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 		}
 		
 		private void endTurn() {
-			
+			GuiEvent ge = new GuiEvent(this, HumanPlayerAgent.END_TURN);
+			agent.postGuiEvent(ge);
 		}
 		
 		private void makeAccusation() {

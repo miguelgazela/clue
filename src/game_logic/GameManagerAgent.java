@@ -141,6 +141,16 @@ public class GameManagerAgent extends GuiAgent {
 						}
 					}
 					break;
+					case GameMessage.END_TURN:
+					{
+						// check if it's this player's turn
+						if(msg.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
+							myAgent.addBehaviour(new UpdateGameStateOfAllAgents());
+							cluedo.updateTurnPlayer();
+							notifyTurnPlayer();
+						}
+					}
+					break;
 					default:
 					{
 						// should not get here!!!
@@ -186,11 +196,6 @@ public class GameManagerAgent extends GuiAgent {
 						cluedo.makeMove(new Coordinates(x, y));
 						msg = new GameMessage(GameMessage.VALID_MOVE);
 						msg.addObject(cluedo.getGameState());
-						
-						myAgent.addBehaviour(new UpdateGameStateOfAllAgents());
-						cluedo.updateTurnPlayer();
-						notifyTurnPlayer();
-						
 					} else {
 						msg = new GameMessage(GameMessage.INVALID_MOVE);
 						// TODO maybe add the reason to why the move is invalid?
