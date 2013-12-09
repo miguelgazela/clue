@@ -22,6 +22,7 @@ public class Tile implements Serializable {
 	private boolean isOccupied;
 	private boolean valid;
 	private boolean isDoor;
+	private boolean isSecretPassage;
 	private String room;
 	
 	public Tile(int xPos, int yPos) {
@@ -30,6 +31,7 @@ public class Tile implements Serializable {
 		playerOccupying = "";
 		isOccupied=false;
 		isDoor = false;
+		isSecretPassage = false;
 		room = "";
 		validNeighbours = new ArrayList<Tile>();
 	}
@@ -47,6 +49,15 @@ public class Tile implements Serializable {
 	
 	public boolean isValid() {
 		return valid;
+	}
+	
+	public boolean isSecretPassage() {
+		return isSecretPassage;
+	}
+	
+	public Tile setSecretPassage(boolean state) {
+		isSecretPassage = state;
+		return this;
 	}
 	
 	public String getRoom() {

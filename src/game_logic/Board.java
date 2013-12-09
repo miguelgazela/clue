@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Random;
 
 public class Board implements Serializable {
 	
@@ -30,6 +31,7 @@ public class Board implements Serializable {
 	private List<List<Tile>> tiles;
 	private HashMap<String, ArrayList<Tile>> doors;
 	private HashMap<String, Coordinates> playersStartingPos;
+	private Random r = new Random(System.currentTimeMillis());
 
 	/**
 	 * Board constructor
@@ -57,6 +59,22 @@ public class Board implements Serializable {
 	public List<List<Tile>> getTiles() {
 		return tiles;
 	}
+
+	private boolean tryToEnterRoom(Tile destTile, Coordinates currentPos, int dicesResult, String player) {
+		ArrayList<Tile> room_doors = doors.get(destTile.getRoom());
+
+		for(Tile door: room_doors) {
+			int distanceToDoor = (int) getDistance(currentPos, door.getCoordinates());
+
+			if((distanceToDoor + 1) <= dicesResult && !door.isOccupied()) { // the + 1 is because the door is still outside of the room
+				return true;
+			} else if((distanceToDoor + 1) <= dicesResult && door.isOccupied() 
+					&& (door.getPlayerOccupying().equals(player))) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**
 	 * checks if a move is valid
@@ -64,35 +82,55 @@ public class Board implements Serializable {
 	public boolean moveIsValid(Coordinates currentPos, Coordinates dest, int dicesResult, String player) {
 		
 		Tile destTile = tiles.get(dest.getY()).get(dest.getX());
+		Tile currentTile = tiles.get(currentPos.getY()).get(currentPos.getX());
 		
-		if(destTile.isValid() && !destTile.isOccupied()) {
-			int distance = (int)getDistance(currentPos, dest);
-			return (distance <= dicesResult);
-		} else {
-			if(destTile.isRoom()) {
-				System.out.println("It's a room!");
+		if(currentTile.isRoom()) {
+			if(destTile.isValid() && !destTile.isOccupied()) {
 				
-				ArrayList<Tile> room_doors = doors.get(destTile.getRoom());
+				ArrayList<Tile> room_doors = doors.get(currentTile.getRoom());
+				int index = 0;
+				int minimumDistance =  ((int) getDistance(room_doors.get(0).getCoordinates(), destTile.getCoordinates())) + 1;
 				
-				for(Tile door: room_doors) {
-					int distanceToDoor = (int) getDistance(currentPos, door.getCoordinates());
-					System.out.println("Distance to the door: "+distanceToDoor);
-					System.out.println("Distance to the door + 1: "+(distanceToDoor+1)+" diceResult: "+dicesResult);
-					
-					if((distanceToDoor + 1) <= dicesResult && !door.isOccupied()) { // the + 1 is because the door is still outside of the room
-						System.out.println("Door is not occupied!");
-						return true;
-					} else if((distanceToDoor + 1) <= dicesResult && door.isOccupied() 
-							&& (door.getPlayerOccupying().equals(player))) {
-						System.out.println("Door is occupied, but by myself, so I can go in");
-						return true;
+				if(room_doors.size() > 1) {
+					for(int i = 1; i < room_doors.size(); i++) {
+						int distance = (int) getDistance(room_doors.get(i).getCoordinates(), destTile.getCoordinates()) + 1;
+						if(distance < minimumDistance) {
+							index = i;
+							minimumDistance = distance;
+						}
 					}
 				}
-				System.out.println("There's no valid door close to me!");
-				return false;
+				return (minimumDistance <= dicesResult);
 			} else {
-				System.out.println("It's not a room and it's invalid!!");
-				return false;
+				if(destTile.isRoom()) {
+					
+					if(destTile.getRoom().equals(currentTile.getRoom())) { // if trying to go to the same room
+						return false;
+					} else {
+						// for each door that this room has, it needs to check if it can get to any door of the other room
+						ArrayList<Tile> room_doors = doors.get(currentTile.getRoom());
+						for(int i = 0; i < room_doors.size(); i++) {
+							if(tryToEnterRoom(destTile, room_doors.get(i).getCoordinates(), dicesResult - 1, player)) {
+								return true;
+							}
+						}
+						return false;
+					}
+					
+				} else {
+					return false;
+				}
+			}
+		}else {
+			if(destTile.isValid() && !destTile.isOccupied()) {
+				int distance = (int)getDistance(currentPos, dest);
+				return (distance <= dicesResult);
+			} else {
+				if(destTile.isRoom()) {
+					return tryToEnterRoom(destTile, currentPos, dicesResult, player);
+				} else {
+					return false;
+				}
 			}
 		}
 	}
@@ -102,11 +140,43 @@ public class Board implements Serializable {
 	 * @param currentPos
 	 * @param dest
 	 */
-	public void makeMove(Coordinates currentPos, Coordinates dest, String player) {
+	public Coordinates makeMove(Coordinates currentPos, Coordinates dest, String player) {
+		
+		tiles.get(currentPos.getY()).get(currentPos.getX()).removePlayer();
 		
 		// needs to see if the movement is to a room, needs to place the player in an empty place inside the room
-		tiles.get(currentPos.getY()).get(currentPos.getX()).removePlayer();
-		tiles.get(currentPos.getY()).get(currentPos.getX()).setOccupied(player);
+		Tile destTile = tiles.get(dest.getY()).get(dest.getX());
+		
+		if(destTile.isRoom()) {			
+			ArrayList<Tile> roomTiles = new ArrayList<>();
+
+			// adds all tiles from this room
+			for(int i = 0; i < tiles.size(); i++) {
+				for(int j = 0; j < tiles.get(i).size(); j++) {
+					
+					Tile currentTile = tiles.get(i).get(j);
+
+					if(currentTile.getRoom().equals(destTile.getRoom())) {
+						roomTiles.add(currentTile);
+					}
+				}
+			}
+
+			// picks a free pos from them
+			while(true) {
+				destTile = roomTiles.get(r.nextInt(roomTiles.size()));
+
+				if(!destTile.isOccupied() && !destTile.isSecretPassage()) {
+					destTile.setOccupied(player);
+					return destTile.getCoordinates();
+				}
+			}
+		} else {
+			destTile.setOccupied(player);
+			return dest;
+		}
+		
+		
 	}
 
 	/**
@@ -176,20 +246,21 @@ public class Board implements Serializable {
 		//kitchen
 		setRoom(0, 5, 1, 5, "Kitchen");
 		setRoom(1, 5, 6, 6, "Kitchen");
-		tiles.get(6).get(4).setDoor(KITCHEN).setRoom("Kitchen");
+		tiles.get(7).get(4).setDoor(KITCHEN);
 		ArrayList<Tile> kitchenDoors = new ArrayList<>();
-		kitchenDoors.add(tiles.get(6).get(4));
+		kitchenDoors.add(tiles.get(7).get(4));
 		doors.put("Kitchen", kitchenDoors);
+		tiles.get(1).get(5).setSecretPassage(true);
 		
 
 		//dining room
 		setRoom(0, 4, 9, 9, "Dining Room");
 		setRoom(0, 7, 10, 15, "Dining Room");
-		tiles.get(15).get(6).setDoor(DINING).setRoom("Dining Room");
-		tiles.get(12).get(7).setDoor(DINING).setRoom("Dining Room");
+		tiles.get(16).get(6).setDoor(DINING);
+		tiles.get(12).get(8).setDoor(DINING);
 		ArrayList<Tile> diningRoomDoors = new ArrayList<>();
-		diningRoomDoors.add(tiles.get(15).get(6));
-		diningRoomDoors.add(tiles.get(12).get(7));
+		diningRoomDoors.add(tiles.get(16).get(6));
+		diningRoomDoors.add(tiles.get(12).get(8));
 		doors.put("Dining Room", diningRoomDoors);
 
 		//lounge
@@ -198,66 +269,70 @@ public class Board implements Serializable {
 		ArrayList<Tile> loungeDoors = new ArrayList<>();
 		loungeDoors.add(tiles.get(18).get(6));
 		doors.put("Lounge", loungeDoors);
+		tiles.get(0).get(19).setSecretPassage(true);
 
 		//hall
 		setRoom(9, 14, 18, 24, "Hall");
-		tiles.get(18).get(11).setDoor(HALL).setRoom("Hall");
-		tiles.get(18).get(12).setDoor(HALL).setRoom("Hall");
-		tiles.get(20).get(14).setDoor(HALL).setRoom("Hall");
+		tiles.get(17).get(11).setDoor(HALL);
+		tiles.get(17).get(12).setDoor(HALL);
+		tiles.get(20).get(15).setDoor(HALL);
 		ArrayList<Tile> hallDoors = new ArrayList<>();
-		hallDoors.add(tiles.get(18).get(11));
-		hallDoors.add(tiles.get(18).get(12));
-		hallDoors.add(tiles.get(20).get(14));
+		hallDoors.add(tiles.get(17).get(11));
+		hallDoors.add(tiles.get(17).get(12));
+		hallDoors.add(tiles.get(20).get(15));
 		doors.put("Hall", hallDoors);
 
 		//study
 		setRoom(17, 23, 21, 24, "Study");
-		tiles.get(21).get(17).setDoor(STUDY).setRoom("Study");
+		tiles.get(20).get(17).setDoor(STUDY);
 		ArrayList<Tile> studyDoors = new ArrayList<>();
-		studyDoors.add(tiles.get(21).get(17));
+		studyDoors.add(tiles.get(20).get(17));
 		doors.put("Study", studyDoors);
+		tiles.get(21).get(23).setSecretPassage(true);
 
 		//library
 		setRoom(18, 23, 14, 18, "Library");
 		setRoom(17, 17, 15, 17, "Library");
-		tiles.get(16).get(17).setDoor(LIBRARY).setRoom("Library");
-		tiles.get(14).get(20).setDoor(LIBRARY).setRoom("Library");
+		tiles.get(16).get(16).setDoor(LIBRARY);
+		tiles.get(13).get(20).setDoor(LIBRARY);
 		ArrayList<Tile> libraryDoors = new ArrayList<>();
-		libraryDoors.add(tiles.get(16).get(17));
-		libraryDoors.add(tiles.get(14).get(20));
+		libraryDoors.add(tiles.get(16).get(16));
+		libraryDoors.add(tiles.get(13).get(20));
 		doors.put("Library", libraryDoors);
 
 		//billiard room
 		setRoom(18, 23, 8, 12, "Billiard Room");
-		tiles.get(9).get(18).setDoor(BILLIARD_ROOM).setRoom("Billiard Room");
+		tiles.get(9).get(17).setDoor(BILLIARD_ROOM);
+		tiles.get(13).get(22).setDoor(BILLIARD_ROOM);
 		ArrayList<Tile> billiardRoomDoors = new ArrayList<>();
-		billiardRoomDoors.add(tiles.get(9).get(18));
+		billiardRoomDoors.add(tiles.get(9).get(17));
+		billiardRoomDoors.add(tiles.get(13).get(22));
 		doors.put("Billiard Room", billiardRoomDoors);
 		
-
 		//conservatory
 		setRoom(18, 23, 0, 4, "Conservatory");
 		setRoom(19, 23, 5, 5, "Conservatory");
 		setRoom(18, 18, 0, 4, "Conservatory");
 		setRoom(17, 17, 0, 1, "Conservatory");
 		setRoom(15, 16, 0, 0, "Conservatory");
-		tiles.get(4).get(18).setDoor(CONVERVATORY).setRoom("Conservatory");
+		tiles.get(5).get(18).setDoor(CONVERVATORY);
 		ArrayList<Tile> conservatoryDoors = new ArrayList<>();
-		conservatoryDoors.add(tiles.get(4).get(18));
+		conservatoryDoors.add(tiles.get(5).get(18));
 		doors.put("Conservatory", conservatoryDoors);
+		tiles.get(5).get(23).setSecretPassage(true);
 
 		//ball room
 		setRoom(10, 13, 0, 1, "Ballroom");
 		setRoom(8, 15, 2, 7, "Ballroom");
-		tiles.get(7).get(9).setDoor(BALLROOM).setRoom("Ballroom");
-		tiles.get(7).get(14).setDoor(BALLROOM).setRoom("Ballroom");
-		tiles.get(5).get(8).setDoor(BALLROOM).setRoom("Ballroom");
-		tiles.get(5).get(15).setDoor(BALLROOM).setRoom("Ballroom");
+		tiles.get(8).get(9).setDoor(BALLROOM);
+		tiles.get(8).get(14).setDoor(BALLROOM);
+		tiles.get(5).get(7).setDoor(BALLROOM);
+		tiles.get(5).get(16).setDoor(BALLROOM);
 		ArrayList<Tile> ballroomDoors = new ArrayList<>();
-		ballroomDoors.add(tiles.get(7).get(9));
-		ballroomDoors.add(tiles.get(7).get(14));
-		ballroomDoors.add(tiles.get(5).get(8));
-		ballroomDoors.add(tiles.get(5).get(15));
+		ballroomDoors.add(tiles.get(8).get(9));
+		ballroomDoors.add(tiles.get(8).get(14));
+		ballroomDoors.add(tiles.get(5).get(7));
+		ballroomDoors.add(tiles.get(5).get(16));
 		doors.put("Ballroom", ballroomDoors);
 
 		//middle
@@ -365,8 +440,7 @@ public class Board implements Serializable {
 	}
 
 	public double getDistance(Coordinates p1, Coordinates p2) {
-		double distance = Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2)) + Math.sqrt(Math.pow(p1.getY() - p2.getY(), 2));
-		return distance;
+		return Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2)) + Math.sqrt(Math.pow(p1.getY() - p2.getY(), 2));
 	}
 
 	public void printPath(ArrayDeque<Coordinates> path, Coordinates source, Coordinates destination) { //debug TODO remove

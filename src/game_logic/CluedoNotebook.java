@@ -1,11 +1,12 @@
 package game_logic;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.swing.text.Position;
-
-public class CluedoNotebook {
+public class CluedoNotebook implements Serializable {
+	
+	private static final long serialVersionUID = -1318267273831185904L;
 	
 	public static final int CLEAR = -1;
 	public static final int HAS_CARD = 0;

@@ -52,10 +52,12 @@ public class Cluedo implements Serializable{
 		public int numberPlayers;
 		public int turnPlayerIndex;
 		public ArrayList<CluedoPlayer> players;
+		public Board board;
 		
-		public GameState(int nP, int tPI, ArrayList<CluedoPlayer> players_) {
+		public GameState(int nP, int tPI, ArrayList<CluedoPlayer> players_, Board board) {
 			this.numberPlayers = nP;
 			this.turnPlayerIndex = tPI;
+			this.board = board;
 			
 			this.players = new ArrayList<CluedoPlayer>();
 			
@@ -86,7 +88,7 @@ public class Cluedo implements Serializable{
 	}
 	
 	public GameState getGameState() {
-		return new GameState(numberPlayers, turnPlayerIndex, players);
+		return new GameState(numberPlayers, turnPlayerIndex, players, board);
 	}
 	
 	/**
@@ -113,16 +115,13 @@ public class Cluedo implements Serializable{
 	
 	private boolean moveIsValid(Coordinates dest) {
 		CluedoPlayer turnPlayer = players.get(turnPlayerIndex);
-		
-		// TODO needs to see if some door is occupied by another player
 		return board.moveIsValid(turnPlayer.getPosOnBoard(), dest, dicesResult, turnPlayer.getName());
 	}
 	
 	public boolean makeMove(Coordinates dest) {
 		if(moveIsValid(dest)) {
 			CluedoPlayer turnPlayer = players.get(turnPlayerIndex);
-			turnPlayer.setPosOnBoard(dest);
-			board.makeMove(turnPlayer.getPosOnBoard(), dest, turnPlayer.getName());
+			turnPlayer.setPosOnBoard(board.makeMove(turnPlayer.getPosOnBoard(), dest, turnPlayer.getName()));
 			return true;
 		}
 		return false;

@@ -140,7 +140,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 		switch (command) {
 		case ROLL_DICE:
 		{
-			if(!waitingForDiceResult && !pickingBoardMove) {
+			if(!waitingForDiceResult && !pickingBoardMove && !madeBoardMove) {
 				askDiceRoll();
 			}
 		}
