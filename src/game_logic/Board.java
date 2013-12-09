@@ -42,7 +42,7 @@ public class Board implements Serializable {
 			tiles.add(new ArrayList<Tile>()); // adding new row
 
 			for(int j = 0; j < Board.BOARD_WIDTH; j++) {
-				tiles.get(i).add(new Tile(i,j));
+				tiles.get(i).add(new Tile(j,i));
 			}
 		}
 		initBoard();
@@ -61,24 +61,39 @@ public class Board implements Serializable {
 	/**
 	 * checks if a move is valid
 	 */
-	public boolean moveIsValid(Coordinates currentPos, Coordinates dest, int dicesResult) {
+	public boolean moveIsValid(Coordinates currentPos, Coordinates dest, int dicesResult, String player) {
 		
 		Tile destTile = tiles.get(dest.getY()).get(dest.getX());
 		
-		if(destTile.isValid()) {
-			return (getDistance(currentPos, dest) <= dicesResult);
+		if(destTile.isValid() && !destTile.isOccupied()) {
+			int distance = (int)getDistance(currentPos, dest);
+			return (distance <= dicesResult);
 		} else {
 			if(destTile.isRoom()) {
+				System.out.println("It's a room!");
+				
 				ArrayList<Tile> room_doors = doors.get(destTile.getRoom());
 				
 				for(Tile door: room_doors) {
-					if(getDistance(currentPos, door.getCoordinates()) <= dicesResult && !door.isOccupied()) {
+					int distanceToDoor = (int) getDistance(currentPos, door.getCoordinates());
+					System.out.println("Distance to the door: "+distanceToDoor);
+					System.out.println("Distance to the door + 1: "+(distanceToDoor+1)+" diceResult: "+dicesResult);
+					
+					if((distanceToDoor + 1) <= dicesResult && !door.isOccupied()) { // the + 1 is because the door is still outside of the room
+						System.out.println("Door is not occupied!");
+						return true;
+					} else if((distanceToDoor + 1) <= dicesResult && door.isOccupied() 
+							&& (door.getPlayerOccupying().equals(player))) {
+						System.out.println("Door is occupied, but by myself, so I can go in");
 						return true;
 					}
 				}
+				System.out.println("There's no valid door close to me!");
+				return false;
+			} else {
+				System.out.println("It's not a room and it's invalid!!");
 				return false;
 			}
-			return false;
 		}
 	}
 	
@@ -88,6 +103,8 @@ public class Board implements Serializable {
 	 * @param dest
 	 */
 	public void makeMove(Coordinates currentPos, Coordinates dest, String player) {
+		
+		// needs to see if the movement is to a room, needs to place the player in an empty place inside the room
 		tiles.get(currentPos.getY()).get(currentPos.getX()).removePlayer();
 		tiles.get(currentPos.getY()).get(currentPos.getX()).setOccupied(player);
 	}
@@ -146,8 +163,6 @@ public class Board implements Serializable {
 	 */
 	private void initBoard() {
 
-		
-		
 		//starting points
 		tiles.get(0).get(9).setValid(true);
 		tiles.get(0).get(14).setValid(true);
@@ -179,9 +194,9 @@ public class Board implements Serializable {
 
 		//lounge
 		setRoom(0, 6, 19, 24, "Lounge");
-		tiles.get(19).get(6).setDoor(LOUNGE).setRoom("Lounge");
+		tiles.get(18).get(6).setDoor(LOUNGE);
 		ArrayList<Tile> loungeDoors = new ArrayList<>();
-		loungeDoors.add(tiles.get(19).get(6));
+		loungeDoors.add(tiles.get(18).get(6));
 		doors.put("Lounge", loungeDoors);
 
 		//hall
@@ -350,7 +365,8 @@ public class Board implements Serializable {
 	}
 
 	public double getDistance(Coordinates p1, Coordinates p2) {
-		return Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2)) + Math.sqrt(Math.pow(p1.getY() - p2.getY(), 2));
+		double distance = Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2)) + Math.sqrt(Math.pow(p1.getY() - p2.getY(), 2));
+		return distance;
 	}
 
 	public void printPath(ArrayDeque<Coordinates> path, Coordinates source, Coordinates destination) { //debug TODO remove

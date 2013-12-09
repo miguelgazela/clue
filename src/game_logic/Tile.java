@@ -79,9 +79,7 @@ public class Tile implements Serializable {
 	}
 	
 	public Tile setDoor(String room) {
-		valid = true;
 		isDoor=true;
-		this.room = room;
 		return this;
 	}
 	
