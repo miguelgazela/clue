@@ -1,5 +1,7 @@
 package game_logic;
 
+import jade.util.leap.Set;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +15,7 @@ public class Tile implements Serializable {
 	private static final long serialVersionUID = 1010908308279299799L;
 	
 	//instance variables
-	private int x;
-	private int y;
+	private Coordinates pos;
 	
 	private List<Tile> validNeighbours;
 	private String playerOccupying;
@@ -24,8 +25,7 @@ public class Tile implements Serializable {
 	private String room;
 	
 	public Tile(int xPos, int yPos) {
-		x = xPos;
-		y = yPos;
+		pos = new Coordinates(xPos, yPos);
 		valid = true;
 		playerOccupying = "";
 		isOccupied=false;
@@ -35,7 +35,7 @@ public class Tile implements Serializable {
 	}
 	
 	public Coordinates getCoordinates() {
-		return new Coordinates(x,y);
+		return pos;
 	}
 	public boolean isOccupied() {
 		return isOccupied;
@@ -53,11 +53,20 @@ public class Tile implements Serializable {
 		return room;
 	}
 	
+	public void setRoom(String room) {
+		this.room = room;
+	}
+	
+	public boolean isRoom() {
+		return !room.equals("");
+	}
+	
 	public List<Tile> getNeighbours() {
 		return validNeighbours;
 	}
-	public void setValid(boolean state) {
+	public Tile setValid(boolean state) {
 		valid = state;
+		return this;
 	}
 	public void setOccupied(String player) {
 		playerOccupying = player;
@@ -69,10 +78,11 @@ public class Tile implements Serializable {
 		isOccupied = false;
 	}
 	
-	public void setDoor(String room) {
+	public Tile setDoor(String room) {
 		valid = true;
 		isDoor=true;
 		this.room = room;
+		return this;
 	}
 	
 	public void addNeighbour(Tile tile) {
@@ -91,13 +101,13 @@ public class Tile implements Serializable {
 	
 	@Override
 	public int hashCode() {
-		return (x * 31) ^ y;
+		return (pos.getX() * 31) ^ pos.getY();
 	}
 	@Override
 	public boolean equals(Object o){
 		if (o instanceof Tile) {
 			Tile other = (Tile) o;
-			return (x == other.getCoordinates().getX() && y == other.getCoordinates().getY());
+			return (pos.getX() == other.getCoordinates().getX() && pos.getY() == other.getCoordinates().getY());
 		}
 		return false;
 	}

@@ -111,17 +111,21 @@ public class Cluedo implements Serializable{
 	 * @return
 	 */
 	
-	public boolean moveIsValid(Coordinates dest) {
+	private boolean moveIsValid(Coordinates dest) {
 		CluedoPlayer turnPlayer = players.get(turnPlayerIndex);
-		Coordinates currentPos = turnPlayer.getPosOnBoard();
 		
 		// TODO needs to see if some door is occupied by another player
-		return board.moveIsValid(currentPos, dest, dicesResult);
+		return board.moveIsValid(turnPlayer.getPosOnBoard(), dest, dicesResult);
 	}
 	
-	public void makeMove(Coordinates dest) {
-		CluedoPlayer turnPlayer = players.get(turnPlayerIndex);
-		turnPlayer.setPosOnBoard(dest);
+	public boolean makeMove(Coordinates dest) {
+		if(moveIsValid(dest)) {
+			CluedoPlayer turnPlayer = players.get(turnPlayerIndex);
+			turnPlayer.setPosOnBoard(dest);
+			board.makeMove(turnPlayer.getPosOnBoard(), dest, turnPlayer.getName());
+			return true;
+		}
+		return false;
 	}
 	
 	/**

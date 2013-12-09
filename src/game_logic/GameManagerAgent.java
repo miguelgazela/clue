@@ -191,15 +191,14 @@ public class GameManagerAgent extends GuiAgent {
 					
 					GameMessage msg = null;
 					
-					// check if move is valid
-					if(cluedo.moveIsValid(new Coordinates(x, y))) {
-						cluedo.makeMove(new Coordinates(x, y));
+					if(cluedo.makeMove(new Coordinates(x, y))) {
 						msg = new GameMessage(GameMessage.VALID_MOVE);
 						msg.addObject(cluedo.getGameState());
 					} else {
 						msg = new GameMessage(GameMessage.INVALID_MOVE);
 						// TODO maybe add the reason to why the move is invalid?
 					}
+					
 					sendGameMessage(msg, request.getSender(), ACLMessage.INFORM);
 					
 				} catch (UnreadableException e) {
