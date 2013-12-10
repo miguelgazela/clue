@@ -5,6 +5,7 @@ import game_ui.UIHumanPlayer;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
@@ -20,6 +21,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 	public static final int ROLL_DICE = 1;
 	public static final int MAKE_MOVE = 2;
 	public static final int END_TURN = 3;
+	public static final int SHOW_SUGGESTION = 4;
 	
 	protected UIHumanPlayer myGui;
 
@@ -92,6 +94,21 @@ public class HumanPlayerAgent extends PlayerAgent {
 								gameState.board.buildReachableTiles(currentTile.getNeighbours(), reachablePos, diceResult-1);
 							} else {
 								ArrayList<Tile> room_doors = gameState.board.getRoomDoors(currentTile.getRoom());
+
+								ListIterator<Tile> it = room_doors.listIterator();
+								while(true) {
+									if(it.hasNext()) {
+										System.out.println("Another door");
+										Tile door = it.next();
+										if(door.isOccupied()) {
+											System.out.println("This door is occupied!");
+											it.remove();
+										}
+									} else {
+										break;
+									}
+								}
+
 								gameState.board.buildReachableTiles(room_doors, reachablePos, diceResult-1);
 							}
 							
@@ -180,6 +197,16 @@ public class HumanPlayerAgent extends PlayerAgent {
 				madeBoardMove = false;
 				endMyTurn();
 				myGui.setVisible(false);
+			}
+		}
+		break;
+		case SHOW_SUGGESTION:
+		{
+			if(!hasMadeSuggestion) {
+				Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
+				if(currentTile.isRoom()) {
+					myGui.showSuggestionPanel(currentTile.getRoom());
+				}
 			}
 		}
 		break;

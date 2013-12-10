@@ -42,6 +42,7 @@ import jade.util.Logger;
 	protected boolean pickingBoardMove = false;
 	protected boolean waitingForMoveConfirmation = false;
 	protected boolean madeBoardMove = false;
+	protected boolean hasMadeSuggestion = false;
 	protected int diceResult = -1;
 	
 	protected GameState gameState = null; 

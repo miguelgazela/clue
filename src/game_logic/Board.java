@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -96,23 +97,24 @@ public class Board implements Serializable {
 			if(destTile.isValid() && !destTile.isOccupied()) {
 				
 				ArrayList<Tile> room_doors = doors.get(currentTile.getRoom());
-				int index = 0;
-				int minimumDistance =  ((int) getDistance(room_doors.get(0).getCoordinates(), destTile.getCoordinates())) + 1;
 				
-				if(room_doors.get(0).isOccupied()) {
-					minimumDistance = 9999; // it is impossible to leave if this door is blocked
-				}
+				ListIterator<Tile> it = room_doors.listIterator();
 				
-				if(room_doors.size() > 1) {
-					for(int i = 1; i < room_doors.size(); i++) {
-						int distance = (int) getDistance(room_doors.get(i).getCoordinates(), destTile.getCoordinates()) + 1;
-						if(distance < minimumDistance && !room_doors.get(i).isOccupied()) { // if this door is closer and isn't occupied
-							index = i;
-							minimumDistance = distance;
+				while(true) {
+					if(it.hasNext()) {
+						Tile door = it.next();
+						if(door.isOccupied()) {
+							it.remove();
 						}
+					} else {
+						break;
 					}
 				}
-				return (minimumDistance <= dicesResult);
+
+				ArrayList<Tile> reachableTiles = new ArrayList<Tile>();
+				buildReachableTiles(room_doors, reachableTiles, dicesResult-1);
+				return reachableTiles.contains(destTile);
+
 			} else {
 				if(destTile.isRoom()) {
 					

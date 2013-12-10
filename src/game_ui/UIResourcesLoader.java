@@ -29,10 +29,12 @@ public class UIResourcesLoader{
 	public BufferedImage newgame_bg;
 	public BufferedImage game_bg;
 	public BufferedImage player_interface;
+	public BufferedImage suggestion;
 	
 	public UICoord[] new_game_btns_coords;
-	public HashMap<String, UICoord> notebook_card_coords;
 	
+	public HashMap<String, UICoord> notebook_card_coords;
+	public HashMap<String, UICoord> suggestion_card_coords;
 	public HashMap<String, Color> player_colors;
 	
 	public UICoord turn_coord;
@@ -71,6 +73,7 @@ public class UIResourcesLoader{
 			newgame_bg = ImageIO.read(new File("images/backgrounds/newgame.png"));
 			game_bg = ImageIO.read(new File("images/backgrounds/game.png"));
 			player_interface = ImageIO.read(new File("images/backgrounds/player_interface.png"));
+			suggestion = ImageIO.read(new File("images/backgrounds/suggestion.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Background Resources Missing");
@@ -183,6 +186,31 @@ public class UIResourcesLoader{
 		notebook_card_coords.put("Study", new UICoord(767, 480));
 		notebook_card_coords.put("Library", new UICoord(767, 501));
 		notebook_card_coords.put("Billiard Room", new UICoord(767, 522));
+		
+		suggestion_card_coords = new HashMap<>();
+		suggestion_card_coords.put("Miss Scarlett", new UICoord(34, 47));
+		suggestion_card_coords.put("Colonel Mustard", new UICoord(34, 68));
+		suggestion_card_coords.put("Mrs. White", new UICoord(34, 89));
+		suggestion_card_coords.put("Reverend Green", new UICoord(185, 47));
+		suggestion_card_coords.put("Mrs. Peacock", new UICoord(185, 68));
+		suggestion_card_coords.put("Professor Plum", new UICoord(185, 89));
+		
+		suggestion_card_coords.put("Candlestick", new UICoord(61346, 164));
+		suggestion_card_coords.put("Dagger", new UICoord(34, 185));
+		suggestion_card_coords.put("Lead pipe", new UICoord(34, 206));
+		suggestion_card_coords.put("Revolver", new UICoord(185, 164));
+		suggestion_card_coords.put("Rope", new UICoord(185, 185));
+		suggestion_card_coords.put("Wrench", new UICoord(185, 206));
+		
+		suggestion_card_coords.put("Kitchen", new UICoord(34, 281));
+		suggestion_card_coords.put("Ballroom", new UICoord(34, 302));
+		suggestion_card_coords.put("Conservatory", new UICoord(34, 323));
+		suggestion_card_coords.put("Dining Room", new UICoord(34, 344));
+		suggestion_card_coords.put("Lounge", new UICoord(34, 365));
+		suggestion_card_coords.put("Hall", new UICoord(185, 281));
+		suggestion_card_coords.put("Study", new UICoord(185, 302));
+		suggestion_card_coords.put("Library", new UICoord(185, 323));
+		suggestion_card_coords.put("Billiard Room", new UICoord(185, 344));
 	}
 	
 	public UICoord getNotebookCardStateCoord(String card) {

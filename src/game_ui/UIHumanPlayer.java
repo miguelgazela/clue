@@ -22,6 +22,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -37,6 +38,7 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 	protected int diceResult = -1;
 	protected CluedoNotebook notebook;
 	protected ArrayList<Tile> reachable = null;
+	protected String room = null;
 
 	public UIHumanPlayer(HumanPlayerAgent owner, String playerName) {
 		super(playerName+" interface");
@@ -70,6 +72,137 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 	public void updateReachablePos(ArrayList<Tile> reachablePos) {
 		this.reachable = reachablePos;
 		repaint();
+	}
+	
+	public void showSuggestionPanel(String room) {
+		new UISuggestion(room);
+	}
+	
+	private class UISuggestion extends JFrame implements ActionListener {
+
+		private static final long serialVersionUID = 4900469373293641686L;
+		private UISuggestionPanel uiSuggestionPanel;
+		protected String room;
+		protected String suspect = null;
+		protected String weapon = null;
+		
+		public UISuggestion(String room) {
+			super();
+			
+			this.room = room;
+			
+			uiSuggestionPanel = new UISuggestionPanel();
+			uiSuggestionPanel.addMouseListener(uiSuggestionPanel);
+			getContentPane().add(uiSuggestionPanel);
+			
+			pack();
+			setLocationRelativeTo(null);
+			setResizable(false);
+			//setUndecorated(true);
+			setVisible(true);
+		}
+		
+		private class UISuggestionPanel extends JPanel implements MouseListener {
+			
+			private static final long serialVersionUID = 2120428337532585982L;
+			transient private BufferedImage background;
+			
+			public UISuggestionPanel() {
+				background = UIResourcesLoader.getInstanceLoader().suggestion;
+			}
+			
+			private void writeObject(ObjectOutputStream out) throws IOException {
+		        out.defaultWriteObject();
+		        ImageIO.write(background, "png", out);
+		    }
+
+		    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		        in.defaultReadObject();
+		        background = ImageIO.read(in);
+		    }
+			
+			@Override
+			public Dimension getPreferredSize() {
+				if (background != null) {
+					int width = background.getWidth();
+					int height = background.getHeight();
+					return new Dimension(width, height);
+				}
+				return super.getPreferredSize();
+			}
+			
+			@Override
+			protected void paintComponent(Graphics g) {
+				super.paintComponent(g); // clear off-screen bitmap
+				if (background != null) {
+					g.drawImage(background, 0, 0, this);
+				}
+				
+				// draw suspect, weapon and room
+				if(suspect != null) {
+					UICoord c = UIResourcesLoader.getInstanceLoader().suggestion_card_coords.get(suspect);
+					g.drawImage(UIResourcesLoader.getInstanceLoader().getCardNoteStatus(CluedoNotebook.HAS_CARD),
+							c.x, c.y, this
+					);
+				}
+				
+				if(weapon != null) {
+					UICoord c = UIResourcesLoader.getInstanceLoader().suggestion_card_coords.get(weapon);
+					g.drawImage(UIResourcesLoader.getInstanceLoader().getCardNoteStatus(CluedoNotebook.HAS_CARD),
+							c.x, c.y, this
+					);
+				}
+				
+				UICoord c = UIResourcesLoader.getInstanceLoader().suggestion_card_coords.get(room);
+				g.drawImage(UIResourcesLoader.getInstanceLoader().getCardNoteStatus(CluedoNotebook.HAS_CARD),
+						c.x, c.y, this
+				);
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int x = e.getX();
+				int y = e.getY();
+				
+				if(x >= 34 && x <= (34 + 17)) { // first column
+					if(y >= 47 && y <= (47+17)) {
+						suspect = "Miss Scarlett";
+					} else if(y >= 68 && y <= (68+17)) {
+						suspect = "Colonel Mustard";
+					} else if(y >= 89 && y <= (89+17)) {
+						suspect = "Mrs. White";
+					} else if(y >= 164 && y <= (164+17)) {
+						weapon = "Candlestick";
+					} else if(y >= 185 && y <= (185+17)) {
+						weapon = "Dagger";
+					} else if(y >= 206 && y <= (206+17)) {
+						weapon = "Lead pipe";
+					}
+				}else if(x >= 185 && x <= (185 + 17)) { // second column
+					if(y >= 47 && y <= (47+17)) {
+						suspect = "Reverend Green";
+					} else if(y >= 68 && y <= (68+17)) {
+						suspect = "Mrs. Peacock";
+					} else if(y >= 89 && y <= (89+17)) {
+						suspect = "Professor Plum";
+					} else if(y >= 164 && y <= (164+17)) {
+						weapon = "Revolver";
+					} else if(y >= 185 && y <= (185+17)) {
+						weapon = "Rope";
+					} else if(y >= 206 && y <= (206+17)) {
+						weapon = "Wrench";
+					}
+				}
+				repaint();
+			}
+
+			@Override public void mousePressed(MouseEvent e) {}
+			@Override public void mouseReleased(MouseEvent e) {}
+			@Override public void mouseEntered(MouseEvent e) {}
+			@Override public void mouseExited(MouseEvent e) {}
+		}
+		
+		@Override public void actionPerformed(ActionEvent e) {}
 	}
 	
 	private class UIPlayerPanel extends JPanel implements MouseListener {
@@ -144,7 +277,7 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 										c.x, 
 										c.y,
 										this
-										);
+								);
 							}
 						}
 					}
@@ -195,7 +328,8 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 		}
 		
 		private void makeSuggestion() {
-			
+			GuiEvent ge = new GuiEvent(this, HumanPlayerAgent.SHOW_SUGGESTION);
+			agent.postGuiEvent(ge);
 		}
 		
 		private void endTurn() {
