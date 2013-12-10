@@ -233,10 +233,17 @@ public class UIGame extends JFrame implements ActionListener {
 	
 	private class UINewGamePanel extends JPanel implements MouseListener, MouseMotionListener {
 
+		private static final int ADD_PLAYER = 0;
+		private static final int HUMAN = 1;
+		public static final int ROOKIE = 2;
+		public static final int DETECTIVE = 3;
+		public static final int INSPECTOR = 4;
+		
 		private static final long serialVersionUID = 7380205004739956983L;
 		private UIResourcesLoader uiResourcesLoader;
 		private Graphics graphics;
 		private BufferedImage background;
+		private int[] typePlayers = {HUMAN, ROOKIE, ROOKIE, ADD_PLAYER, ADD_PLAYER, ADD_PLAYER};
 		
 		public UINewGamePanel() {
 			uiResourcesLoader = UIResourcesLoader.getInstanceLoader();
@@ -262,11 +269,27 @@ public class UIGame extends JFrame implements ActionListener {
 				graphics.drawImage(background, 0, 0, this);
 				drawStartGameBtn();
 			}
+
+			// draw the type of players
+			for(int i = 0; i < typePlayers.length; i++) {
+				UICoord c = UIResourcesLoader.getInstanceLoader().new_game_first_player_coord;
+				Image image = UIResourcesLoader.getInstanceLoader().getNewGameString(typePlayers[i]);
+				graphics.drawImage(image, c.x, c.y + i*75, this);
+			}
 		}
 		
 		private void drawStartGameBtn() {
 			GameImage btn = uiResourcesLoader.startGameBtn;
 			graphics.drawImage(btn.image, btn.coord.x, btn.coord.y, this);
+		}
+		
+		private void updateTypePlayer(int playerIndex) {
+			if(playerIndex <= 2) { // they always have a player
+				typePlayers[playerIndex] = (typePlayers[playerIndex] == INSPECTOR) ? HUMAN : (typePlayers[playerIndex] + 1);
+			} else {
+				typePlayers[playerIndex] = (typePlayers[playerIndex] == INSPECTOR) ? ADD_PLAYER : (typePlayers[playerIndex] + 1);
+			}
+			repaint();
 		}
 		
 		@Override
@@ -287,28 +310,49 @@ public class UIGame extends JFrame implements ActionListener {
 						.play();
 					}}.run();
 				} else if(x >= 373 && y >= 646 && x <= 417 && y <= 691) { // start game
-					boolean startGame = true; // TODO temporary
+
+					int humanPlayers = 0;
+					int botPlayers = 0;
+					ArrayList<Integer> botLevel = new ArrayList<>();
 					
-					if(startGame) {
-						uiGamePanel.clearPossibleGame();
-						uiGamePanel.startGame();
+					for(int i = 0; i < typePlayers.length; i++) {
+						humanPlayers += typePlayers[i] == HUMAN ? 1 : 0; 
 						
-						new Runnable() {@Override public void run() {
-							panel.createTransition()
-							.push(new SLKeyframe(GameCfg, 1f)
-							.setStartSide(SLSide.RIGHT, uiGamePanel)
-							.setEndSide(SLSide.LEFT, uiMainMenuPanel)
-							.setEndSide(SLSide.RIGHT, uiNewGamePanel)
-							.setDelay(1.0f, uiNewGamePanel)
-							.setDelay(0.3f, uiMainMenuPanel)
-							.setCallback(new SLKeyframe.Callback() {@Override public void done() {
-								currentMenuState = MenuState.Game;
-							}}))
-							.play();
-						}}.run();
+						if(typePlayers[i] >= ROOKIE && typePlayers[i] <= INSPECTOR) {
+							botPlayers++;
+							botLevel.add(new Integer(typePlayers[i]));
+						}
 					}
-				} else {
-					UICoord[] coords = uiResourcesLoader.new_game_btns_coords;
+					
+					uiGamePanel.clearPossibleGame();
+					uiGamePanel.startGame(humanPlayers, botPlayers, botLevel);
+
+					new Runnable() {@Override public void run() {
+						panel.createTransition()
+						.push(new SLKeyframe(GameCfg, 1f)
+						.setStartSide(SLSide.RIGHT, uiGamePanel)
+						.setEndSide(SLSide.LEFT, uiMainMenuPanel)
+						.setEndSide(SLSide.RIGHT, uiNewGamePanel)
+						.setDelay(1.0f, uiNewGamePanel)
+						.setDelay(0.3f, uiMainMenuPanel)
+						.setCallback(new SLKeyframe.Callback() {@Override public void done() {
+							currentMenuState = MenuState.Game;
+						}}))
+						.play();
+					}}.run();
+					
+				} else if(x >= 185 && x <= (185+205) && y >= 183 && y <= (183 + 40)) { // P1
+					updateTypePlayer(0);
+				} else if(x >= 185 && x <= (185+205) && y >= 258 && y <= (258 + 40)) { // P2
+					updateTypePlayer(1);
+				} else if(x >= 185 && x <= (185+205) && y >= 333 && y <= (333 + 40)) { // P3
+					updateTypePlayer(2);
+				} else if(x >= 185 && x <= (185+205) && y >= 408 && y <= (408 + 40)) { // P4
+					updateTypePlayer(3);
+				} else if(x >= 185 && x <= (185+205) && y >= 483 && y <= (483 + 40)) { // P5
+					updateTypePlayer(4);
+				} else if(x >= 185 && x <= (185+205) && y >= 558 && y <= (558 + 40)) { // P6
+					updateTypePlayer(5);
 				}
 			}
 		}
@@ -337,10 +381,11 @@ public class UIGame extends JFrame implements ActionListener {
 			background = uiResourcesLoader.game_bg;
 		}
 		
-		public void startGame() {
+		public void startGame(int humanPlayers, int botPlayers, ArrayList<Integer> botLevel) {
 			GuiEvent ge = new GuiEvent(this, GameManagerAgent.CREATE_GAME);
-			ge.addParameter(new Integer(3)); // TODO temporary number of human players
-			ge.addParameter(new Integer(0)); // TODO temporary number of bot players
+			ge.addParameter(new Integer(humanPlayers));
+			ge.addParameter(new Integer(botPlayers));
+			ge.addParameter(botLevel);
 			gameManagerAgent.postGuiEvent(ge);
 		}
 		
@@ -425,8 +470,8 @@ public class UIGame extends JFrame implements ActionListener {
 		}
 		
 		private void resetGame() {
-			clearPossibleGame();
-			startGame();
+			//clearPossibleGame();
+			//startGame();
 		}
 		
 		@Override

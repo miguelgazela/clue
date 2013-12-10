@@ -39,8 +39,8 @@ public class UIResourcesLoader{
 	public UICoord sidebar_name_coord;
 	public UICoord player_dashboard;
 	
-	private GameImage[] v_unselectedNewGameBtn;
-	private GameImage[] v_selectedNewGameBtn;
+	private Image[] v_newGameStrings;
+	public UICoord new_game_first_player_coord;
 	
 	private Image[] v_players_tokens;
 	public Image[] v_players_sidebar_names;
@@ -57,7 +57,7 @@ public class UIResourcesLoader{
 		initPieces();
 		initImages();
 		initBtns();
-//		initStrings();
+		initStrings();
 		initCoords();
 		
 		// initialize backgrounds
@@ -82,20 +82,31 @@ public class UIResourcesLoader{
 		return instanceLoader;
 	}
 	
-//	private void initStrings() {
-//		try {
+	private void initStrings() {
+		try {
 //			v_gameStatus = new Image[9];
 //			v_gameStatus[0] = ImageIO.read(new File("images/strings/placePiece.png"));
 //			v_gameStatus[1] = ImageIO.read(new File("images/strings/selectPiece.png"));
 //			v_gameStatus[2] = ImageIO.read(new File("images/strings/movePiece.png"));
 //			v_gameStatus[3] = ImageIO.read(new File("images/strings/p1Won.png"));
 //			v_gameStatus[4] = ImageIO.read(new File("images/strings/p2Won.png"));
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			System.out.println("Strings Resources Missing");
-//			System.exit(-1);
-//		}
-//	}
+			v_newGameStrings = new Image[5];
+			v_newGameStrings[0] = ImageIO.read(new File("images/buttons/add_player.png"));
+			v_newGameStrings[1] = ImageIO.read(new File("images/buttons/human.png"));
+			v_newGameStrings[2] = ImageIO.read(new File("images/buttons/rookie.png"));
+			v_newGameStrings[3] = ImageIO.read(new File("images/buttons/detective.png"));
+			v_newGameStrings[4] = ImageIO.read(new File("images/buttons/inspector.png"));
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.out.println("Strings Resources Missing");
+			System.exit(-1);
+		}
+	}
+	
+	public Image getNewGameString(int type) {
+		return v_newGameStrings[type];
+	}
 	
 	private void initImages() {
 		v_cards_note_status = new Image[3];
@@ -133,6 +144,7 @@ public class UIResourcesLoader{
 		game_status_coord = new UICoord(363, 668);
 		sidebar_name_coord = new UICoord(0, 176);
 		player_dashboard = new UICoord(574, 9);
+		new_game_first_player_coord = new UICoord(185, 183);
 		
 		notebook_card_coords = new HashMap<>();
 		notebook_card_coords.put("Miss Scarlett", new UICoord(616, 225));
@@ -263,18 +275,4 @@ public class UIResourcesLoader{
 //		}
 //		return null;
 //	}
-	
-	public GameImage getUnselectedNewGameBtn(int btn) {
-		if(btn < RANDOM_GAME || btn > STRATEGIC_GAME) {
-			throw new ArrayIndexOutOfBoundsException();
-		}
-		return v_unselectedNewGameBtn[btn];
-	}
-	
-	public GameImage getSelectedNewGameBtn(int btn) {
-		if(btn < RANDOM_GAME || btn > STRATEGIC_GAME) {
-			throw new ArrayIndexOutOfBoundsException();
-		}
-		return v_selectedNewGameBtn[btn];
-	}
 }

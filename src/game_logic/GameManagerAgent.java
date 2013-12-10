@@ -211,6 +211,8 @@ public class GameManagerAgent extends GuiAgent {
 	
 	private class UpdateGameStateOfAllAgents extends OneShotBehaviour {
 
+		private static final long serialVersionUID = 5056291833901886321L;
+
 		@Override
 		public void action() {
 			GameMessage update = new GameMessage(GameMessage.GAME_STATE_UPDATE);
@@ -278,13 +280,13 @@ public class GameManagerAgent extends GuiAgent {
 	 * @param numPlayers
 	 * @throws Exception 
 	 */
-	public void createGame(int numHumanPlayers, int numBotPlayers) throws Exception {
+	public void createGame(int numHumanPlayers, int numBotPlayers, ArrayList<Integer> botLevels) throws Exception {
 		if(numHumanPlayers + numBotPlayers < 3) {
 			throw new Exception("Invalid number of players. min: 3 max: 6");
 		}
 		this.numPlayers = numHumanPlayers + numBotPlayers;
 		createGameContainers();
-		createSuspectsAgents(numHumanPlayers, numBotPlayers);
+		createSuspectsAgents(numHumanPlayers, numBotPlayers, botLevels);
 	}
 	
 	public Cluedo getCluedo() {
@@ -340,7 +342,7 @@ public class GameManagerAgent extends GuiAgent {
 	 * creates all the agents that will be in the game
 	 * @param numPlayers
 	 */
-	private void createSuspectsAgents(int numHumPlayers, int numBotPlayers) {
+	private void createSuspectsAgents(int numHumPlayers, int numBotPlayers, ArrayList<Integer> botLevels) {
 		PlatformController container = getContainerController();
 
 		try {
@@ -353,6 +355,7 @@ public class GameManagerAgent extends GuiAgent {
 					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.HumanPlayerAgent", null);
 					agentType.put(Cluedo.suspects[i], new Integer(HUMAN));
 				} else {
+					// TODO create the right kind of bot!!!
 					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.BotPlayerAgent", null);
 					agentType.put(Cluedo.suspects[i], new Integer(BOT));
 				}
@@ -381,8 +384,10 @@ public class GameManagerAgent extends GuiAgent {
 		{
 			int numHumPlayers = ((Integer)ev.getParameter(0)).intValue();
 			int numBotPlayers = ((Integer)ev.getParameter(1)).intValue();
+			ArrayList<Integer> botLevels = (ArrayList<Integer>)ev.getParameter(2);
+			
 			try {
-				createGame(numHumPlayers, numBotPlayers);
+				createGame(numHumPlayers, numBotPlayers, botLevels);
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.exit(-1);
