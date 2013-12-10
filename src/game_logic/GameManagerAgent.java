@@ -280,13 +280,14 @@ public class GameManagerAgent extends GuiAgent {
 	 * @param numPlayers
 	 * @throws Exception 
 	 */
-	public void createGame(int numHumanPlayers, int numBotPlayers, ArrayList<Integer> botLevels) throws Exception {
-		if(numHumanPlayers + numBotPlayers < 3) {
-			throw new Exception("Invalid number of players. min: 3 max: 6");
+	public void createGame(int[] typePlayers) throws Exception {
+		for(int type: typePlayers) {
+			if(type != 0) {
+				numPlayers++;
+			}
 		}
-		this.numPlayers = numHumanPlayers + numBotPlayers;
 		createGameContainers();
-		createSuspectsAgents(numHumanPlayers, numBotPlayers, botLevels);
+		createSuspectsAgents(typePlayers);
 	}
 	
 	public Cluedo getCluedo() {
@@ -342,21 +343,28 @@ public class GameManagerAgent extends GuiAgent {
 	 * creates all the agents that will be in the game
 	 * @param numPlayers
 	 */
-	private void createSuspectsAgents(int numHumPlayers, int numBotPlayers, ArrayList<Integer> botLevels) {
+	private void createSuspectsAgents(int[] typePlayers) {
 		PlatformController container = getContainerController();
-
+		
+		int HUMAN = 1, ROOKIE = 2, DETECTIVE = 3, INSPECTOR = 4;
+		
 		try {
 			// create human players
 			// create bot players
-			for (int i = 0;  i < (numHumPlayers + numBotPlayers);  i++) {
+			for(int i = 0; i < typePlayers.length; i++) {
 				AgentController guest = null;
 				
-				if(i < numHumPlayers) {
+				if(typePlayers[i] == HUMAN) {
 					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.HumanPlayerAgent", null);
 					agentType.put(Cluedo.suspects[i], new Integer(HUMAN));
-				} else {
-					// TODO create the right kind of bot!!!
-					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.BotPlayerAgent", null);
+				} else if(typePlayers[i] == ROOKIE) {
+					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.RandomBotPlayer", null);
+					agentType.put(Cluedo.suspects[i], new Integer(BOT));
+				} else if(typePlayers[i] == DETECTIVE) {
+					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.NormalBotPlayer", null);
+					agentType.put(Cluedo.suspects[i], new Integer(BOT));
+				} else if(typePlayers[i] == INSPECTOR) {
+					guest = container.createNewAgent(Cluedo.suspects[i], "game_logic.SmartBotPlayer", null);
 					agentType.put(Cluedo.suspects[i], new Integer(BOT));
 				}
 				
@@ -382,12 +390,10 @@ public class GameManagerAgent extends GuiAgent {
 		switch (command) {
 		case CREATE_GAME:
 		{
-			int numHumPlayers = ((Integer)ev.getParameter(0)).intValue();
-			int numBotPlayers = ((Integer)ev.getParameter(1)).intValue();
-			ArrayList<Integer> botLevels = (ArrayList<Integer>)ev.getParameter(2);
+			int[] typePlayers = (int[])ev.getParameter(0);
 			
 			try {
-				createGame(numHumPlayers, numBotPlayers, botLevels);
+				createGame(typePlayers);
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.exit(-1);

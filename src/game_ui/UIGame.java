@@ -287,7 +287,15 @@ public class UIGame extends JFrame implements ActionListener {
 			if(playerIndex <= 2) { // they always have a player
 				typePlayers[playerIndex] = (typePlayers[playerIndex] == INSPECTOR) ? HUMAN : (typePlayers[playerIndex] + 1);
 			} else {
-				typePlayers[playerIndex] = (typePlayers[playerIndex] == INSPECTOR) ? ADD_PLAYER : (typePlayers[playerIndex] + 1);
+				if(typePlayers[playerIndex-1] != ADD_PLAYER) { // the user must fill out the previous players
+					if(typePlayers[playerIndex] == INSPECTOR) {
+						for(int i = playerIndex; i < typePlayers.length; i++) {
+							typePlayers[i] = ADD_PLAYER;
+						}
+					} else {
+						typePlayers[playerIndex] += 1;
+					}
+				}
 			}
 			repaint();
 		}
@@ -311,21 +319,21 @@ public class UIGame extends JFrame implements ActionListener {
 					}}.run();
 				} else if(x >= 373 && y >= 646 && x <= 417 && y <= 691) { // start game
 
-					int humanPlayers = 0;
-					int botPlayers = 0;
-					ArrayList<Integer> botLevel = new ArrayList<>();
-					
-					for(int i = 0; i < typePlayers.length; i++) {
-						humanPlayers += typePlayers[i] == HUMAN ? 1 : 0; 
-						
-						if(typePlayers[i] >= ROOKIE && typePlayers[i] <= INSPECTOR) {
-							botPlayers++;
-							botLevel.add(new Integer(typePlayers[i]));
-						}
-					}
+//					int humanPlayers = 0;
+//					int botPlayers = 0;
+//					ArrayList<Integer> botLevel = new ArrayList<>();
+//					
+//					for(int i = 0; i < typePlayers.length; i++) {
+//						humanPlayers += typePlayers[i] == HUMAN ? 1 : 0; 
+//						
+//						if(typePlayers[i] >= ROOKIE && typePlayers[i] <= INSPECTOR) {
+//							botPlayers++;
+//							botLevel.add(new Integer(typePlayers[i]));
+//						}
+//					}
 					
 					uiGamePanel.clearPossibleGame();
-					uiGamePanel.startGame(humanPlayers, botPlayers, botLevel);
+					uiGamePanel.startGame(typePlayers);
 
 					new Runnable() {@Override public void run() {
 						panel.createTransition()
@@ -381,11 +389,9 @@ public class UIGame extends JFrame implements ActionListener {
 			background = uiResourcesLoader.game_bg;
 		}
 		
-		public void startGame(int humanPlayers, int botPlayers, ArrayList<Integer> botLevel) {
+		public void startGame(int[] typePlayer) {
 			GuiEvent ge = new GuiEvent(this, GameManagerAgent.CREATE_GAME);
-			ge.addParameter(new Integer(humanPlayers));
-			ge.addParameter(new Integer(botPlayers));
-			ge.addParameter(botLevel);
+			ge.addParameter(typePlayer);
 			gameManagerAgent.postGuiEvent(ge);
 		}
 		

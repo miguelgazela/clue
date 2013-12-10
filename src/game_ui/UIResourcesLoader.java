@@ -139,7 +139,7 @@ public class UIResourcesLoader{
 	
 	private void initCoords() {
 		new_game_btns_coords = new UICoord[2];
-		board_source_coord_main_ui = new UICoord(210, 21);
+		board_source_coord_main_ui = new UICoord(437, 21);
 		board_source_coord_player_interface = new UICoord(14, 12);
 		game_status_coord = new UICoord(363, 668);
 		sidebar_name_coord = new UICoord(0, 176);
