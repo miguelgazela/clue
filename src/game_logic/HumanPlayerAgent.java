@@ -2,6 +2,7 @@ package game_logic;
 
 import game_ui.UIHumanPlayer;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
 import jade.core.AID;
@@ -42,11 +43,12 @@ public class HumanPlayerAgent extends PlayerAgent {
 					System.out.println("HUMANPLAYER: "+message.getType());
 
 					switch (message.getType()) {
-					case GameMessage.DISTRIBUTE_CARDS: // receiving this players cards and initial position
+					case GameMessage.DISTRIBUTE_CARDS: // receiving this players cards and initial game state
 					{
 						if(myCards == null) {
 							myCards = (ArrayList<CluedoCard>) message.getObject(0);
 							gameState = (Cluedo.GameState) message.getObject(1);
+							posOnBoard = (Coordinates) message.getObject(2);
 							
 							// send ack
 							GameMessage msg_ack = new GameMessage(GameMessage.ACK_DISTRIBUTE_CARDS);
@@ -80,6 +82,10 @@ public class HumanPlayerAgent extends PlayerAgent {
 							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - rolled the dice and got "+diceResult);
 							waitingForDiceResult = false;
 							pickingBoardMove = true;
+							myGui.updateDiceResult(diceResult);
+							ArrayList<Tile> reachablePos = new ArrayList<>();
+							buildReachableTiles(gameState.board.getTiles().get(posOnBoard.getY()).get(posOnBoard.getX()).getNeighbours(), reachablePos, diceResult-1);
+							myGui.updateReachablePos(reachablePos);
 						}
 					}
 					break;
@@ -88,9 +94,10 @@ public class HumanPlayerAgent extends PlayerAgent {
 						if(waitingForMoveConfirmation) {
 							// our move has been done
 							gameState = (Cluedo.GameState) message.getObject(0);
+							posOnBoard = (Coordinates) message.getObject(1);
 							myGui.setGameState(gameState);
+							myGui.updateReachablePos(null);
 							myGui.repaint();
-							
 							waitingForMoveConfirmation = false;
 							madeBoardMove = true;
 						}
@@ -126,7 +133,6 @@ public class HumanPlayerAgent extends PlayerAgent {
 				block();
 			}
 		}
-		
 	}
 
 	@Override

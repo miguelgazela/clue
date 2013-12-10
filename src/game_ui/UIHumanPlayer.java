@@ -1,16 +1,16 @@
 package game_ui;
 
 import game_logic.Cluedo.GameState;
-import game_logic.Board;
 import game_logic.CluedoCard;
 import game_logic.CluedoNotebook;
 import game_logic.Coordinates;
-import game_logic.GameManagerAgent;
 import game_logic.HumanPlayerAgent;
-
+import game_logic.Tile;
 import jade.gui.GuiEvent;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,8 +20,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -34,7 +34,9 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 	protected UIPlayerPanel uiPlayerPanel;
 	protected HumanPlayerAgent agent;
 	protected GameState gameState = null;
+	protected int diceResult = -1;
 	protected CluedoNotebook notebook;
+	protected ArrayList<Tile> reachable = null;
 
 	public UIHumanPlayer(HumanPlayerAgent owner, String playerName) {
 		super(playerName+" interface");
@@ -58,6 +60,16 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 	
 	public void updatePlayerCards(ArrayList<CluedoCard> cards) {
 		notebook.addPlayerCards(cards);
+	}
+	
+	public void updateDiceResult(int dr) {
+		this.diceResult = dr;
+		repaint();
+	}
+	
+	public void updateReachablePos(ArrayList<Tile> reachablePos) {
+		this.reachable = reachablePos;
+		repaint();
 	}
 	
 	private class UIPlayerPanel extends JPanel implements MouseListener {
@@ -95,20 +107,20 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 			if (background != null) {
 				g.drawImage(background, 0, 0, this);
 			}
-			
+
 			if(gameState != null) {
-				
+
 				for(int i = 0; i < gameState.players.size(); i++) {
 					UICoord c = UIResourcesLoader.getInstanceLoader().board_source_coord_player_interface;
 					Coordinates pos = gameState.players.get(i).getPosOnBoard();
-					
+
 					g.drawImage(
 							UIResourcesLoader.getInstanceLoader().getPlayerToken(i), 
 							c.x + pos.getX()*UIResourcesLoader.BOARD_POS_DIF, 
 							c.y + pos.getY()*UIResourcesLoader.BOARD_POS_DIF,
 							this
-					);
-					
+							);
+
 					// draw dashboard
 					if(gameState.players.get(i).getName().equals(agent.getLocalName())) {
 						c = UIResourcesLoader.getInstanceLoader().player_dashboard;
@@ -117,13 +129,13 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 								c.x, 
 								c.y,
 								this
-						);
+								);
 					}
-					
+
 					// draw notebook cards state
 					for (Map.Entry entry : notebook.getCardsState().entrySet()) { 
 						c = UIResourcesLoader.getInstanceLoader().getNotebookCardStateCoord((String)entry.getKey());
-						
+
 						if(c != null) {
 
 							if((int)entry.getValue() != -1) {
@@ -136,8 +148,37 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 							}
 						}
 					}
-			}
-				
+					
+					Color oldColor = g.getColor(); // saves the old color
+					
+					// draw dice result
+					if(diceResult != -1) {
+						Font font = new Font("Verdana", Font.BOLD, 20);
+						g.setFont(font);
+						g.setColor(Color.WHITE);
+
+						if(diceResult < 10) {
+							g.drawString(Integer.toString(diceResult), 705, 103);
+						} else {
+							g.drawString(Integer.toString(diceResult), 698, 103);
+						}
+					}
+					
+					// draw reachable pos
+					if(reachable != null) {
+						
+						g.setColor(UIResourcesLoader.getInstanceLoader().player_colors.get(agent.getLocalName()));
+						
+						for(Tile tile: reachable) {
+							Coordinates tileCoord = tile.getCoordinates();
+							int xCoord = (tileCoord.getX()*23) + 14;
+							int yCoord = (tileCoord.getY()*23) + 12;
+							g.fillRect(xCoord, yCoord, 22, 22);
+						}
+					}
+					
+					g.setColor(oldColor);
+				}
 			}
 		}
 		
@@ -147,7 +188,7 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 			ge.addParameter(new Integer(y));
 			agent.postGuiEvent(ge);
 		}
-	
+		
 		private void rollDice() {
 			GuiEvent ge = new GuiEvent(this, HumanPlayerAgent.ROLL_DICE);
 			agent.postGuiEvent(ge);
@@ -158,6 +199,8 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 		}
 		
 		private void endTurn() {
+			diceResult = -1;
+			reachable = null;
 			GuiEvent ge = new GuiEvent(this, HumanPlayerAgent.END_TURN);
 			agent.postGuiEvent(ge);
 		}
@@ -261,5 +304,4 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		
 	}
-
 }

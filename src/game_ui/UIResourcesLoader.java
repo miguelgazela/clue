@@ -1,5 +1,6 @@
 package game_ui;
 
+import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -31,6 +32,8 @@ public class UIResourcesLoader{
 	
 	public UICoord[] new_game_btns_coords;
 	public HashMap<String, UICoord> notebook_card_coords;
+	
+	public HashMap<String, Color> player_colors;
 	
 	public UICoord turn_coord;
 	public UICoord game_status_coord;
@@ -73,6 +76,16 @@ public class UIResourcesLoader{
 			System.out.println("Background Resources Missing");
 			System.exit(-1);
 		}
+		
+		
+		// init players colors
+		player_colors = new HashMap<>();
+		player_colors.put("Miss Scarlett", new Color(240, 110, 170));
+		player_colors.put("Colonel Mustard", new Color(52, 152, 219));
+		player_colors.put("Mrs. White", new Color(142, 68, 173));
+		player_colors.put("Reverend Green", new Color(231, 76, 60));
+		player_colors.put("Professor Plum", new Color(46, 204, 113));
+		player_colors.put("Mrs. Peacock", new Color(230, 126, 34));
 	}
 
 	public static UIResourcesLoader getInstanceLoader() {

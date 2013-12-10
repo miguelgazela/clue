@@ -16,6 +16,7 @@ import game_ui.UIGame;
 import java.io.IOException;
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.List;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -111,6 +112,18 @@ import jade.util.Logger;
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - ending this agents turn.");
 		GameMessage msg = new GameMessage(GameMessage.END_TURN);
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
+	}
+	
+	protected void buildReachableTiles(List<Tile> neighbours, ArrayList<Tile> result, int depth) {
+		for(Tile neighbour: neighbours) {
+			if(depth == 0) {
+				if(!neighbour.isOccupied() && neighbour.isValid()) {
+					result.add(neighbour);
+				}
+			} else {
+				buildReachableTiles(neighbour.getNeighbours(), result, depth - 1);
+			}
+		}
 	}
 	
 	protected void sendGameMessage(GameMessage gameMsg, AID receiver, int performative) {

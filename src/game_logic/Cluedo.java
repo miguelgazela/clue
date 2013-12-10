@@ -118,13 +118,20 @@ public class Cluedo implements Serializable{
 		return board.moveIsValid(turnPlayer.getPosOnBoard(), dest, dicesResult, turnPlayer.getName());
 	}
 	
-	public boolean makeMove(Coordinates dest) {
+	/**
+	 * tries to make a move, if the move is valid makes it and returns the coordinates of the new position,
+	 * or else it returns null
+	 * @param dest
+	 * @return
+	 */
+	public Coordinates makeMove(Coordinates dest) {
 		if(moveIsValid(dest)) {
 			CluedoPlayer turnPlayer = players.get(turnPlayerIndex);
-			turnPlayer.setPosOnBoard(board.makeMove(turnPlayer.getPosOnBoard(), dest, turnPlayer.getName()));
-			return true;
+			Coordinates move = board.makeMove(turnPlayer.getPosOnBoard(), dest, turnPlayer.getName());
+			turnPlayer.setPosOnBoard(move);
+			return move;
 		}
-		return false;
+		return null;
 	}
 	
 	/**

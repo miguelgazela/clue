@@ -191,9 +191,12 @@ public class GameManagerAgent extends GuiAgent {
 					
 					GameMessage msg = null;
 					
-					if(cluedo.makeMove(new Coordinates(x, y))) {
+					Coordinates move = cluedo.makeMove(new Coordinates(x, y));
+					
+					if(move != null) {
 						msg = new GameMessage(GameMessage.VALID_MOVE);
 						msg.addObject(cluedo.getGameState());
+						msg.addObject(move);
 					} else {
 						msg = new GameMessage(GameMessage.INVALID_MOVE);
 						// TODO maybe add the reason to why the move is invalid?
@@ -262,6 +265,7 @@ public class GameManagerAgent extends GuiAgent {
 				GameMessage msg = new GameMessage(GameMessage.DISTRIBUTE_CARDS);
 				msg.addObject(cluedo.getPlayerCards(agent.getLocalName()));
 				msg.addObject(cluedo.getGameState());
+				msg.addObject(cluedo.getBoard().getPlayerStartingPos(agent.getLocalName()));
 				sendGameMessage(msg, agent, ACLMessage.INFORM);
 			}
 			myGui.hasGameRunning = true;

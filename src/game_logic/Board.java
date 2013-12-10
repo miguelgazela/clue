@@ -127,14 +127,35 @@ public class Board implements Serializable {
 			}
 		}else {
 			if(destTile.isValid() && !destTile.isOccupied()) {
-				int distance = (int)getDistance(currentPos, dest);
-				return (distance <= dicesResult);
+				
+				ArrayList<Tile> reachableTiles = new ArrayList<Tile>();
+				buildReachableTiles(currentTile.getNeighbours(), reachableTiles, dicesResult-1);
+				
+				if(reachableTiles.contains(destTile)) {
+					return true;
+				} else {
+					return false;
+				}
+				
+				
+//				int distance = (int)getDistance(currentPos, dest);
+//				return (distance <= dicesResult);
 			} else {
 				if(destTile.isRoom()) {
 					return tryToEnterRoom(destTile, currentPos, dicesResult, player);
 				} else {
 					return false;
 				}
+			}
+		}
+	}
+	
+	private void buildReachableTiles(List<Tile> neighbours, ArrayList<Tile> result, int depth) {
+		for(Tile neighbour: neighbours) {
+			if(depth == 0) {
+				result.add(neighbour);
+			} else {
+				buildReachableTiles(neighbour.getNeighbours(), result, depth - 1);
 			}
 		}
 	}
