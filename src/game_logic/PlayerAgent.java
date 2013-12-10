@@ -114,18 +114,6 @@ import jade.util.Logger;
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 	}
 	
-	protected void buildReachableTiles(List<Tile> neighbours, ArrayList<Tile> result, int depth) {
-		for(Tile neighbour: neighbours) {
-			if(depth == 0) {
-				if(!neighbour.isOccupied() && neighbour.isValid()) {
-					result.add(neighbour);
-				}
-			} else {
-				buildReachableTiles(neighbour.getNeighbours(), result, depth - 1);
-			}
-		}
-	}
-	
 	protected void sendGameMessage(GameMessage gameMsg, AID receiver, int performative) {
 		ACLMessage msg = new ACLMessage(performative);
 		

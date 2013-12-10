@@ -59,6 +59,14 @@ public class Board implements Serializable {
 	public List<List<Tile>> getTiles() {
 		return tiles;
 	}
+	
+	public Tile getTileAtPosition(Coordinates pos) {
+		return tiles.get(pos.getY()).get(pos.getX());
+	}
+	
+	public ArrayList<Tile> getRoomDoors(String room) {
+		return doors.get(room);
+	}
 
 	private boolean tryToEnterRoom(Tile destTile, Coordinates currentPos, int dicesResult, String player) {
 		ArrayList<Tile> room_doors = doors.get(destTile.getRoom());
@@ -121,25 +129,17 @@ public class Board implements Serializable {
 						return false;
 					}
 					
-				} else {
-					return false;
-				}
+				} 
+				return false; // trying to go to the same room
 			}
 		}else {
 			if(destTile.isValid() && !destTile.isOccupied()) {
 				
+				// builds an array with all the reachable tiles and returns true if destTile is present in it
 				ArrayList<Tile> reachableTiles = new ArrayList<Tile>();
 				buildReachableTiles(currentTile.getNeighbours(), reachableTiles, dicesResult-1);
+				return reachableTiles.contains(destTile);
 				
-				if(reachableTiles.contains(destTile)) {
-					return true;
-				} else {
-					return false;
-				}
-				
-				
-//				int distance = (int)getDistance(currentPos, dest);
-//				return (distance <= dicesResult);
 			} else {
 				if(destTile.isRoom()) {
 					return tryToEnterRoom(destTile, currentPos, dicesResult, player);
@@ -150,10 +150,12 @@ public class Board implements Serializable {
 		}
 	}
 	
-	private void buildReachableTiles(List<Tile> neighbours, ArrayList<Tile> result, int depth) {
+	public void buildReachableTiles(List<Tile> neighbours, ArrayList<Tile> result, int depth) {
 		for(Tile neighbour: neighbours) {
 			if(depth == 0) {
-				result.add(neighbour);
+				if(neighbour.isValid() && !neighbour.isOccupied()) {
+					result.add(neighbour);
+				}
 			} else {
 				buildReachableTiles(neighbour.getNeighbours(), result, depth - 1);
 			}

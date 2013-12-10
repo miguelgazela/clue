@@ -4,6 +4,7 @@ import game_ui.UIHumanPlayer;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
@@ -83,16 +84,29 @@ public class HumanPlayerAgent extends PlayerAgent {
 							waitingForDiceResult = false;
 							pickingBoardMove = true;
 							myGui.updateDiceResult(diceResult);
+							
 							ArrayList<Tile> reachablePos = new ArrayList<>();
-							buildReachableTiles(gameState.board.getTiles().get(posOnBoard.getY()).get(posOnBoard.getX()).getNeighbours(), reachablePos, diceResult-1);
+							Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
+							
+							if(!currentTile.isRoom()) {
+								gameState.board.buildReachableTiles(currentTile.getNeighbours(), reachablePos, diceResult-1);
+							} else {
+								ArrayList<Tile> room_doors = gameState.board.getRoomDoors(currentTile.getRoom());
+								gameState.board.buildReachableTiles(room_doors, reachablePos, diceResult-1);
+							}
+							
 							myGui.updateReachablePos(reachablePos);
+							
+//							if(gameState.board.)
+//							
+//							buildReachableTiles(gameState.board.getTiles().get(posOnBoard.getY()).get(posOnBoard.getX()).getNeighbours(), reachablePos, diceResult-1);
+//							myGui.updateReachablePos(reachablePos);
 						}
 					}
 					break;
 					case GameMessage.VALID_MOVE:
 					{
-						if(waitingForMoveConfirmation) {
-							// our move has been done
+						if(waitingForMoveConfirmation) { // our move has been done
 							gameState = (Cluedo.GameState) message.getObject(0);
 							posOnBoard = (Coordinates) message.getObject(1);
 							myGui.setGameState(gameState);
