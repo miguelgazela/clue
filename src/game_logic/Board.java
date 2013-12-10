@@ -91,10 +91,14 @@ public class Board implements Serializable {
 				int index = 0;
 				int minimumDistance =  ((int) getDistance(room_doors.get(0).getCoordinates(), destTile.getCoordinates())) + 1;
 				
+				if(room_doors.get(0).isOccupied()) {
+					minimumDistance = 9999; // it is impossible to leave if this door is blocked
+				}
+				
 				if(room_doors.size() > 1) {
 					for(int i = 1; i < room_doors.size(); i++) {
 						int distance = (int) getDistance(room_doors.get(i).getCoordinates(), destTile.getCoordinates()) + 1;
-						if(distance < minimumDistance) {
+						if(distance < minimumDistance && !room_doors.get(i).isOccupied()) { // if this door is closer and isn't occupied
 							index = i;
 							minimumDistance = distance;
 						}
@@ -150,7 +154,7 @@ public class Board implements Serializable {
 		if(destTile.isRoom()) {			
 			ArrayList<Tile> roomTiles = new ArrayList<>();
 
-			// adds all tiles from this room
+			// adds all tiles from this room that are not occupied and are not secret passages
 			for(int i = 0; i < tiles.size(); i++) {
 				for(int j = 0; j < tiles.get(i).size(); j++) {
 					
@@ -165,7 +169,7 @@ public class Board implements Serializable {
 			// picks a free pos from them
 			while(true) {
 				destTile = roomTiles.get(r.nextInt(roomTiles.size()));
-
+				
 				if(!destTile.isOccupied() && !destTile.isSecretPassage()) {
 					destTile.setOccupied(player);
 					return destTile.getCoordinates();
@@ -269,7 +273,7 @@ public class Board implements Serializable {
 		ArrayList<Tile> loungeDoors = new ArrayList<>();
 		loungeDoors.add(tiles.get(18).get(6));
 		doors.put("Lounge", loungeDoors);
-		tiles.get(0).get(19).setSecretPassage(true);
+		tiles.get(19).get(0).setSecretPassage(true);
 
 		//hall
 		setRoom(9, 14, 18, 24, "Hall");
