@@ -38,12 +38,9 @@ import jade.util.Logger;
 	
 	protected boolean stillInGame;
 	protected boolean myTurn;
-//	protected boolean waitingForDiceResult = false;
 	protected boolean pickingBoardMove = false;
-//	protected boolean waitingForMoveConfirmation = false;
 	protected boolean madeBoardMove = false;
 	protected boolean madeSuggestion = false;
-//	protected boolean waitingForSuggestionAnswer = false;
 	protected int diceResult = -1;
 	
 	protected GameState gameState = null; 
@@ -144,7 +141,4 @@ import jade.util.Logger;
 			System.exit(-1);
 		}
 	}
-	
-	protected abstract void makePlay();
-
  }

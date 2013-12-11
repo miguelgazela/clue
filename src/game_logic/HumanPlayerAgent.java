@@ -232,11 +232,6 @@ public class HumanPlayerAgent extends PlayerAgent {
 		}
 	}
 
-	@Override
-	protected void makePlay() {
-		System.out.println("MakePlay do HumanPlayer");
-	}
-
 	public void postGuiEvent(GuiEvent ge) {
 		int command = ge.getType();
 
