@@ -38,12 +38,12 @@ import jade.util.Logger;
 	
 	protected boolean stillInGame;
 	protected boolean myTurn;
-	protected boolean waitingForDiceResult = false;
+//	protected boolean waitingForDiceResult = false;
 	protected boolean pickingBoardMove = false;
-	protected boolean waitingForMoveConfirmation = false;
+//	protected boolean waitingForMoveConfirmation = false;
 	protected boolean madeBoardMove = false;
-	protected boolean hasMadeSuggestion = false;
-	protected boolean waitingForSuggestionAnswer = false;
+	protected boolean madeSuggestion = false;
+//	protected boolean waitingForSuggestionAnswer = false;
 	protected int diceResult = -1;
 	
 	protected GameState gameState = null; 
@@ -72,8 +72,6 @@ import jade.util.Logger;
 		// move to the corridor container
 		ContainerID cid = new ContainerID("Corridor", null);
 		doMove(cid);
-		
-		//addBehaviour(new PlayerBehaviour()); TODO it doesn't work, why??
 	}
 	
 	public boolean isStillInGame() {
@@ -84,7 +82,7 @@ import jade.util.Logger;
 	 * sends the game manager a msg asking for a dice roll result
 	 */
 	protected void askDiceRoll() {
-		waitingForDiceResult = true;
+		pickingBoardMove = true;
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending request for a dice roll.");
 		GameMessage msg = new GameMessage(GameMessage.ASK_DICE_ROLL);
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
@@ -97,8 +95,7 @@ import jade.util.Logger;
 	 * @param weapon
 	 */
 	protected void makeSuggestion(CluedoSuggestion playerSuggestion) {
-		hasMadeSuggestion = true;
-		waitingForSuggestionAnswer = true;
+		madeSuggestion = true;
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending a solution suggestion.");
 		GameMessage msg = new GameMessage(GameMessage.MAKE_SUGGESTION);
 		msg.addObject(playerSuggestion);
@@ -112,6 +109,7 @@ import jade.util.Logger;
 	 */
 	protected void makeMove(int x, int y) {
 		pickingBoardMove = false;
+		madeBoardMove = true;
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending request for making a move.");
 		
 		GameMessage msg = new GameMessage(GameMessage.MAKE_MOVE);
@@ -119,13 +117,16 @@ import jade.util.Logger;
 		msg.addObject(new Integer(y));
 		
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
-		waitingForMoveConfirmation = true;
 	}
 	
 	/**
 	 * ends this players turn
 	 */
 	protected void endMyTurn() {
+		pickingBoardMove = false;
+		madeBoardMove = false;
+		madeSuggestion = false;
+		myTurn = false;
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - ending this agents turn.");
 		GameMessage msg = new GameMessage(GameMessage.END_TURN);
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);

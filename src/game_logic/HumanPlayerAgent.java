@@ -79,11 +79,9 @@ public class HumanPlayerAgent extends PlayerAgent {
 					break;
 					case GameMessage.RSLT_DICE_ROLL: // receiving the result of the dice roll
 					{
-						if(waitingForDiceResult) {
+						if(pickingBoardMove) {
 							diceResult = ((Integer) message.getObject(0)).intValue();
 							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - rolled the dice and got "+diceResult);
-							waitingForDiceResult = false;
-							pickingBoardMove = true;
 							myGui.updateDiceResult(diceResult);
 							
 							ArrayList<Tile> reachablePos = new ArrayList<>();
@@ -114,23 +112,20 @@ public class HumanPlayerAgent extends PlayerAgent {
 					break;
 					case GameMessage.VALID_MOVE:
 					{
-						if(waitingForMoveConfirmation) { // our move has been done
+						if(madeBoardMove) { // our move has been done
 							gameState = (Cluedo.GameState) message.getObject(0);
 							posOnBoard = (Coordinates) message.getObject(1);
 							myGui.setGameState(gameState);
 							myGui.updateReachablePos(null);
 							myGui.repaint();
-							waitingForMoveConfirmation = false;
-							madeBoardMove = true;
 						}
 					}
 					break;
 					case GameMessage.INVALID_MOVE:
 					{
-						if(waitingForMoveConfirmation) {
-							waitingForMoveConfirmation = false;
-							pickingBoardMove = true;
-						}
+						madeBoardMove = false;
+						pickingBoardMove = true;
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - my move is invalid");
 					}
 					break;
 					case GameMessage.GAME_STATE_UPDATE:
@@ -248,7 +243,8 @@ public class HumanPlayerAgent extends PlayerAgent {
 		switch (command) {
 		case ROLL_DICE:
 		{
-			if(!waitingForDiceResult && !pickingBoardMove && !madeBoardMove) {
+			// needs to check if he is in a room and all the doors are blocked!
+			if(!madeBoardMove && !pickingBoardMove && !madeSuggestion) {
 				askDiceRoll();
 			}
 		}
@@ -264,7 +260,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 		break;
 		case END_TURN:
 		{
-			if(madeBoardMove) { // TODO needs to check other stuff
+			if(madeBoardMove || madeSuggestion) {
 				madeBoardMove = false;
 				endMyTurn();
 				myGui.setVisible(false);
@@ -273,7 +269,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 		break;
 		case SHOW_SUGGESTION:
 		{
-			if(!hasMadeSuggestion) {
+			if(!madeSuggestion) {
 				Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
 				if(currentTile.isRoom()) {
 					myGui.showSuggestionPanel(currentTile.getRoom());
@@ -283,7 +279,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 		break;
 		case MAKE_SUGGESTION:
 		{
-			if(!hasMadeSuggestion) {
+			if(!madeSuggestion) {
 				Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
 				String room = currentTile.getRoom();
 				String suspect = (String)ge.getParameter(0);
