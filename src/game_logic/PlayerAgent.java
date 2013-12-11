@@ -43,6 +43,7 @@ import jade.util.Logger;
 	protected boolean waitingForMoveConfirmation = false;
 	protected boolean madeBoardMove = false;
 	protected boolean hasMadeSuggestion = false;
+	protected boolean waitingForSuggestionAnswer = false;
 	protected int diceResult = -1;
 	
 	protected GameState gameState = null; 
@@ -95,13 +96,12 @@ import jade.util.Logger;
 	 * @param suspect
 	 * @param weapon
 	 */
-	protected void makeSuggestion(String room, String suspect, String weapon) {
+	protected void makeSuggestion(CluedoSuggestion playerSuggestion) {
 		hasMadeSuggestion = true;
+		waitingForSuggestionAnswer = true;
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending a solution suggestion.");
 		GameMessage msg = new GameMessage(GameMessage.MAKE_SUGGESTION);
-		msg.addObject(room);
-		msg.addObject(suspect);
-		msg.addObject(weapon);
+		msg.addObject(playerSuggestion);
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 	}
 	
@@ -145,65 +145,5 @@ import jade.util.Logger;
 	}
 	
 	protected abstract void makePlay();
-	
-	private class PlayerBehaviour extends CyclicBehaviour {
 
-		private static final long serialVersionUID = 6875374470516568688L;
-
-		@Override
-		public void action() {
-			ACLMessage msg = myAgent.receive();
-			
-			if(msg != null) {
-				try {
-					GameMessage message = (GameMessage) msg.getContentObject();
-
-					System.out.println("PLAYERAGENT: "+message.getType());
-					
-					switch (message.getType()) {
-
-					case GameMessage.DISTRIBUTE_CARDS: // receiving this players cards and initial position
-					{
-						if(myCards == null) {
-							myCards = (ArrayList<CluedoCard>) message.getObject(0);
-							posOnBoard = (Coordinates) message.getObject(1);
-
-							// send ack
-							GameMessage msg_ack = new GameMessage(GameMessage.ACK_DISTRIBUTE_CARDS);
-							sendGameMessage(msg_ack, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
-							
-						} else {
-							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Receiving cards and initial position again.");
-						}
-					}
-					break;
-//					case GameMessage.TURN_PLAYER: // receiving the name of the current turn's player
-//					{
-//						String turnPlayerName = (String) message.getObject(0);
-//						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received turn player name "+turnPlayerName);
-//
-//						if(turnPlayerName.equals(myAgent.getLocalName())) {
-//							myTurn = true;
-//							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - it's my turn!");
-//
-//							makePlay();
-//						}
-//					}
-//					break;
-					default:
-					{
-						// should not get here!!!
-						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - unrecognized message.");
-					}
-					break;
-					}
-				} catch (UnreadableException e) {
-					e.printStackTrace();
-					System.exit(-1);
-				}
-			} else { // if no message is arrived, block the behaviour
-				block();
-			}
-		}
-	}
  }

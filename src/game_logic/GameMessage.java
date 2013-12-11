@@ -18,6 +18,10 @@ public class GameMessage implements Serializable {
 	public static final String GAME_STATE_UPDATE = "GAME_STATE_UPDATE";
 	public static final String END_TURN = "END_TURN";
 	public static final String MAKE_SUGGESTION = "MAKE_SUGGESTION";
+	public static final String PLAYER_MADE_SUGGESTION = "PLAYER_MADE_SUGGESTION";
+	public static final String CONTRADICT_SUGGESTION = "CONTRADICT_SUGGESTION";
+	public static final String NO_CONTRADICTION_CARD = "NO_CONTRADICTION_CARD";
+	public static final String HAVE_CONTRADICTION_CARD = "HAVE_CONTRADICTION_CARD";
 	
 	private final String type;
 	private ArrayList<Object> objects = null;
@@ -36,8 +40,12 @@ public class GameMessage implements Serializable {
 		return type;
 	}
 
-	public Object getObjects() {
+	public ArrayList<Object> getObjects() {
 		return objects;
+	}
+	
+	public void setObjects(ArrayList<Object> objects) {
+		this.objects = objects;
 	}
 	
 	public Object getObject(int index) {

@@ -215,6 +215,7 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 						ge.addParameter(suspect);
 						ge.addParameter(weapon);
 						agent.postGuiEvent(ge);
+						dispose();
 					}
 				}
 				repaint();

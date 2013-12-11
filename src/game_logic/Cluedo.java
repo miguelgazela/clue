@@ -26,6 +26,7 @@ public class Cluedo implements Serializable{
 	 * the index of the player that is playing this turn
 	 */
 	private int turnPlayerIndex = -1;
+	private int suggestionContradictorIndex = -1;
 	private int dicesResult = -1;
 	private Logger myLogger = Logger.getMyLogger(getClass().getName());
 	private ArrayList<CluedoPlayer> players;
@@ -44,27 +45,6 @@ public class Cluedo implements Serializable{
 		initGameSolution();
 		initPlayers();
 		findWhoPlaysFirst();
-	}
-	
-	public class GameState implements Serializable {
-		private static final long serialVersionUID = -7446685256646116162L;
-		
-		public int numberPlayers;
-		public int turnPlayerIndex;
-		public ArrayList<CluedoPlayer> players;
-		public Board board;
-		
-		public GameState(int nP, int tPI, ArrayList<CluedoPlayer> players_, Board board) {
-			this.numberPlayers = nP;
-			this.turnPlayerIndex = tPI;
-			this.board = board;
-			
-			this.players = new ArrayList<CluedoPlayer>();
-			
-			for(CluedoPlayer player: players_) {
-				this.players.add(new CluedoPlayer(player.getName(), player.getPosOnBoard()));
-			}
-		}
 	}
 	
 	public CluedoCard getMurderWeapon() {
@@ -104,6 +84,17 @@ public class Cluedo implements Serializable{
 	 */
 	public Board getBoard() {
 		return board;
+	}
+	
+	/**
+	 * returns if the 3 cards received are the solution to this game
+	 * @param room
+	 * @param suspect
+	 * @param weapon
+	 * @return
+	 */
+	public boolean isGameSolution(String room, String suspect, String weapon) {
+		return (this.room.equals(room) && this.murderer.equals(suspect) && this.weapon.equals(weapon));
 	}
 	
 	/**
@@ -235,6 +226,22 @@ public class Cluedo implements Serializable{
 		} else {
 			turnPlayerIndex++;
 		}
+		updateSuggestionContradictor();
+	}
+	
+	/**
+	 * updates the index of the player that must give a contradiction to a suggestion
+	 */
+	public void updateSuggestionContradictor() {
+		if(suggestionContradictorIndex == (numberPlayers - 1)) {
+			suggestionContradictorIndex = 0;
+		} else {
+			suggestionContradictorIndex += 1;
+		}
+	}
+	
+	public String getSuggestionContradictorName() {
+		return suspects[suggestionContradictorIndex];
 	}
 	
 	/**
@@ -244,6 +251,9 @@ public class Cluedo implements Serializable{
 	public String getTurnPlayerName() {
 		return suspects[turnPlayerIndex];
 	}
+	
+	
+	
 	
 	/**
 	 * find which player makes the first play. The player with the higher result
@@ -277,7 +287,35 @@ public class Cluedo implements Serializable{
 			}
 			hasSingleMax = (occurrences == 1);
 		}
+		
+		if(turnPlayerIndex == (numberPlayers - 1)) {
+			suggestionContradictorIndex = 0;
+		} else {
+			suggestionContradictorIndex = turnPlayerIndex + 1;
+		}
+		
 		myLogger.log(Logger.INFO, "Cluedo - Player that goes first: "+suspects[turnPlayerIndex]);
+	}
+	
+	public class GameState implements Serializable {
+		private static final long serialVersionUID = -7446685256646116162L;
+		
+		public int numberPlayers;
+		public int turnPlayerIndex;
+		public ArrayList<CluedoPlayer> players;
+		public Board board;
+		
+		public GameState(int nP, int tPI, ArrayList<CluedoPlayer> players_, Board board) {
+			this.numberPlayers = nP;
+			this.turnPlayerIndex = tPI;
+			this.board = board;
+			
+			this.players = new ArrayList<CluedoPlayer>();
+			
+			for(CluedoPlayer player: players_) {
+				this.players.add(new CluedoPlayer(player.getName(), player.getPosOnBoard()));
+			}
+		}
 	}
 	
 //	//use this to test specific functions without having to run the entire game TODO remove in the end

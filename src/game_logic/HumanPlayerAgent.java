@@ -99,10 +99,8 @@ public class HumanPlayerAgent extends PlayerAgent {
 								ListIterator<Tile> it = room_doors.listIterator();
 								while(true) {
 									if(it.hasNext()) {
-										System.out.println("Another door");
 										Tile door = it.next();
 										if(door.isOccupied()) {
-											System.out.println("This door is occupied!");
 											it.remove();
 										}
 									} else {
@@ -144,6 +142,31 @@ public class HumanPlayerAgent extends PlayerAgent {
 						myGui.repaint();
 					}
 					break;
+					case GameMessage.PLAYER_MADE_SUGGESTION:
+					{
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received suggestion warning");
+					}
+					break;
+					case GameMessage.CONTRADICT_SUGGESTION: 
+					{
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received request to contradict a suggestion");
+						contradictSuggestion(msg);
+					}
+					break;
+					case GameMessage.NO_CONTRADICTION_CARD: // some player is contradicting another player
+					{
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received a NO contradiction to suggestion");
+						String playerThatContradicted = (String)message.getObject(0); 
+						CluedoSuggestion playerSuggestion = (CluedoSuggestion) message.getObject(1);
+					}
+					break;
+					case GameMessage.HAVE_CONTRADICTION_CARD: // some player had a card to contradict another player's suggestion
+					{
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received contradiction to suggestion");
+						String playerThatContradicted = (String)message.getObject(0); 
+						CluedoSuggestion playerSuggestion = (CluedoSuggestion) message.getObject(1);
+					}
+					break;
 					default:
 					{
 						// should not get here!!!
@@ -159,6 +182,45 @@ public class HumanPlayerAgent extends PlayerAgent {
 				block();
 			}
 		}
+	}
+	
+	private void contradictSuggestion(ACLMessage msg) {
+		try {
+			GameMessage gameMsg = (GameMessage) msg.getContentObject();
+			CluedoSuggestion playerSuggestion = (CluedoSuggestion) gameMsg.getObject(0);
+			
+			// see if I have any card that has been suggested
+			for(CluedoCard card: myCards) {
+				String cardName = card.getName();
+				
+				// i have one card to contradict, say yes to gamemanager and send card to the requester
+				if(cardName.equals(playerSuggestion.getRoom()) 
+						|| cardName.equals(playerSuggestion.getSuspect()) 
+						|| cardName.equals(playerSuggestion.getWeapon())) {
+					
+					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - I have at least one card to contradict this suggestion.");
+					GameMessage haveContrCard = new GameMessage(GameMessage.HAVE_CONTRADICTION_CARD);
+					haveContrCard.addObject(playerSuggestion);
+					sendGameMessage(haveContrCard, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
+					
+					// send the card to the player that asked it
+					return;
+					
+				}
+			}
+			
+			// send msg to game manager saying you don't have a card
+			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - I have no card to contradict this suggestion.");
+			GameMessage noContrCard = new GameMessage(GameMessage.NO_CONTRADICTION_CARD);
+			noContrCard.addObject(playerSuggestion);
+			sendGameMessage(noContrCard, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
+
+		} catch (UnreadableException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		
+		
 	}
 
 	@Override
@@ -212,7 +274,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 				String room = currentTile.getRoom();
 				String suspect = (String)ge.getParameter(0);
 				String weapon = (String)ge.getParameter(1);
-				makeSuggestion(room, suspect, weapon);
+				makeSuggestion(new CluedoSuggestion(room, suspect, weapon, getLocalName()));
 			}
 		}
 		break;

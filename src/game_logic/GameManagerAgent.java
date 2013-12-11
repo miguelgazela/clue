@@ -148,6 +148,14 @@ public class GameManagerAgent extends GuiAgent {
 						}
 					}
 					break;
+					case GameMessage.NO_CONTRADICTION_CARD:
+					case GameMessage.HAVE_CONTRADICTION_CARD:
+					{
+						if(gameState == GameState.Waiting_for_play) {
+							addBehaviour(new HandleSuggestionContradiction(myAgent, msg));
+						}
+					}
+					break;
 					case GameMessage.END_TURN:
 					{
 						// check if it's this player's turn
@@ -175,6 +183,59 @@ public class GameManagerAgent extends GuiAgent {
 		}	
 	}
 	
+	private class HandleSuggestionContradiction extends OneShotBehaviour {
+
+		private static final long serialVersionUID = -7212843736966184461L;
+		ACLMessage request;
+
+		public HandleSuggestionContradiction(Agent a, ACLMessage request) {
+			super(a);
+			this.request = request;
+		}
+		
+		@Override
+		public void action() {
+			if(request.getSender().getLocalName().equals(cluedo.getSuggestionContradictorName())) {
+				try {
+					GameMessage gameMsg = (GameMessage)request.getContentObject();
+					if(gameMsg.getType().equals(GameMessage.NO_CONTRADICTION_CARD)) { // the player didn't have a card of the suggestion
+						
+						GameMessage update = new GameMessage(GameMessage.NO_CONTRADICTION_CARD);
+						update.addObject(request.getSender().getLocalName());
+						update.addObject(gameMsg.getObject(0)); // the CluedoSuggestion
+						
+						for(AID agent: agents) {
+							if(!agent.getLocalName().equals(request.getSender().getLocalName())) {
+								sendGameMessage(update, agent, ACLMessage.INFORM);
+							}
+						}
+						
+						// send message to the next player to the left
+						cluedo.updateSuggestionContradictor();
+						GameMessage requestContradiction = new GameMessage(GameMessage.CONTRADICT_SUGGESTION);
+						requestContradiction.addObject(gameMsg.getObject(0));
+						sendGameMessage(requestContradiction, new AID(cluedo.getSuggestionContradictorName(), AID.ISLOCALNAME), ACLMessage.INFORM);
+						
+					} else if(gameMsg.getType().equals(GameMessage.HAVE_CONTRADICTION_CARD)){
+						GameMessage update = new GameMessage(GameMessage.HAVE_CONTRADICTION_CARD);
+						update.addObject(request.getSender().getLocalName());
+						update.addObject(gameMsg.getObject(0)); // the CluedoSuggestion
+						
+						for(AID agent: agents) {
+							if(!agent.getLocalName().equals(request.getSender().getLocalName())) {
+								sendGameMessage(update, agent, ACLMessage.INFORM);
+							}
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}
+		}
+		
+	}
+	
 	private class HandleMakeSuggestionRequest extends OneShotBehaviour {
 		private static final long serialVersionUID = -6137878476840405835L;
 		ACLMessage request;
@@ -188,7 +249,37 @@ public class GameManagerAgent extends GuiAgent {
 		public void action() {
 			// check if it's this player's turn
 			if(request.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
-				
+				try {
+					
+					GameMessage message = (GameMessage) request.getContentObject();
+					CluedoSuggestion playerSuggestion = (CluedoSuggestion) message.getObject(0);
+					
+					if(cluedo.isGameSolution(playerSuggestion.getRoom(), playerSuggestion.getSuspect(), playerSuggestion.getWeapon())) {
+						// game over and this player is the winner!
+						System.out.println("GAME OVER!");
+					} else {
+						// somebody must have a card to contradict this suggestion
+						
+						// warn other agents about the suggestion
+						GameMessage suggestionWarning = new GameMessage(GameMessage.PLAYER_MADE_SUGGESTION);
+						suggestionWarning.addObject(playerSuggestion);
+						
+						for(AID agent: agents) {
+							if(!agent.getLocalName().equals(request.getSender().getLocalName())) {
+								sendGameMessage(suggestionWarning, agent, ACLMessage.INFORM);
+							}
+						}
+						
+						// send request to the next player to the left
+						GameMessage requestContradiction = new GameMessage(GameMessage.CONTRADICT_SUGGESTION);
+						requestContradiction.addObject(playerSuggestion);
+						sendGameMessage(requestContradiction, new AID(cluedo.getSuggestionContradictorName(), AID.ISLOCALNAME), ACLMessage.INFORM);
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
 			}
 		}
 	}
