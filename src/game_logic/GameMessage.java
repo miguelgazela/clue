@@ -17,6 +17,7 @@ public class GameMessage implements Serializable {
 	public static final String INVALID_MOVE = "INVALID_MOVE";
 	public static final String GAME_STATE_UPDATE = "GAME_STATE_UPDATE";
 	public static final String END_TURN = "END_TURN";
+	public static final String MAKE_SUGGESTION = "MAKE_SUGGESTION";
 	
 	private final String type;
 	private ArrayList<Object> objects = null;

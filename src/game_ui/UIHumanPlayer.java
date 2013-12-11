@@ -157,6 +157,23 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 				g.drawImage(UIResourcesLoader.getInstanceLoader().getCardNoteStatus(CluedoNotebook.HAS_CARD),
 						c.x, c.y, this
 				);
+				
+				// draw the players cards
+				for (Map.Entry entry : notebook.getCardsState().entrySet()) {
+					if((int)entry.getValue() == CluedoNotebook.HAS_CARD) { // if the player has this card
+						c = UIResourcesLoader.getInstanceLoader().suggestion_card_coords.get((String)entry.getKey());
+						
+						if(c != null) { // because of the corridor
+							g.drawImage(
+									UIResourcesLoader.getInstanceLoader().getCardNoteStatus(CluedoNotebook.NOT_SOLUTION),
+									c.x, 
+									c.y,
+									this
+							);
+						}
+					}
+				}
+				
 			}
 			
 			@Override
@@ -191,6 +208,13 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 						weapon = "Rope";
 					} else if(y >= 206 && y <= (206+17)) {
 						weapon = "Wrench";
+					}
+				} else if(x >= 52 && x <= 277 && y >= 430 && y <= 460) { // make suggestion
+					if(weapon != null && suspect != null) {
+						GuiEvent ge = new GuiEvent(this, HumanPlayerAgent.MAKE_SUGGESTION);
+						ge.addParameter(suspect);
+						ge.addParameter(weapon);
+						agent.postGuiEvent(ge);
 					}
 				}
 				repaint();

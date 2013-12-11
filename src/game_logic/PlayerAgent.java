@@ -90,6 +90,22 @@ import jade.util.Logger;
 	}
 	
 	/**
+	 * sends the game maneger a suggestion for the game solution
+	 * @param room
+	 * @param suspect
+	 * @param weapon
+	 */
+	protected void makeSuggestion(String room, String suspect, String weapon) {
+		hasMadeSuggestion = true;
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending a solution suggestion.");
+		GameMessage msg = new GameMessage(GameMessage.MAKE_SUGGESTION);
+		msg.addObject(room);
+		msg.addObject(suspect);
+		msg.addObject(weapon);
+		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
+	}
+	
+	/**
 	 * sends the game manager a msg asking to move to this board location
 	 * @param x
 	 * @param y

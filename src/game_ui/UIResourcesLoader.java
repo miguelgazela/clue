@@ -195,7 +195,7 @@ public class UIResourcesLoader{
 		suggestion_card_coords.put("Mrs. Peacock", new UICoord(185, 68));
 		suggestion_card_coords.put("Professor Plum", new UICoord(185, 89));
 		
-		suggestion_card_coords.put("Candlestick", new UICoord(61346, 164));
+		suggestion_card_coords.put("Candlestick", new UICoord(34, 164));
 		suggestion_card_coords.put("Dagger", new UICoord(34, 185));
 		suggestion_card_coords.put("Lead pipe", new UICoord(34, 206));
 		suggestion_card_coords.put("Revolver", new UICoord(185, 164));

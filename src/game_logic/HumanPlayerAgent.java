@@ -22,6 +22,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 	public static final int MAKE_MOVE = 2;
 	public static final int END_TURN = 3;
 	public static final int SHOW_SUGGESTION = 4;
+	public static final int MAKE_SUGGESTION = 5;
 	
 	protected UIHumanPlayer myGui;
 
@@ -111,13 +112,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 
 								gameState.board.buildReachableTiles(room_doors, reachablePos, diceResult-1);
 							}
-							
 							myGui.updateReachablePos(reachablePos);
-							
-//							if(gameState.board.)
-//							
-//							buildReachableTiles(gameState.board.getTiles().get(posOnBoard.getY()).get(posOnBoard.getX()).getNeighbours(), reachablePos, diceResult-1);
-//							myGui.updateReachablePos(reachablePos);
 						}
 					}
 					break;
@@ -207,6 +202,17 @@ public class HumanPlayerAgent extends PlayerAgent {
 				if(currentTile.isRoom()) {
 					myGui.showSuggestionPanel(currentTile.getRoom());
 				}
+			}
+		}
+		break;
+		case MAKE_SUGGESTION:
+		{
+			if(!hasMadeSuggestion) {
+				Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
+				String room = currentTile.getRoom();
+				String suspect = (String)ge.getParameter(0);
+				String weapon = (String)ge.getParameter(1);
+				makeSuggestion(room, suspect, weapon);
 			}
 		}
 		break;

@@ -141,6 +141,13 @@ public class GameManagerAgent extends GuiAgent {
 						}
 					}
 					break;
+					case GameMessage.MAKE_SUGGESTION:
+					{
+						if(gameState == GameState.Waiting_for_play) {
+							addBehaviour(new HandleMakeSuggestionRequest(myAgent, msg));
+						}
+					}
+					break;
 					case GameMessage.END_TURN:
 					{
 						// check if it's this player's turn
@@ -166,6 +173,24 @@ public class GameManagerAgent extends GuiAgent {
 				block();
 			}
 		}	
+	}
+	
+	private class HandleMakeSuggestionRequest extends OneShotBehaviour {
+		private static final long serialVersionUID = -6137878476840405835L;
+		ACLMessage request;
+
+		public HandleMakeSuggestionRequest(Agent a, ACLMessage request) {
+			super(a);
+			this.request = request;
+		}
+		
+		@Override
+		public void action() {
+			// check if it's this player's turn
+			if(request.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
+				
+			}
+		}
 	}
 	
 	private class HandleMakeMoveRequest extends OneShotBehaviour {
