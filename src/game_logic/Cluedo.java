@@ -226,7 +226,7 @@ public class Cluedo implements Serializable{
 		} else {
 			turnPlayerIndex++;
 		}
-		updateSuggestionContradictor();
+		setSuggestionContradictor();
 	}
 	
 	/**
@@ -237,6 +237,17 @@ public class Cluedo implements Serializable{
 			suggestionContradictorIndex = 0;
 		} else {
 			suggestionContradictorIndex += 1;
+		}
+	}
+	
+	/**
+	 * sets the index of the player that must contradict to be the one to the left of the current turn player index
+	 */
+	private void setSuggestionContradictor() {
+		if(turnPlayerIndex == (numberPlayers - 1)) {
+			suggestionContradictorIndex = 0;
+		} else {
+			suggestionContradictorIndex = turnPlayerIndex + 1;
 		}
 	}
 	
@@ -288,12 +299,7 @@ public class Cluedo implements Serializable{
 			hasSingleMax = (occurrences == 1);
 		}
 		
-		if(turnPlayerIndex == (numberPlayers - 1)) {
-			suggestionContradictorIndex = 0;
-		} else {
-			suggestionContradictorIndex = turnPlayerIndex + 1;
-		}
-		
+		setSuggestionContradictor();
 		myLogger.log(Logger.INFO, "Cluedo - Player that goes first: "+suspects[turnPlayerIndex]);
 	}
 	

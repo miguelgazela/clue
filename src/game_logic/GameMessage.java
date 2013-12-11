@@ -22,6 +22,7 @@ public class GameMessage implements Serializable {
 	public static final String CONTRADICT_SUGGESTION = "CONTRADICT_SUGGESTION";
 	public static final String NO_CONTRADICTION_CARD = "NO_CONTRADICTION_CARD";
 	public static final String HAVE_CONTRADICTION_CARD = "HAVE_CONTRADICTION_CARD";
+	public static final String CONTRADICT_CARD = "CONTRADICT_CARD";
 	
 	private final String type;
 	private ArrayList<Object> objects = null;

@@ -44,8 +44,6 @@ public class HumanPlayerAgent extends PlayerAgent {
 				try {
 					GameMessage message = (GameMessage) msg.getContentObject();
 
-					System.out.println("HUMANPLAYER: "+message.getType());
-
 					switch (message.getType()) {
 					case GameMessage.DISTRIBUTE_CARDS: // receiving this players cards and initial game state
 					{
@@ -167,6 +165,15 @@ public class HumanPlayerAgent extends PlayerAgent {
 						CluedoSuggestion playerSuggestion = (CluedoSuggestion) message.getObject(1);
 					}
 					break;
+					case GameMessage.CONTRADICT_CARD: // a card to contradict our suggestion
+					{
+						CluedoCard card = (CluedoCard) message.getObject(0);
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received the card "+card.getName()+" to contradict my suggestion from "+msg.getSender().getLocalName());
+						if(myTurn) {
+							myGui.showCardContradict(card.getName(), msg.getSender().getLocalName());
+						}
+					}
+					break;
 					default:
 					{
 						// should not get here!!!
@@ -184,6 +191,12 @@ public class HumanPlayerAgent extends PlayerAgent {
 		}
 	}
 	
+	/**
+	 * sends a message to the game manager saying if he has a card that can contradict a suggestion and sends a message with that
+	 * card to the player that made the suggestion or sends only a message to the game manager saying he doesn't
+	 * have a card to contradict that suggestion.
+	 * @param msg
+	 */
 	private void contradictSuggestion(ACLMessage msg) {
 		try {
 			GameMessage gameMsg = (GameMessage) msg.getContentObject();
@@ -204,8 +217,11 @@ public class HumanPlayerAgent extends PlayerAgent {
 					sendGameMessage(haveContrCard, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 					
 					// send the card to the player that asked it
+					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending card "+cardName+" to "+playerSuggestion.getPlayer());
+					GameMessage contradictionCard = new GameMessage(GameMessage.CONTRADICT_CARD);
+					contradictionCard.addObject(card);
+					sendGameMessage(contradictionCard, new AID(playerSuggestion.getPlayer(), AID.ISLOCALNAME), ACLMessage.INFORM);
 					return;
-					
 				}
 			}
 			
@@ -219,8 +235,6 @@ public class HumanPlayerAgent extends PlayerAgent {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-		
-		
 	}
 
 	@Override

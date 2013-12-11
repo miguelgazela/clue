@@ -27,7 +27,9 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 
 public class UIHumanPlayer extends JFrame implements ActionListener {
 
@@ -42,6 +44,12 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 
 	public UIHumanPlayer(HumanPlayerAgent owner, String playerName) {
 		super(playerName+" interface");
+		
+		UIManager.put("OptionPane.cancelButtonText", "Cancel");
+		UIManager.put("OptionPane.noButtonText", "No");
+		UIManager.put("OptionPane.okButtonText", "Ok");
+		UIManager.put("OptionPane.yesButtonText", "Yes");
+		
 		agent = owner;
 		notebook = new CluedoNotebook();
 		
@@ -76,6 +84,10 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 	
 	public void showSuggestionPanel(String room) {
 		new UISuggestion(room);
+	}
+	
+	public void showCardContradict(String cardName, String fromPlayer) {
+		JOptionPane.showMessageDialog(null, "Player "+fromPlayer+" has the card "+cardName+". Your suggestion is wrong.","", JOptionPane.OK_OPTION);
 	}
 	
 	private class UISuggestion extends JFrame implements ActionListener {

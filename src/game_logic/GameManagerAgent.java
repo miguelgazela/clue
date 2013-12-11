@@ -198,35 +198,32 @@ public class GameManagerAgent extends GuiAgent {
 			if(request.getSender().getLocalName().equals(cluedo.getSuggestionContradictorName())) {
 				try {
 					GameMessage gameMsg = (GameMessage)request.getContentObject();
+					GameMessage update = null;
+					
 					if(gameMsg.getType().equals(GameMessage.NO_CONTRADICTION_CARD)) { // the player didn't have a card of the suggestion
-						
-						GameMessage update = new GameMessage(GameMessage.NO_CONTRADICTION_CARD);
-						update.addObject(request.getSender().getLocalName());
-						update.addObject(gameMsg.getObject(0)); // the CluedoSuggestion
-						
-						for(AID agent: agents) {
-							if(!agent.getLocalName().equals(request.getSender().getLocalName())) {
-								sendGameMessage(update, agent, ACLMessage.INFORM);
-							}
+						update = new GameMessage(GameMessage.NO_CONTRADICTION_CARD);
+					} else if(gameMsg.getType().equals(GameMessage.HAVE_CONTRADICTION_CARD)){
+						update = new GameMessage(GameMessage.HAVE_CONTRADICTION_CARD);
+					}
+					
+					update.addObject(request.getSender().getLocalName());
+					update.addObject(gameMsg.getObject(0)); // the CluedoSuggestion
+					
+					for(AID agent: agents) {
+						if(!agent.getLocalName().equals(request.getSender().getLocalName())) {
+							sendGameMessage(update, agent, ACLMessage.INFORM);
 						}
-						
+					}
+					
+					if(gameMsg.getType().equals(GameMessage.NO_CONTRADICTION_CARD)) {
 						// send message to the next player to the left
 						cluedo.updateSuggestionContradictor();
 						GameMessage requestContradiction = new GameMessage(GameMessage.CONTRADICT_SUGGESTION);
 						requestContradiction.addObject(gameMsg.getObject(0));
 						sendGameMessage(requestContradiction, new AID(cluedo.getSuggestionContradictorName(), AID.ISLOCALNAME), ACLMessage.INFORM);
-						
-					} else if(gameMsg.getType().equals(GameMessage.HAVE_CONTRADICTION_CARD)){
-						GameMessage update = new GameMessage(GameMessage.HAVE_CONTRADICTION_CARD);
-						update.addObject(request.getSender().getLocalName());
-						update.addObject(gameMsg.getObject(0)); // the CluedoSuggestion
-						
-						for(AID agent: agents) {
-							if(!agent.getLocalName().equals(request.getSender().getLocalName())) {
-								sendGameMessage(update, agent, ACLMessage.INFORM);
-							}
-						}
 					}
+					
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 					System.exit(-1);
@@ -255,7 +252,7 @@ public class GameManagerAgent extends GuiAgent {
 					CluedoSuggestion playerSuggestion = (CluedoSuggestion) message.getObject(0);
 					
 					if(cluedo.isGameSolution(playerSuggestion.getRoom(), playerSuggestion.getSuspect(), playerSuggestion.getWeapon())) {
-						// game over and this player is the winner!
+						// TODO game over and this player is the winner
 						System.out.println("GAME OVER!");
 					} else {
 						// somebody must have a card to contradict this suggestion
