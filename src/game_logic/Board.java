@@ -478,6 +478,7 @@ public class Board implements Serializable {
 			minimumPath.add(currentTile);
 			currentTile = currentTile.previous;
 		}
+		minimumPath.add(currentTile); // adding the source as well
 		
 		Collections.reverse(minimumPath);
 		return minimumPath;
