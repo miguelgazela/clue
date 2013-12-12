@@ -1,6 +1,7 @@
 package game_logic;
 
 import game_ui.UIGame;
+import jade.Boot;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.Profile;
@@ -16,7 +17,9 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.util.Logger;
 import jade.wrapper.AgentController;
+import jade.wrapper.ContainerController;
 import jade.wrapper.PlatformController;
+import jade.wrapper.StaleProxyException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,6 +48,21 @@ public class GameManagerAgent extends GuiAgent {
 	
 	private Cluedo cluedo;
 	private GameState gameState;
+	
+	public static void main(String args[]) throws StaleProxyException {
+		Boot.main(new String[]{"-gui", "-name", "-SMA"});
+		 
+        Profile perfil = new ProfileImpl(); 
+        perfil.setParameter(Profile.CONTAINER_NAME, "Container");
+ 
+        Runtime run = Runtime.instance();
+        ContainerController control = run.createMainContainer(perfil);
+ 
+        GameManagerAgent manager = new GameManagerAgent();
+        AgentController controlAgent1 = control.acceptNewAgent("host", manager);
+ 
+        controlAgent1.start();
+	}
 	
 	public void setup() {
 		
