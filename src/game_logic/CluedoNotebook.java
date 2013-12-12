@@ -40,8 +40,37 @@ public class CluedoNotebook implements Serializable {
 		}
 	}
 	
+	public void updateCardState(String card, int state) {
+		if (cards_state.containsKey(card))
+			cards_state.put(card, state);
+	}
+	
 	public HashMap<String, Integer> getCardsState() {
 		return cards_state;
+	}
+	
+	public ArrayList<String> getRoomsNotChecked() {
+		ArrayList<String> cardsStrings = new ArrayList<String>();
+		
+		for (String card : Cluedo.rooms)
+			if (cards_state.get(card) == CLEAR)
+				cardsStrings.add(card);
+		
+		return cardsStrings;
+	}
+	
+	public String getSuspectNotChecked() {		
+		for (String card : Cluedo.suspects)
+			if (cards_state.get(card) == CLEAR)
+				return card;		
+		return null;
+	}
+	
+	public String getWeaponNotChecked() {		
+		for (String card : Cluedo.suspects)
+			if (cards_state.get(card) == CLEAR)
+				return card;	
+		return null;
 	}
 	
 	private void initCardsState() {

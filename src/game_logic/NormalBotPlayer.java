@@ -6,15 +6,50 @@ import jade.util.Logger;
 public class NormalBotPlayer extends BotPlayerAgent {
 
 	private static final long serialVersionUID = 2702856073265411877L;
+	private CluedoNotebook playerNotebook = new CluedoNotebook();
+	private String roomSolutionString = null;
+	private String suspectSolutionString = null;
+	private String weaponSolutionString = null;
 	
 	public void setup() {
 		super.setup();
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - new NormalBotPlayer.");
+		playerNotebook.addPlayerCards(myCards);
 	}
 
 	@Override
 	public void makePlay(ACLMessage msg) {
-		System.out.println("I will make a normal play");
+		Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
+		
+		// Room is known.
+		if (roomSolutionString != null) {
+			if (currentTile.isRoom()) {
+				// In solution room.
+				if (currentTile.getRoom().equals(roomSolutionString)) {
+					// Make suggestion.
+					if (suspectSolutionString == null || weaponSolutionString == null) {
+						
+					}
+					// Make accusation.
+					else {
+						
+					}
+				}
+				// In other room. Needs to get out and try to reach solution room.
+				else {
+					
+				}
+			}
+			// In the corridor
+			else {
+				
+			}
+		}
+		// Room not known
+		else {
+			
+		}
+		
 	}
 
 	@Override
