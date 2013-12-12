@@ -1,5 +1,7 @@
 package game_logic;
 
+import game_logic.Coordinates;
+
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -427,14 +429,14 @@ public class Board implements Serializable {
 				if(c1.equals(c2))
 					return 0;
 
-				return (getDistance(c1,destination) < getDistance(c2, destination)) ? 1 : -1; //use distance to destination to order
+				return (getDistance(c1,destination) < getDistance(c2, destination)) ? -1 : 1; //use distance to destination to order
 			}
 		});
 
 		HashMap<Coordinates, Tile> visited = new HashMap<Coordinates, Tile>();
 		HashMap<Coordinates,Coordinates> parents = new HashMap<Coordinates,Coordinates>();
 
-		open.add(tiles.get(source.getX()).get(source.getY()));
+		open.add(tiles.get(source.getY()).get(source.getX()));
 		boolean firstMove = true;
 
 		while(!open.isEmpty()) {
@@ -475,26 +477,29 @@ public class Board implements Serializable {
 	public void printPath(ArrayDeque<Coordinates> path, Coordinates source, Coordinates destination) { //debug TODO remove
 		for(int i = 0; i < Board.BOARD_HEIGHT; i++) {			
 			for(int j = 0; j < Board.BOARD_WIDTH; j++) {
-				if(i==source.getX() && j==source.getY()) {
+				if(i==source.getY() && j==source.getX()) {
 					System.out.print("[S]"); //source
-				} else if(i==destination.getX() && j==destination.getY()) {
+				} else if(i==destination.getY() && j==destination.getX()) {
 					System.out.print("[D]"); //destination
 				} else if(path.contains(tiles.get(i).get(j).getCoordinates())) {
 					System.out.print("[N]"); //path
 				} else {
 					tiles.get(i).get(j).printTile();
-				}				
+				}
 			}
 			System.out.println("");
 		}
 	}
 	//	//use this to test specific functions without having to run the entire game TODO remove in the end
-//	public static void main(String[] args) throws Exception {
-//		Board board = new Board();
-//		board.printBoard();
-//
-//		System.out.println("Turnos: " + (board.closestPath(new Coordinates(7,0), new Coordinates(19,23)).size()-1));
-//		board.printPath(board.closestPath(new Coordinates(7,0), new Coordinates(19,23)), new Coordinates(7, 0), new Coordinates(19,23));
-//
-//	}
+	public static void main(String[] args) throws Exception {
+		Board board = new Board();
+		board.printBoard();
+		ArrayDeque<Coordinates> path = board.closestPath(new Coordinates(1,7), new Coordinates(17,9));
+		for(Coordinates c : path)
+			System.out.println(c.getX() + " " + c.getY());
+		System.out.println("Turnos: " + (path.size()-1));
+		board.printPath(path, new Coordinates(1,7), new Coordinates(17,9));
+
+
+	}
 }
