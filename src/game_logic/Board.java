@@ -425,6 +425,9 @@ public class Board implements Serializable {
 
 	public ArrayList<Tile> djs(Coordinates source, Coordinates destination)
 	{
+		if(source.equals(destination)) {
+			return new ArrayList<>(); // returns an empty path
+		}
 		PriorityQueue<Tile> queue = new PriorityQueue<>(10, new Comparator<Tile>() {
 			public int compare(Tile t1, Tile t2) {
 
@@ -466,27 +469,6 @@ public class Board implements Serializable {
 			}
 		}
 
-//		for(int i = 0; i < Board.BOARD_HEIGHT; i++) {			
-//			for(int j = 0; j < Board.BOARD_WIDTH; j++) {
-//				
-//				if(i==source.getY() && j==source.getX()) {
-//					System.out.print("[ S] "); //source
-//				} else if(i==destination.getY() && j==destination.getX()) {
-//					System.out.print("[ D] "); //destination
-//				} else if(tiles.get(i).get(j).distance == 9999) {
-//					System.out.print("[ X] ");
-//				} else {
-//					if(tiles.get(i).get(j).distance < 10) {
-//						System.out.print("[ "+tiles.get(i).get(j).distance+"] ");
-//					} else {
-//						System.out.print("["+tiles.get(i).get(j).distance+"] ");
-//					}
-//					
-//				}
-//			}
-//			System.out.println("");	
-//		}
-		
 		// build the actual arraylist of path
 		ArrayList<Tile> minimumPath = new ArrayList<>();
 		

@@ -24,9 +24,6 @@ import jade.wrapper.StaleProxyException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-
-import javax.swing.event.HyperlinkEvent;
 
 import aurelienribon.slidinglayout.SLAnimator;
 
@@ -50,7 +47,7 @@ public class GameManagerAgent extends GuiAgent {
 	private GameState gameState;
 	
 	public static void main(String args[]) throws StaleProxyException {
-		Boot.main(new String[]{"-gui", "-name", "-SMA"});
+		Boot.main(new String[]{"-gui"});
 		 
         Profile perfil = new ProfileImpl(); 
         perfil.setParameter(Profile.CONTAINER_NAME, "Container");
@@ -317,6 +314,8 @@ public class GameManagerAgent extends GuiAgent {
 					int y = ((Integer)message.getObject(1)).intValue();
 					
 					GameMessage msg = null;
+					
+					System.out.println("RECEIVED MAKE MOVE TO "+(new Coordinates(x, y)).toString());
 					
 					Coordinates move = cluedo.makeMove(new Coordinates(x, y));
 					

@@ -87,7 +87,7 @@ public class RandomBotPlayer extends BotPlayerAgent {
 							if(!door.isOccupied()) {
 								
 								ArrayList<Tile> path = gameState.board.djs(posOnBoard, door.getCoordinates());
-								int dist = minimumPath.size();
+								int dist = path.size();
 								
 								if(dist < minDistance) {
 									targetRoom = randomRoom;
@@ -151,7 +151,7 @@ public class RandomBotPlayer extends BotPlayerAgent {
 					enterRoom = true;
 				} else {
 					
-					// goes to the minimumPath and moves to the nth position
+					// goes to the minimumPath and moves to the diceResulth position
 					Coordinates destTileCoords = minimumPath.get(diceResult-1).getCoordinates();
 					myLogger.log(Logger.INFO, "Agent "+getLocalName()
 							+" - getting closer to the targetCoord: "
@@ -239,10 +239,11 @@ public class RandomBotPlayer extends BotPlayerAgent {
 			ListIterator<Tile> it = minimumPath.listIterator();
 			while(it.hasNext()) {
 				Tile current = it.next();
+				it.remove(); // it removes before checking because it has to remove the currentTile anyway
+				
 				if(current.getCoordinates().equals(posOnBoard)) {
 					break;
 				}
-				it.remove();
 			}
 			
 			System.out.println("New minimum path after removing moved tiles");
