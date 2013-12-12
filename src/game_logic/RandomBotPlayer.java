@@ -4,14 +4,18 @@ import jade.lang.acl.ACLMessage;
 import jade.util.Logger;
 
 import java.util.ArrayList;
+import java.util.ListIterator;
 import java.util.Random;
 
 public class RandomBotPlayer extends BotPlayerAgent {
 
 	private static final long serialVersionUID = 3588603829094518352L;
+	
 	private String targetRoom = null;
 	private Coordinates targetCoord = null;
 	private Tile doorToExit = null;
+	private ArrayList<Tile> minimumPath;
+	
 	private Random r = new Random(System.currentTimeMillis());
 	
 	public void setup() {
@@ -74,9 +78,6 @@ public class RandomBotPlayer extends BotPlayerAgent {
 					endMyTurn();
 				}
 			} else {
-
-				// calculate the closest room and door for it that the bot player hasn't visited yet
-				
 				while(true) {
 					String randomRoom = Cluedo.rooms[r.nextInt(Cluedo.rooms.length)];
 					if(!randomRoom.equals("Corridor")) {
@@ -84,10 +85,14 @@ public class RandomBotPlayer extends BotPlayerAgent {
 
 						for(Tile door: roomDoors) {
 							if(!door.isOccupied()) {
-								int dist = (int) Board.getDistance(posOnBoard, door.getCoordinates());
+								
+								ArrayList<Tile> path = gameState.board.djs(posOnBoard, door.getCoordinates());
+								int dist = minimumPath.size();
+								
 								if(dist < minDistance) {
 									targetRoom = randomRoom;
 									minDistance = dist;
+									minimumPath = path;
 									targetCoord = door.getCoordinates();
 								}
 							}
@@ -99,6 +104,7 @@ public class RandomBotPlayer extends BotPlayerAgent {
 					}
 				}
 				
+				Board.printPath(minimumPath);
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING TO RANDOM ROOM: "+targetRoom);
 				askDiceRoll();
 			}
@@ -139,26 +145,22 @@ public class RandomBotPlayer extends BotPlayerAgent {
 				}
 				
 			} else {
-				if(Board.getDistance(posOnBoard, targetCoord) < diceResult) { // he can get to the room
+				
+				if(minimumPath.size() < diceResult) { // he can get to the room
+					// TODO needs to check if the room door is still free
 					enterRoom = true;
-				} else { // can't get to the room this turn, goes closer
-					ArrayList<Tile> reachableTiles = new ArrayList<>();
-					gameState.board.buildReachableTiles(currentTile.getNeighbours(), reachableTiles, diceResult-1);
-
-					Coordinates destCoord = null;
-					int minDistance = 9999;
-
-					for(Tile tile: reachableTiles) {
-						int dist = (int) Board.getDistance(targetCoord, tile.getCoordinates());
-						if(dist < minDistance) {
-							destCoord = tile.getCoordinates();
-							minDistance = dist;
-						}
-					}
-
-					// make the move to the tile closest to the target coord
-					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - getting closer to the targetCoord: "+targetCoord.getX()+"-"+targetCoord.getY()+" by going to "+destCoord.getX()+"-"+destCoord.getY());
-					makeMove(destCoord.getX(), destCoord.getY());
+				} else {
+					
+					// goes to the minimumPath and moves to the nth position
+					Coordinates destTileCoords = minimumPath.get(diceResult-1).getCoordinates();
+					myLogger.log(Logger.INFO, "Agent "+getLocalName()
+							+" - getting closer to the targetCoord: "
+							+targetCoord.getX()+"-"
+							+targetCoord.getY()
+							+" by going to "+destTileCoords.getX()
+							+"-"+destTileCoords.getY()
+					);
+					makeMove(destTileCoords.getX(), destTileCoords.getY());
 				}
 			}
 			
@@ -233,6 +235,19 @@ public class RandomBotPlayer extends BotPlayerAgent {
 			endMyTurn(); // TODO temporary
 			
 		} else {
+			// delete the part of the path that he moved
+			ListIterator<Tile> it = minimumPath.listIterator();
+			while(it.hasNext()) {
+				Tile current = it.next();
+				if(current.getCoordinates().equals(posOnBoard)) {
+					break;
+				}
+				it.remove();
+			}
+			
+			System.out.println("New minimum path after removing moved tiles");
+			Board.printPath(minimumPath);
+			
 			endMyTurn();
 		}
 	}

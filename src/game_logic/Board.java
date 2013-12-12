@@ -5,6 +5,7 @@ import game_logic.Coordinates;
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -422,6 +423,84 @@ public class Board implements Serializable {
 		}
 	}
 
+	public ArrayList<Tile> djs(Coordinates source, Coordinates destination)
+	{
+		PriorityQueue<Tile> queue = new PriorityQueue<>(10, new Comparator<Tile>() {
+			public int compare(Tile t1, Tile t2) {
+
+				if(t1.distance == t2.distance) {
+					return 0;
+				}
+				return (t1.distance < t2.distance) ? -1 : 1;
+			}
+		});
+		
+		for(int i = 0; i < BOARD_HEIGHT; i++) {
+			for(int j = 0; j < BOARD_WIDTH; j++) {
+				Tile tile = tiles.get(i).get(j);
+				tile.distance = 9999;
+				tile.visited = false;
+				tile.previous = null;
+			}
+		}
+
+		Tile currentTile = tiles.get(source.getY()).get(source.getX());
+		currentTile.distance = 0;
+		queue.add(currentTile);
+
+		while(!queue.isEmpty()) {
+			Tile current = queue.poll();
+			current.visited = true;
+
+			ArrayList<Tile> neighbours = (ArrayList<Tile>) current.getNeighbours();
+			for(Tile neighbour: neighbours) {
+				int dist = current.distance + 1; // accumulate shortest dist from source
+				if(dist < neighbour.distance) {
+					neighbour.distance = dist; // keep the shortest dist from src to neighbour
+					neighbour.previous = current;
+
+					if(!neighbour.visited) {
+						queue.add(neighbour); // add unvisited neighbour into queue to be processed
+					}
+				}
+			}
+		}
+
+//		for(int i = 0; i < Board.BOARD_HEIGHT; i++) {			
+//			for(int j = 0; j < Board.BOARD_WIDTH; j++) {
+//				
+//				if(i==source.getY() && j==source.getX()) {
+//					System.out.print("[ S] "); //source
+//				} else if(i==destination.getY() && j==destination.getX()) {
+//					System.out.print("[ D] "); //destination
+//				} else if(tiles.get(i).get(j).distance == 9999) {
+//					System.out.print("[ X] ");
+//				} else {
+//					if(tiles.get(i).get(j).distance < 10) {
+//						System.out.print("[ "+tiles.get(i).get(j).distance+"] ");
+//					} else {
+//						System.out.print("["+tiles.get(i).get(j).distance+"] ");
+//					}
+//					
+//				}
+//			}
+//			System.out.println("");	
+//		}
+		
+		// build the actual arraylist of path
+		ArrayList<Tile> minimumPath = new ArrayList<>();
+		
+		currentTile = tiles.get(destination.getY()).get(destination.getX());
+		
+		while(!currentTile.getCoordinates().equals(source)) {
+			minimumPath.add(currentTile);
+			currentTile = currentTile.previous;
+		}
+		
+		Collections.reverse(minimumPath);
+		return minimumPath;
+	}
+
 	private ArrayDeque<Coordinates> closestPath(Coordinates source, final Coordinates destination) { //TODO move to agents
 		PriorityQueue<Tile> open = new PriorityQueue<Tile>(10,new Comparator<Tile>() {
 			public int compare(Tile tile1, Tile tile2) {
@@ -490,16 +569,24 @@ public class Board implements Serializable {
 			System.out.println("");
 		}
 	}
+	
+	public static void printPath(ArrayList<Tile> path) {
+		for(Tile tile: path) {
+			System.out.println(tile.getCoordinates().toString());
+		}
+	}
+	
 	//	//use this to test specific functions without having to run the entire game TODO remove in the end
 	public static void main(String[] args) throws Exception {
 		Board board = new Board();
 		board.printBoard();
-		ArrayDeque<Coordinates> path = board.closestPath(new Coordinates(1,7), new Coordinates(17,9));
-		for(Coordinates c : path)
-			System.out.println(c.getX() + " " + c.getY());
-		System.out.println("Turnos: " + (path.size()-1));
-		board.printPath(path, new Coordinates(1,7), new Coordinates(17,9));
-
-
+		
+//		ArrayDeque<Coordinates> path = board.closestPath(new Coordinates(0,7), new Coordinates(17,20));
+//		for(Coordinates c : path)
+//		System.out.println(c.getX() + " " + c.getY());
+//		System.out.println("Turnos: " + (path.size()-1));
+//		board.printPath(path, new Coordinates(1,7), new Coordinates(17,9));
+		
+		ArrayList<Tile> path = board.djs(new Coordinates(0, 7), new Coordinates(17, 20));
 	}
 }

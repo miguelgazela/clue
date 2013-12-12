@@ -25,6 +25,11 @@ public class Tile implements Serializable {
 	private boolean isSecretPassage;
 	private String room;
 	
+	// for the shortest path algorithm
+	public boolean visited = false;
+	public int distance;
+	public Tile previous = null;
+	
 	public Tile(int xPos, int yPos) {
 		pos = new Coordinates(xPos, yPos);
 		valid = true;
