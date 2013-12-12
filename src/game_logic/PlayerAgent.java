@@ -50,7 +50,6 @@ import jade.util.Logger;
 	{ 
 		stillInGame = true;
 		myTurn = false;
-		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - ready to play, sending READY msg.");
 		
 		try {
 			// create the agent description of itself and register it
@@ -80,7 +79,7 @@ import jade.util.Logger;
 	 */
 	protected void askDiceRoll() {
 		pickingBoardMove = true;
-		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending request for a dice roll.");
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - SENDING REQUEST FOR DICE ROLL.");
 		GameMessage msg = new GameMessage(GameMessage.ASK_DICE_ROLL);
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 	}
@@ -93,7 +92,7 @@ import jade.util.Logger;
 	 */
 	protected void makeSuggestion(CluedoSuggestion playerSuggestion) {
 		madeSuggestion = true;
-		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending a solution suggestion.");
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - SENDING SUGGESTION.");
 		GameMessage msg = new GameMessage(GameMessage.MAKE_SUGGESTION);
 		msg.addObject(playerSuggestion);
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
@@ -107,7 +106,7 @@ import jade.util.Logger;
 	protected void makeMove(int x, int y) {
 		pickingBoardMove = false;
 		madeBoardMove = true;
-		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - sending request for making a move.");
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - SENDING REQUEST TO MAKE MOVE.");
 		
 		GameMessage msg = new GameMessage(GameMessage.MAKE_MOVE);
 		msg.addObject(new Integer(x));
@@ -124,7 +123,7 @@ import jade.util.Logger;
 		madeBoardMove = false;
 		madeSuggestion = false;
 		myTurn = false;
-		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - ending this agents turn.");
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - ENDING MY TURN.");
 		GameMessage msg = new GameMessage(GameMessage.END_TURN);
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 	}

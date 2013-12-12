@@ -319,19 +319,6 @@ public class UIGame extends JFrame implements ActionListener {
 					}}.run();
 				} else if(x >= 373 && y >= 646 && x <= 417 && y <= 691) { // start game
 
-//					int humanPlayers = 0;
-//					int botPlayers = 0;
-//					ArrayList<Integer> botLevel = new ArrayList<>();
-//					
-//					for(int i = 0; i < typePlayers.length; i++) {
-//						humanPlayers += typePlayers[i] == HUMAN ? 1 : 0; 
-//						
-//						if(typePlayers[i] >= ROOKIE && typePlayers[i] <= INSPECTOR) {
-//							botPlayers++;
-//							botLevel.add(new Integer(typePlayers[i]));
-//						}
-//					}
-					
 					uiGamePanel.clearPossibleGame();
 					uiGamePanel.startGame(typePlayers);
 

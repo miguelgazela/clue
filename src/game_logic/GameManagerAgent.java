@@ -55,8 +55,6 @@ public class GameManagerAgent extends GuiAgent {
 		gameState = GameState.Waiting_for_players;
 
 		try {
-			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Setting up GameManager");
-
 			// create the agent description of itself
 			DFAgentDescription dfd = new DFAgentDescription();
 			dfd.setName( getAID() );
@@ -103,7 +101,6 @@ public class GameManagerAgent extends GuiAgent {
 					{
 						if(gameState == GameState.Waiting_for_players) { // READY_PLAY msgs received after game begins are ignored
 							playersReady++;
-							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - "+msg.getSender().getLocalName()+" is ready to start the game.");
 
 							if(playersReady == numPlayers) {
 								myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - All players are ready, starting game.");
@@ -117,7 +114,6 @@ public class GameManagerAgent extends GuiAgent {
 					{
 						if(gameState == GameState.Distribution_of_cards) { // waiting for ack from all players
 							playersThatReceivedCards++;
-							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - "+msg.getSender().getLocalName()+" has received his cards.");
 
 							if(playersThatReceivedCards == numPlayers) {
 								myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - All players received their cards.");
@@ -316,6 +312,7 @@ public class GameManagerAgent extends GuiAgent {
 					}
 					
 					sendGameMessage(msg, request.getSender(), ACLMessage.INFORM);
+					myGui.repaint();
 					
 				} catch (UnreadableException e) {
 					e.printStackTrace();
@@ -351,7 +348,7 @@ public class GameManagerAgent extends GuiAgent {
 		
 		@Override
 		public void action() {
-			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - receiving request for dice roll.");
+			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - RECEIVED REQUEST FOR DICE ROLL FROM " + request.getSender().getLocalName());
 			
 			// check if it's this player's turn
 			if(request.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
@@ -368,8 +365,6 @@ public class GameManagerAgent extends GuiAgent {
 	 * starts the cluedo game
 	 */
 	public void startGame() {
-		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Starting the game.");
-		
 		try {
 			cluedo = new Cluedo(agents.size());
 			
@@ -382,6 +377,7 @@ public class GameManagerAgent extends GuiAgent {
 				sendGameMessage(msg, agent, ACLMessage.INFORM);
 			}
 			myGui.hasGameRunning = true;
+			myGui.repaint();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -415,7 +411,7 @@ public class GameManagerAgent extends GuiAgent {
 	 * sends a message to all agents with the name of the turn player
 	 */
 	private void notifyTurnPlayer() {
-		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Notifying players about this turn's player");
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NOTIFY PLAYERS ABOUT TURN PLAYER");
 		String currentTurnPlayer = cluedo.getTurnPlayerName();
 		
 		for(int i = 0; i < agents.size(); i++) {

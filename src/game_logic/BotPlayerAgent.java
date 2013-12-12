@@ -15,7 +15,6 @@ public abstract class BotPlayerAgent extends PlayerAgent {
 
 	public void setup() {
 		super.setup();
-		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - new bot player.");
 		addBehaviour(new BotPlayerBehaviour());
 	}
 	

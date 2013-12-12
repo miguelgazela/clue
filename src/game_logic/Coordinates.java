@@ -21,6 +21,11 @@ public class Coordinates implements Serializable {
 	}
 
 	@Override
+	public String toString() {
+		return "X: "+x+" Y: "+y;
+	}
+	
+	@Override
 	public int hashCode() {
 		return (x * 31) ^ y;
 	}

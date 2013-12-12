@@ -14,8 +14,7 @@ public class NormalBotPlayer extends BotPlayerAgent {
 
 	@Override
 	public void makePlay(ACLMessage msg) {
-		// TODO Auto-generated method stub
-		
+		System.out.println("I will make a normal play");
 	}
 
 	@Override

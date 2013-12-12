@@ -29,7 +29,6 @@ public class HumanPlayerAgent extends PlayerAgent {
 	public void setup() {
 		super.setup();
 		myGui = new UIHumanPlayer(this, getLocalName());
-		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - new human player.");
 		addBehaviour(new HumanPlayerBehaviour());
 	}
 	
@@ -60,19 +59,17 @@ public class HumanPlayerAgent extends PlayerAgent {
 							myGui.updatePlayerCards(myCards);
 							myGui.repaint();
 							
-						} else {
-							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Receiving cards and initial position again.");
 						}
 					}
 					break;
 					case GameMessage.TURN_PLAYER: // receiving the name of the current turn's player
 					{
 						String turnPlayerName = (String) message.getObject(0);
-						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received turn player name "+turnPlayerName);
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - RECEIVED TURN PLAYER "+turnPlayerName);
 
 						if(turnPlayerName.equals(myAgent.getLocalName())) {
 							myTurn = true;
-							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - it's my turn!");
+							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - MY TURN");
 							myGui.setVisible(true);
 						}
 					}
@@ -81,7 +78,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 					{
 						if(pickingBoardMove) {
 							diceResult = ((Integer) message.getObject(0)).intValue();
-							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - rolled the dice and got "+diceResult);
+							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOT DICE RESULT: "+diceResult);
 							myGui.updateDiceResult(diceResult);
 							
 							ArrayList<Tile> reachablePos = new ArrayList<>();
@@ -125,7 +122,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 					{
 						madeBoardMove = false;
 						pickingBoardMove = true;
-						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - my move is invalid");
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - MY MOVE IS INVALID");
 					}
 					break;
 					case GameMessage.GAME_STATE_UPDATE:
@@ -142,7 +139,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 					break;
 					case GameMessage.CONTRADICT_SUGGESTION: 
 					{
-						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received request to contradict a suggestion");
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - RECEIVED REQUEST TO CONTRADICT SUGGESTION");
 						contradictSuggestion(msg);
 					}
 					break;
