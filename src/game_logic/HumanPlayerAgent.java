@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import jade.core.AID;
+import jade.core.ContainerID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
@@ -115,6 +116,12 @@ public class HumanPlayerAgent extends PlayerAgent {
 							myGui.setGameState(gameState);
 							myGui.updateReachablePos(null);
 							myGui.repaint();
+							
+							if(gameState.board.getTileAtPosition(posOnBoard).isRoom()) {
+								// move the player to that room here?
+//								ContainerID cid = new ContainerID(gameState.board.getTileAtPosition(posOnBoard).getRoom(), null);
+//								doMove(cid);
+							}
 						}
 					}
 					break;

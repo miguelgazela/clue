@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.ListIterator;
 
 import jade.core.AID;
+import jade.core.ContainerID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
@@ -76,6 +77,11 @@ public abstract class BotPlayerAgent extends PlayerAgent {
 						if(madeBoardMove) { // our move has been done
 							gameState = (Cluedo.GameState) message.getObject(0);
 							posOnBoard = (Coordinates) message.getObject(1);
+							if(gameState.board.getTileAtPosition(posOnBoard).isRoom()) {
+								// move the player to that room here?
+//								ContainerID cid = new ContainerID(gameState.board.getTileAtPosition(posOnBoard).getRoom(), null);
+//								doMove(cid);
+							}
 						}
 						handleValidMoveMsg(msg);
 					}
