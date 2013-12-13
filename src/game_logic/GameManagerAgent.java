@@ -42,6 +42,7 @@ public class GameManagerAgent extends GuiAgent {
 	private ArrayList<AID> agents = new ArrayList<AID>();
 	private HashMap<String, Integer> agentType = new HashMap<>();
 	private int numPlayers = 0;
+	private ArrayList<String> suggestionsMade = new ArrayList<>();
 	private Logger myLogger = Logger.getMyLogger(getClass().getName());
 	
 	private Cluedo cluedo;
@@ -270,6 +271,13 @@ public class GameManagerAgent extends GuiAgent {
 					
 					GameMessage message = (GameMessage) request.getContentObject();
 					CluedoSuggestion playerSuggestion = (CluedoSuggestion) message.getObject(0);
+					
+					String sgst = playerSuggestion.getSuspect()+"-"+playerSuggestion.getWeapon()+"-"+playerSuggestion.getRoom();
+					if(!suggestionsMade.contains(sgst)) {
+						suggestionsMade.add(sgst);
+					}
+					
+					System.out.println("SUGGESTIONS MADE SO FAR: "+suggestionsMade.size());
 					
 					if(cluedo.isGameSolution(playerSuggestion.getRoom(), playerSuggestion.getSuspect(), playerSuggestion.getWeapon())) {
 						gameOver();

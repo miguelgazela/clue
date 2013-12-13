@@ -17,7 +17,6 @@ public class RandomBotPlayer extends BotPlayerAgent {
 	private Coordinates targetCoord = null;
 	private Tile doorToExit = null;
 	private ArrayList<Tile> minimumPath;
-	private ArrayList<String> suggestionsMade = new ArrayList<>();
 	
 	private Random r = new Random(System.currentTimeMillis());
 	
@@ -155,10 +154,8 @@ public class RandomBotPlayer extends BotPlayerAgent {
 			if(cardsOwnedByPlayer < 2) {
 				break;
 			}
-			System.out.println("********************************************");
 		}
 		
-		suggestionsMade.add(suspect+"-"+weapon+"-"+current.getRoom());
 		makeSuggestion(new CluedoSuggestion(current.getRoom(), suspect, weapon, getLocalName()));
 	}
 	

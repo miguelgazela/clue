@@ -125,22 +125,16 @@ public class Board implements Serializable {
 			if(destTile.isValid() && !destTile.isOccupied()) {
 				
 				ArrayList<Tile> room_doors = doors.get(currentTile.getRoom());
+				ArrayList<Tile> freeDoors = new ArrayList<>();
 				
-				ListIterator<Tile> it = room_doors.listIterator();
-				
-				while(true) {
-					if(it.hasNext()) {
-						Tile door = it.next();
-						if(door.isOccupied()) {
-							it.remove();
-						}
-					} else {
-						break;
+				for(Tile door: room_doors) {
+					if(!door.isOccupied()) {
+						freeDoors.add(door);
 					}
 				}
-
+				
 				ArrayList<Tile> reachableTiles = new ArrayList<Tile>();
-				buildReachableTiles(room_doors, reachableTiles, dicesResult-1);
+				buildReachableTiles(freeDoors, reachableTiles, dicesResult-1);
 				return reachableTiles.contains(destTile);
 
 			} else {
@@ -151,6 +145,7 @@ public class Board implements Serializable {
 					} else {
 						// for each door that this room has, it needs to check if it can get to any door of the other room
 						ArrayList<Tile> room_doors = doors.get(currentTile.getRoom());
+						
 						for(int i = 0; i < room_doors.size(); i++) {
 							if(tryToEnterRoom(destTile, room_doors.get(i).getCoordinates(), dicesResult - 1, player)) {
 								return true;
