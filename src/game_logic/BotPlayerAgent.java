@@ -12,6 +12,8 @@ import jade.util.Logger;
 public abstract class BotPlayerAgent extends PlayerAgent {
 
 	private static final long serialVersionUID = -6042695269335080044L;
+	
+	protected CluedoNotebook playerNotebook = new CluedoNotebook();
 
 	public void setup() {
 		super.setup();
@@ -36,6 +38,9 @@ public abstract class BotPlayerAgent extends PlayerAgent {
 							myCards = (ArrayList<CluedoCard>) message.getObject(0);
 							gameState = (Cluedo.GameState) message.getObject(1);
 							posOnBoard = (Coordinates) message.getObject(2);
+
+							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - new NormalBotPlayer.");
+							playerNotebook.addPlayerCards(myCards);
 							
 							// send ack
 							GameMessage msg_ack = new GameMessage(GameMessage.ACK_DISTRIBUTE_CARDS);
