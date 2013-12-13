@@ -176,6 +176,13 @@ public class HumanPlayerAgent extends PlayerAgent {
 						}
 					}
 					break;
+					case GameMessage.GAME_OVER: // someone has won the game
+					{
+						String winner = (String) message.getObject(0);
+						String solution = (String) message.getObject(1); 
+						myGui.showGameOver(winner, solution);
+					}
+					break;
 					default:
 					{
 						// should not get here!!!

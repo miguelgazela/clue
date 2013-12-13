@@ -90,6 +90,10 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 		JOptionPane.showMessageDialog(null, "Player "+fromPlayer+" has the card "+cardName+". Your suggestion is wrong.","", JOptionPane.OK_OPTION);
 	}
 	
+	public void showGameOver(String winner, String solution) {
+		JOptionPane.showMessageDialog(null, "Player "+winner+" has won the game. "+solution,"", JOptionPane.OK_OPTION);
+	}
+	
 	private class UISuggestion extends JFrame implements ActionListener {
 
 		private static final long serialVersionUID = 4900469373293641686L;

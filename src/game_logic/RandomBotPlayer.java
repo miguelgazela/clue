@@ -43,7 +43,6 @@ public class RandomBotPlayer extends BotPlayerAgent {
 				
 			} else {
 				calculateNewPathFromCorridor();
-				Board.printPath(minimumPath);
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING TO RANDOM ROOM: "+targetRoom);
 				askDiceRoll();
 			}
@@ -62,8 +61,6 @@ public class RandomBotPlayer extends BotPlayerAgent {
 		doorToExit = null;
 		minimumPath = null;
 	
-		System.out.println(roomDoors.size());
-		
 		for(Tile door: roomDoors) {
 			if(!door.isOccupied()) {
 				
@@ -176,7 +173,6 @@ public class RandomBotPlayer extends BotPlayerAgent {
 			} else {
 				
 				if(minimumPath.size() <= diceResult) { // he can get to the room
-					// TODO needs to check if the room door is still free
 					enterRoom = true;
 				} else {
 					
@@ -313,10 +309,6 @@ public class RandomBotPlayer extends BotPlayerAgent {
 				
 				it.remove();
 			}
-			
-			System.out.println("New minimum path after removing moved tiles");
-			Board.printPath(minimumPath);
-			
 			endMyTurn();
 		}
 	}
@@ -339,7 +331,6 @@ public class RandomBotPlayer extends BotPlayerAgent {
 			
 		} else {
 			calculateNewPathFromCorridor();
-			Board.printPath(minimumPath);
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING INSTEAD TO RANDOM ROOM: "+targetRoom);
 			askDiceRoll();
 		}

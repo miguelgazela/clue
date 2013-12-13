@@ -1,14 +1,12 @@
 package game_logic;
 
-import java.util.ArrayList;
-import java.util.ListIterator;
-
 import jade.core.AID;
-import jade.core.ContainerID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import jade.util.Logger;
+
+import java.util.ArrayList;
 
 public abstract class BotPlayerAgent extends PlayerAgent {
 
@@ -137,6 +135,32 @@ public abstract class BotPlayerAgent extends PlayerAgent {
 						CluedoCard card = (CluedoCard) message.getObject(0);
 						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received the card "+card.getName()+" to contradict my suggestion from "+msg.getSender().getLocalName());
 						handleCardFromPlayer(msg, card);
+					}
+					break;
+					case GameMessage.GAME_OVER: // someone has won the game
+					{
+						String winner = (String) message.getObject(0);
+						String solution = (String) message.getObject(1); 
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - the game is over. The winner is "+winner);
+					}
+					break;
+					case GameMessage.RESET: // start another game (for bots only)
+					{
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - RESETTING GAME");
+						stillInGame = true;
+						myTurn = false;
+						pickingBoardMove = false;
+						madeBoardMove = false;
+						madeSuggestion = false;
+						diceResult = -1;
+						gameState = null; 
+						posOnBoard = null;
+						myCards = null;
+						playerNotebook = new CluedoNotebook();
+						
+						// send ack
+						GameMessage msg_ack = new GameMessage(GameMessage.ACK_RESET);
+						sendGameMessage(msg_ack, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 					}
 					break;
 					default:

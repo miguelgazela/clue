@@ -42,11 +42,20 @@ public class GameManagerAgent extends GuiAgent {
 	private ArrayList<AID> agents = new ArrayList<AID>();
 	private HashMap<String, Integer> agentType = new HashMap<>();
 	private int numPlayers = 0;
-	private ArrayList<String> suggestionsMade = new ArrayList<>();
 	private Logger myLogger = Logger.getMyLogger(getClass().getName());
 	
 	private Cluedo cluedo;
 	private GameState gameState;
+	
+	// for statistics purposes
+	private ArrayList<String> suggestionsMade = new ArrayList<>();
+	private ArrayList<Integer> numberTurnsList = new ArrayList<>();
+	private ArrayList<Integer> numberSuggestionsList = new ArrayList<>();
+	private ArrayList<Integer> numberUniqueSuggestions = new ArrayList<>(); 
+	
+	private int numberTurns = 0;
+	private int numberSuggestions = 0;
+	private int numberOfGamesToMake = 0;
 	
 	public static void main(String args[]) throws StaleProxyException {
 		Boot.main(new String[]{"-gui"});
@@ -69,6 +78,7 @@ public class GameManagerAgent extends GuiAgent {
 		SLAnimator.start();
 		myGui = new UIGame(this);
 		myLogger.setLevel(Logger.SEVERE);
+		numberOfGamesToMake = 1;
 		
 		gameState = GameState.Waiting_for_players;
 
@@ -123,6 +133,7 @@ public class GameManagerAgent extends GuiAgent {
 							if(playersReady == numPlayers) {
 								myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - All players are ready, starting game.");
 								gameState = GameState.Distribution_of_cards;
+								playersReady = 0;
 								((GameManagerAgent)myAgent).startGame();
 							}
 						}
@@ -136,8 +147,20 @@ public class GameManagerAgent extends GuiAgent {
 							if(playersThatReceivedCards == numPlayers) {
 								myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - All players received their cards.");
 								gameState = GameState.Waiting_for_play;
+								playersThatReceivedCards = 0;
 								((GameManagerAgent)myAgent).notifyTurnPlayer();
 							}
+						}
+					}
+					break;
+					case GameMessage.ACK_RESET:
+					{
+						playersReady++;
+						
+						if(playersReady == numPlayers) {
+							gameState = GameState.Distribution_of_cards;
+							playersReady = 0;
+							((GameManagerAgent)myAgent).startGame();
 						}
 					}
 					break;
@@ -176,6 +199,7 @@ public class GameManagerAgent extends GuiAgent {
 						if(msg.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
 							myAgent.addBehaviour(new UpdateGameStateOfAllAgents());
 							cluedo.updateTurnPlayer();
+							numberTurns++;
 							notifyTurnPlayer();
 						}
 					}
@@ -234,7 +258,6 @@ public class GameManagerAgent extends GuiAgent {
 						cluedo.updateSuggestionContradictor();
 						
 						if(cluedo.getSuggestionContradictorName().equals(cluedo.getTurnPlayerName())) { // no one had a card to contradict, the player made a suggestion with his cards
-							System.out.println("NO ONE HAD A CARD TO CONTRADICT, THEY MUST BE YOURS");
 							cluedo.updateTurnPlayer();
 							notifyTurnPlayer();
 							return;
@@ -272,6 +295,7 @@ public class GameManagerAgent extends GuiAgent {
 					
 					GameMessage message = (GameMessage) request.getContentObject();
 					CluedoSuggestion playerSuggestion = (CluedoSuggestion) message.getObject(0);
+					numberSuggestions++;
 					
 					String sgst = playerSuggestion.getSuspect()+"-"+playerSuggestion.getWeapon()+"-"+playerSuggestion.getRoom();
 					if(!suggestionsMade.contains(sgst)) {
@@ -331,9 +355,6 @@ public class GameManagerAgent extends GuiAgent {
 					int y = ((Integer)message.getObject(1)).intValue();
 					
 					GameMessage msg = null;
-					
-//					System.out.println("RECEIVED MAKE MOVE TO "+(new Coordinates(x, y)).toString());
-					
 					Coordinates move = cluedo.makeMove(new Coordinates(x, y));
 					
 					if(move != null) {
@@ -399,6 +420,7 @@ public class GameManagerAgent extends GuiAgent {
 	 * starts the cluedo game
 	 */
 	public void startGame() {
+		numberOfGamesToMake--;
 		try {
 			cluedo = new Cluedo(agents.size());
 			
@@ -420,7 +442,35 @@ public class GameManagerAgent extends GuiAgent {
 	
 	public void gameOver() {
 		System.out.println("GAME OVER!");
-		System.exit(-1);
+		
+		numberTurnsList.add(new Integer(numberTurns));
+		numberTurns = 0;
+		numberSuggestionsList.add(new Integer(numberSuggestions));
+		numberSuggestions = 0;
+		numberUniqueSuggestions.add(new Integer(suggestionsMade.size()));
+		suggestionsMade.clear();
+		
+		if(numberOfGamesToMake > 0) { // reset and start another game
+			for(AID agent: agents) {
+				GameMessage msg = new GameMessage(GameMessage.RESET);
+				sendGameMessage(msg, agent, ACLMessage.INFORM);
+			}
+		} else {
+			// send all players that the game is over
+			for(AID agent: agents) {
+				GameMessage msg = new GameMessage(GameMessage.GAME_OVER);
+				msg.addObject(cluedo.getTurnPlayerName());
+				msg.addObject(cluedo.getGameSolution());
+				sendGameMessage(msg, agent, ACLMessage.INFORM);
+			}
+			
+			for(int i = 0; i < numberTurnsList.size(); i++) {
+				System.out.print("#TURNS: "+numberTurnsList.get(i));
+				System.out.print("#SUGGESTIONS: "+numberSuggestionsList.get(i));
+				System.out.print("#UNIQUE SUGGESTIONS: "+numberUniqueSuggestions.get(i));
+				System.out.println("");
+			}
+		}
 	}
 
 	/**
@@ -455,7 +505,6 @@ public class GameManagerAgent extends GuiAgent {
 			sendGameMessage(msg, agents.get(i), ACLMessage.INFORM);
 		}
 		
-		// update gui TODO should not be here
 		int type = agentType.get(currentTurnPlayer).intValue();
 		myGui.humanPlayer = (type == HUMAN);
 		myGui.turnPlayer = currentTurnPlayer;

@@ -50,6 +50,7 @@ import jade.util.Logger;
 	{ 
 		stillInGame = true;
 		myTurn = false;
+		myLogger.setLevel(Logger.SEVERE);
 		
 		try {
 			// create the agent description of itself and register it
