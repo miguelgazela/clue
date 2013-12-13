@@ -461,12 +461,11 @@ public class Board implements Serializable {
 				if(dist < neighbour.distance) {
 					neighbour.distance = dist; // keep the shortest dist from src to neighbour
 					neighbour.previous = current;
-
-					if(!neighbour.visited) {
+					if(!neighbour.visited && !neighbour.isOccupied()) {
 						queue.add(neighbour); // add unvisited neighbour into queue to be processed
 					}
-				}
-			}
+				}				
+			}			
 		}
 
 		// build the actual arraylist of path
@@ -536,14 +535,16 @@ public class Board implements Serializable {
 		return Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2)) + Math.sqrt(Math.pow(p1.getY() - p2.getY(), 2));
 	}
 
-	public void printPath(ArrayDeque<Coordinates> path, Coordinates source, Coordinates destination) { //debug TODO remove
+	public void printPath(ArrayList<Tile> path, Coordinates source, Coordinates destination) { //debug TODO remove
 		for(int i = 0; i < Board.BOARD_HEIGHT; i++) {			
 			for(int j = 0; j < Board.BOARD_WIDTH; j++) {
 				if(i==source.getY() && j==source.getX()) {
 					System.out.print("[S]"); //source
 				} else if(i==destination.getY() && j==destination.getX()) {
 					System.out.print("[D]"); //destination
-				} else if(path.contains(tiles.get(i).get(j).getCoordinates())) {
+				} else if(tiles.get(i).get(j).isOccupied()) {
+					System.out.print("[O]");
+				} else if(path.contains(tiles.get(i).get(j))) {
 					System.out.print("[N]"); //path
 				} else {
 					tiles.get(i).get(j).printTile();
@@ -560,16 +561,16 @@ public class Board implements Serializable {
 	}
 	
 	//	//use this to test specific functions without having to run the entire game TODO remove in the end
-	public static void main(String[] args) throws Exception {
-		Board board = new Board();
-		board.printBoard();
-		
-//		ArrayDeque<Coordinates> path = board.closestPath(new Coordinates(0,7), new Coordinates(17,20));
+//	public static void main(String[] args) throws Exception {
+//		Board board = new Board();
+//		board.printBoard();
+//		board.getTileAtPosition(new Coordinates(8,8)).setOccupied("aa");
+//		ArrayList<Tile> path = board.djs(new Coordinates(0, 7), new Coordinates(17, 20));
 //		for(Coordinates c : path)
 //		System.out.println(c.getX() + " " + c.getY());
 //		System.out.println("Turnos: " + (path.size()-1));
-//		board.printPath(path, new Coordinates(1,7), new Coordinates(17,9));
-		
-		ArrayList<Tile> path = board.djs(new Coordinates(0, 7), new Coordinates(17, 20));
-	}
+//		board.printPath(path, new Coordinates(0,7), new Coordinates(17,20));
+//		
+//		
+//	}
 }
