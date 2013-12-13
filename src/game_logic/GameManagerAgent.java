@@ -68,6 +68,7 @@ public class GameManagerAgent extends GuiAgent {
 		// create and show the GUI
 		SLAnimator.start();
 		myGui = new UIGame(this);
+		myLogger.setLevel(Logger.SEVERE);
 		
 		gameState = GameState.Waiting_for_players;
 
@@ -277,9 +278,9 @@ public class GameManagerAgent extends GuiAgent {
 						suggestionsMade.add(sgst);
 					}
 					
-					System.out.println("SUGGESTIONS MADE SO FAR: "+suggestionsMade.size());
-					
 					if(cluedo.isGameSolution(playerSuggestion.getRoom(), playerSuggestion.getSuspect(), playerSuggestion.getWeapon())) {
+						System.out.println("SUGGESTION: "+sgst);
+						System.out.println("SOLUTION: "+cluedo.getGameSolution());
 						gameOver();
 					} else {
 						// somebody must have a card to contradict this suggestion
@@ -331,7 +332,7 @@ public class GameManagerAgent extends GuiAgent {
 					
 					GameMessage msg = null;
 					
-					System.out.println("RECEIVED MAKE MOVE TO "+(new Coordinates(x, y)).toString());
+//					System.out.println("RECEIVED MAKE MOVE TO "+(new Coordinates(x, y)).toString());
 					
 					Coordinates move = cluedo.makeMove(new Coordinates(x, y));
 					

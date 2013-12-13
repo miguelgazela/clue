@@ -37,7 +37,7 @@ public class RandomBotPlayer extends BotPlayerAgent {
 					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 					askDiceRoll();
 				} else { // the player is blocked in the room
-					System.out.println("BLOCKED IN ROOM!!!");
+//					System.out.println("BLOCKED IN ROOM!!!");
 					makeRandomSuggestion(currentTile);
 				}
 				
@@ -90,10 +90,10 @@ public class RandomBotPlayer extends BotPlayerAgent {
 					}
 					
 					if(targetRoom != null) {
-						System.out.println("Trying to go to room"+targetRoom);
-						System.out.println("Current posOnBoard: "+posOnBoard.toString());
-						System.out.println("Trying to reach coord: "+targetCoord.toString());
-						System.out.println("Leaving through door at: "+doorToExit.getCoordinates().toString());
+//						System.out.println("Trying to go to room"+targetRoom);
+//						System.out.println("Current posOnBoard: "+posOnBoard.toString());
+//						System.out.println("Trying to reach coord: "+targetCoord.toString());
+//						System.out.println("Leaving through door at: "+doorToExit.getCoordinates().toString());
 						break;
 					}
 				}
@@ -213,7 +213,7 @@ public class RandomBotPlayer extends BotPlayerAgent {
 			}
 		} else {
 			// it shouldn't get here
-			System.out.println("No target coord after requesting a dice roll");
+//			System.out.println("No target coord after requesting a dice roll");
 		}
 	}
 
@@ -324,7 +324,7 @@ public class RandomBotPlayer extends BotPlayerAgent {
 	@Override
 	public void handleInvalidMoveMsg(ACLMessage msg) {
 		// 
-		System.out.println("I MADE AN INVALID MOVE. SOME TILE IN THE PATH MUST BE OCCUPIED NOW");
+//		System.out.println("I MADE AN INVALID MOVE. SOME TILE IN THE PATH MUST BE OCCUPIED NOW");
 		Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
 		
 		if(currentTile.isRoom()) {
