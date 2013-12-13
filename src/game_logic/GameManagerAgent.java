@@ -46,20 +46,20 @@ public class GameManagerAgent extends GuiAgent {
 	private Cluedo cluedo;
 	private GameState gameState;
 	
-	public static void main(String args[]) throws StaleProxyException {
-		Boot.main(new String[]{"-gui"});
-		 
-        Profile perfil = new ProfileImpl(); 
-        perfil.setParameter(Profile.CONTAINER_NAME, "Container");
- 
-        Runtime run = Runtime.instance();
-        ContainerController control = run.createMainContainer(perfil);
- 
-        GameManagerAgent manager = new GameManagerAgent();
-        AgentController controlAgent1 = control.acceptNewAgent("host", manager);
- 
-        controlAgent1.start();
-	}
+//	public static void main(String args[]) throws StaleProxyException {
+//		Boot.main(new String[]{"-gui"});
+//		 
+//        Profile perfil = new ProfileImpl(); 
+//        perfil.setParameter(Profile.CONTAINER_NAME, "Container");
+// 
+//        Runtime run = Runtime.instance();
+//        ContainerController control = run.createMainContainer(perfil);
+// 
+//        GameManagerAgent manager = new GameManagerAgent();
+//        AgentController controlAgent1 = control.acceptNewAgent("host", manager);
+// 
+//        controlAgent1.start();
+//	}
 	
 	public void setup() {
 		
