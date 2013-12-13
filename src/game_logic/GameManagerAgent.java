@@ -53,7 +53,7 @@ public class GameManagerAgent extends GuiAgent {
 //        perfil.setParameter(Profile.CONTAINER_NAME, "Container");
 // 
 //        Runtime run = Runtime.instance();
-//        ContainerController control = run.createMainContainer(perfil);
+//        ContainerController control = run.createAgentContainer(perfil);
 // 
 //        GameManagerAgent manager = new GameManagerAgent();
 //        AgentController controlAgent1 = control.acceptNewAgent("host", manager);
