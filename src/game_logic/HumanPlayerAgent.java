@@ -72,6 +72,9 @@ public class HumanPlayerAgent extends PlayerAgent {
 							myTurn = true;
 							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - MY TURN");
 							myGui.setVisible(true);
+						} else {
+							myTurn = false;
+							myGui.setVisible(false);
 						}
 					}
 					break;

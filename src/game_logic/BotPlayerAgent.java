@@ -60,6 +60,11 @@ public abstract class BotPlayerAgent extends PlayerAgent {
 							myTurn = true;
 							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - it's my turn");
 							makePlay(msg);
+						} else {
+							myTurn = false;
+							madeBoardMove = false;
+							madeSuggestion = false;
+							pickingBoardMove = false;
 						}
 					}
 					break;

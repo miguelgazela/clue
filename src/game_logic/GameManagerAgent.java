@@ -22,6 +22,7 @@ import jade.wrapper.PlatformController;
 import jade.wrapper.StaleProxyException;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -46,20 +47,20 @@ public class GameManagerAgent extends GuiAgent {
 	private Cluedo cluedo;
 	private GameState gameState;
 	
-//	public static void main(String args[]) throws StaleProxyException {
-//		Boot.main(new String[]{"-gui"});
-//		 
-//        Profile perfil = new ProfileImpl(); 
-//        perfil.setParameter(Profile.CONTAINER_NAME, "Container");
-// 
-//        Runtime run = Runtime.instance();
-//        ContainerController control = run.createAgentContainer(perfil);
-// 
-//        GameManagerAgent manager = new GameManagerAgent();
-//        AgentController controlAgent1 = control.acceptNewAgent("host", manager);
-// 
-//        controlAgent1.start();
-//	}
+	public static void main(String args[]) throws StaleProxyException {
+		Boot.main(new String[]{"-gui"});
+		 
+        Profile perfil = new ProfileImpl(); 
+        perfil.setParameter(Profile.CONTAINER_NAME, "Container");
+ 
+        Runtime run = Runtime.instance();
+        ContainerController control = run.createAgentContainer(perfil);
+ 
+        GameManagerAgent manager = new GameManagerAgent();
+        AgentController controlAgent1 = control.acceptNewAgent("host", manager);
+ 
+        controlAgent1.start();
+	}
 	
 	public void setup() {
 		
@@ -229,6 +230,14 @@ public class GameManagerAgent extends GuiAgent {
 					if(gameMsg.getType().equals(GameMessage.NO_CONTRADICTION_CARD)) {
 						// send message to the next player to the left
 						cluedo.updateSuggestionContradictor();
+						
+						if(cluedo.getSuggestionContradictorName().equals(cluedo.getTurnPlayerName())) { // no one had a card to contradict, the player made a suggestion with his cards
+							System.out.println("NO ONE HAD A CARD TO CONTRADICT, THEY MUST BE YOURS");
+							cluedo.updateTurnPlayer();
+							notifyTurnPlayer();
+							return;
+						}
+						
 						GameMessage requestContradiction = new GameMessage(GameMessage.CONTRADICT_SUGGESTION);
 						requestContradiction.addObject(gameMsg.getObject(0));
 						sendGameMessage(requestContradiction, new AID(cluedo.getSuggestionContradictorName(), AID.ISLOCALNAME), ACLMessage.INFORM);
@@ -263,8 +272,7 @@ public class GameManagerAgent extends GuiAgent {
 					CluedoSuggestion playerSuggestion = (CluedoSuggestion) message.getObject(0);
 					
 					if(cluedo.isGameSolution(playerSuggestion.getRoom(), playerSuggestion.getSuspect(), playerSuggestion.getWeapon())) {
-						// TODO game over and this player is the winner
-						System.out.println("GAME OVER!");
+						gameOver();
 					} else {
 						// somebody must have a card to contradict this suggestion
 						
@@ -401,8 +409,9 @@ public class GameManagerAgent extends GuiAgent {
 		}
 	}
 	
-	protected void endGame() {
-		// TODO this will be called to end the game
+	public void gameOver() {
+		System.out.println("GAME OVER!");
+		System.exit(-1);
 	}
 
 	/**

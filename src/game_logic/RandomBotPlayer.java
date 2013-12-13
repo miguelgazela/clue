@@ -29,79 +29,19 @@ public class RandomBotPlayer extends BotPlayerAgent {
 		if(targetRoom == null) { // 
 			
 			Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
-			int minDistance = 9999;
-			targetCoord = null;
 			
 			if(currentTile.isRoom()) {
-				ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(currentTile.getRoom());
-				
-				for(Tile door: roomDoors) {
-					if(!door.isOccupied()) {
-						
-						while(true) {
-							String randomRoom = Cluedo.rooms[r.nextInt(Cluedo.rooms.length)];
-							if(!randomRoom.equals("Corridor") && !randomRoom.equals(currentTile.getRoom())) {
-								ArrayList<Tile> roomDoors_2 = gameState.board.getRoomDoors(randomRoom);
-
-								for(Tile door_2: roomDoors_2) {
-									if(!door_2.isOccupied()) {
-										ArrayList<Tile> path = gameState.board.djs(door.getCoordinates(), door_2.getCoordinates());
-										int dist = path.size();
-										
-										if(dist < minDistance) {
-											targetRoom = randomRoom;
-											minDistance = dist;
-											minimumPath = path;
-											targetCoord = door_2.getCoordinates();
-											doorToExit = door;
-										}
-									}
-								}
-							}
-							
-							if(targetRoom != null) {
-								System.out.println("Trying to go to room"+targetRoom);
-								System.out.println("Current posOnBoard: "+posOnBoard.toString());
-								System.out.println("Trying to reach coord: "+targetCoord.toString());
-								System.out.println("Leaving through door at: "+doorToExit.getCoordinates().toString());
-								break;
-							}
-						}
-					}
-				}
+				calculateNewPathFromRoom(currentTile);
 				
 				if(targetRoom != null) {
 					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 					askDiceRoll();
 				} else { // the player is blocked in the room
-					
 					makeRandomSuggestion(currentTile);
 				}
+				
 			} else {
-				while(true) {
-					String randomRoom = Cluedo.rooms[r.nextInt(Cluedo.rooms.length)];
-					if(!randomRoom.equals("Corridor")) {
-						ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(randomRoom);
-
-						for(Tile door: roomDoors) {
-							if(!door.isOccupied()) {
-								
-								ArrayList<Tile> path = gameState.board.djs(posOnBoard, door.getCoordinates());
-								int dist = path.size();
-								
-								if(dist < minDistance) {
-									targetRoom = randomRoom;
-									minDistance = dist;
-									minimumPath = path;
-									targetCoord = door.getCoordinates();
-								}
-							}
-						}
-						if(targetRoom != null) {
-							break;
-						}
-					}
-				}
+				calculateNewPathFromCorridor();
 				Board.printPath(minimumPath);
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING TO RANDOM ROOM: "+targetRoom);
 				askDiceRoll();
@@ -109,6 +49,80 @@ public class RandomBotPlayer extends BotPlayerAgent {
 		} else {
 			// TODO has to do different things?
 			askDiceRoll();
+		}
+	}
+	
+	private void calculateNewPathFromRoom(Tile currentTile) {
+		
+		ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(currentTile.getRoom());
+		int minDistance = 9999;
+		targetCoord = null;
+		targetRoom = null;
+		
+		for(Tile door: roomDoors) {
+			if(!door.isOccupied()) {
+				
+				while(true) {
+					String randomRoom = Cluedo.rooms[r.nextInt(Cluedo.rooms.length)];
+					if(!randomRoom.equals("Corridor") && !randomRoom.equals(currentTile.getRoom())) {
+						ArrayList<Tile> roomDoors_2 = gameState.board.getRoomDoors(randomRoom);
+
+						for(Tile door_2: roomDoors_2) {
+							if(!door_2.isOccupied()) {
+								ArrayList<Tile> path = gameState.board.djs(door.getCoordinates(), door_2.getCoordinates());
+								int dist = path.size();
+								
+								if(dist < minDistance) {
+									targetRoom = randomRoom;
+									minDistance = dist;
+									minimumPath = path;
+									targetCoord = door_2.getCoordinates();
+									doorToExit = door;
+								}
+							}
+						}
+					}
+					
+					if(targetRoom != null) {
+						System.out.println("Trying to go to room"+targetRoom);
+						System.out.println("Current posOnBoard: "+posOnBoard.toString());
+						System.out.println("Trying to reach coord: "+targetCoord.toString());
+						System.out.println("Leaving through door at: "+doorToExit.getCoordinates().toString());
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+	private void calculateNewPathFromCorridor() {
+		int minDistance = 9999;
+		targetCoord = null;
+		
+		while(true) {
+			String randomRoom = Cluedo.rooms[r.nextInt(Cluedo.rooms.length)];
+			if(!randomRoom.equals("Corridor")) {
+				ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(randomRoom);
+
+				for(Tile door: roomDoors) {
+					if(!door.isOccupied()) {
+						
+						ArrayList<Tile> path = gameState.board.djs(posOnBoard, door.getCoordinates());
+						int dist = path.size();
+						
+						if(dist < minDistance) {
+							targetRoom = randomRoom;
+							minDistance = dist;
+							minimumPath = path;
+							targetCoord = door.getCoordinates();
+						}
+					}
+				}
+				
+				if(targetRoom != null && targetCoord != null) {
+					break;
+				}
+			}
 		}
 	}
 	
@@ -120,7 +134,6 @@ public class RandomBotPlayer extends BotPlayerAgent {
 		String weapon = Cluedo.weapons[r.nextInt(Cluedo.weapons.length)];
 		
 		// TODO it should make a new suggestion then
-		myLogger.log(Logger.INFO, "Agent " + getLocalName() + " - BLOCKED INSIDE THIS ROOM: " + current.getRoom());
 		makeSuggestion(new CluedoSuggestion(current.getRoom(), suspect, weapon, getLocalName()));
 	}
 	
@@ -286,6 +299,25 @@ public class RandomBotPlayer extends BotPlayerAgent {
 
 	@Override
 	public void handleInvalidMoveMsg(ACLMessage msg) {
-		System.out.println("I made an invalid move. Should not get here!");
+		// 
+		System.out.println("I MADE AN INVALID MOVE. SOME TILE IN THE PATH MUST BE OCCUPIED NOW");
+		Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
+		
+		if(currentTile.isRoom()) {
+			calculateNewPathFromRoom(currentTile);
+			
+			if(targetRoom != null) {
+				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
+				askDiceRoll();
+			} else { // the player is blocked in the room
+				makeRandomSuggestion(currentTile);
+			}
+			
+		} else {
+			calculateNewPathFromCorridor();
+			Board.printPath(minimumPath);
+			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING INSTEAD TO RANDOM ROOM: "+targetRoom);
+			askDiceRoll();
+		}
 	}
 }
