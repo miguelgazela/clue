@@ -17,6 +17,7 @@ public class RandomBotPlayer extends BotPlayerAgent {
 	private Coordinates targetCoord = null;
 	private Tile doorToExit = null;
 	private ArrayList<Tile> minimumPath;
+	private ArrayList<String> suggestionsMade = new ArrayList<>();
 	
 	private Random r = new Random(System.currentTimeMillis());
 	
@@ -37,6 +38,7 @@ public class RandomBotPlayer extends BotPlayerAgent {
 					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 					askDiceRoll();
 				} else { // the player is blocked in the room
+					System.out.println("BLOCKED IN ROOM!!!");
 					makeRandomSuggestion(currentTile);
 				}
 				
@@ -53,17 +55,22 @@ public class RandomBotPlayer extends BotPlayerAgent {
 	}
 	
 	private void calculateNewPathFromRoom(Tile currentTile) {
-		
+
 		ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(currentTile.getRoom());
 		int minDistance = 9999;
-		targetCoord = null;
 		targetRoom = null;
+		targetCoord = null;
+		doorToExit = null;
+		minimumPath = null;
+	
+		System.out.println(roomDoors.size());
 		
 		for(Tile door: roomDoors) {
 			if(!door.isOccupied()) {
 				
 				while(true) {
 					String randomRoom = Cluedo.rooms[r.nextInt(Cluedo.rooms.length)];
+					
 					if(!randomRoom.equals("Corridor") && !randomRoom.equals(currentTile.getRoom())) {
 						ArrayList<Tile> roomDoors_2 = gameState.board.getRoomDoors(randomRoom);
 
@@ -127,13 +134,31 @@ public class RandomBotPlayer extends BotPlayerAgent {
 	}
 	
 	private void makeRandomSuggestion(Tile current) {
-		// pick a random suspect
-		String suspect = Cluedo.suspects[r.nextInt(Cluedo.suspects.length)];
 		
-		// pick a random weapon
-		String weapon = Cluedo.weapons[r.nextInt(Cluedo.weapons.length)];
+		String suspect = null, weapon = null;
 		
-		// TODO it should make a new suggestion then
+		while(true) {
+			int cardsOwnedByPlayer = 0;
+			
+			// pick a random suspect
+			suspect = Cluedo.suspects[r.nextInt(Cluedo.suspects.length)];
+			
+			// pick a random weapon
+			weapon = Cluedo.weapons[r.nextInt(Cluedo.weapons.length)];
+			
+			for(CluedoCard card: myCards) {
+				if(card.getName().equals(suspect) || card.getName().equals(weapon)) {
+					cardsOwnedByPlayer++;
+				}
+			}
+			
+			if(cardsOwnedByPlayer < 2) {
+				break;
+			}
+			System.out.println("********************************************");
+		}
+		
+		suggestionsMade.add(suspect+"-"+weapon+"-"+current.getRoom());
 		makeSuggestion(new CluedoSuggestion(current.getRoom(), suspect, weapon, getLocalName()));
 	}
 	
@@ -274,6 +299,8 @@ public class RandomBotPlayer extends BotPlayerAgent {
 		if(currentTile.isRoom()) { // if he moved inside a room
 			targetRoom = null;
 			targetCoord = null;
+			minimumPath = null;
+			
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - I'M INSIDE A ROOM. MAKING A SUGGESTION");
 			makeRandomSuggestion(currentTile);
 			

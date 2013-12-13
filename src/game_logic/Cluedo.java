@@ -68,7 +68,7 @@ public class Cluedo implements Serializable{
 	}
 	
 	public GameState getGameState() {
-		return new GameState(numberPlayers, turnPlayerIndex, players, board);
+		return new GameState(numberPlayers, turnPlayerIndex, players, new Board(board));
 	}
 	
 	/**

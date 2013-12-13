@@ -1,7 +1,5 @@
 package game_logic;
 
-import game_logic.Coordinates;
-
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -10,7 +8,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
 
@@ -54,6 +51,34 @@ public class Board implements Serializable {
 		initBoard();
 		setNeighbours();
 		initPlayersPositions();
+	}
+	
+	public Board(Board original) {
+		tiles = new ArrayList<List<Tile>>();
+		doors = new HashMap<>();
+
+		for(int i = 0; i < Board.BOARD_HEIGHT; i++) {
+			tiles.add(new ArrayList<Tile>()); // adding new row
+
+			for(int j = 0; j < Board.BOARD_WIDTH; j++) {
+				tiles.get(i).add(new Tile(j,i));
+			}
+		}
+		initBoard();
+		setNeighbours();
+		
+		for(int i = 0; i < Board.BOARD_HEIGHT; i++) {
+			tiles.add(new ArrayList<Tile>()); // adding new row
+
+			for(int j = 0; j < Board.BOARD_WIDTH; j++) {
+				tiles.get(i).add(new Tile(j,i));
+				
+				Tile originalTile = original.getTiles().get(i).get(j);
+				if(originalTile.isOccupied()) {
+					tiles.get(i).get(j).setOccupied(originalTile.getPlayerOccupying()); 
+				}
+			}
+		}
 	}
 
 	/**
@@ -207,8 +232,6 @@ public class Board implements Serializable {
 			destTile.setOccupied(player);
 			return dest;
 		}
-		
-		
 	}
 
 	/**
@@ -461,7 +484,9 @@ public class Board implements Serializable {
 				if(dist < neighbour.distance) {
 					neighbour.distance = dist; // keep the shortest dist from src to neighbour
 					neighbour.previous = current;
-					if(!neighbour.visited && !neighbour.isOccupied()) {
+					
+//					if(!neighbour.visited && !neighbour.isOccupied()) {
+					if(!neighbour.visited) { 
 						queue.add(neighbour); // add unvisited neighbour into queue to be processed
 					}
 				}				
