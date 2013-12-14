@@ -30,6 +30,7 @@ public class UIResourcesLoader{
 	public BufferedImage game_bg;
 	public BufferedImage player_interface;
 	public BufferedImage suggestion;
+	public BufferedImage accusation;
 	
 	public UICoord[] new_game_btns_coords;
 	
@@ -74,6 +75,7 @@ public class UIResourcesLoader{
 			game_bg = ImageIO.read(new File("images/backgrounds/game.png"));
 			player_interface = ImageIO.read(new File("images/backgrounds/player_interface.png"));
 			suggestion = ImageIO.read(new File("images/backgrounds/suggestion.png"));
+			accusation = ImageIO.read(new File("images/backgrounds/accusation.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Background Resources Missing");

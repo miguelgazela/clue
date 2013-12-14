@@ -81,8 +81,9 @@ public class GameManagerAgent extends GuiAgent {
 		// create and show the GUI
 		SLAnimator.start();
 		myGui = new UIGame(this);
-		myLogger.setLevel(Logger.WARNING);
-		numberOfGamesToMake = 100;
+
+		myLogger.setLevel(Logger.INFO);
+		numberOfGamesToMake = 1;
 		
 		gameState = GameState.Waiting_for_players;
 
@@ -189,6 +190,13 @@ public class GameManagerAgent extends GuiAgent {
 						}
 					}
 					break;
+					case GameMessage.MAKE_ACCUSATION:
+					{
+						if(gameState == GameState.Waiting_for_play) {
+							addBehaviour(new HandleMakeAccusationRequest(myAgent, msg));
+						}
+					}
+					break;
 					case GameMessage.NO_CONTRADICTION_CARD:
 					case GameMessage.HAVE_CONTRADICTION_CARD:
 					{
@@ -280,6 +288,55 @@ public class GameManagerAgent extends GuiAgent {
 					}
 					
 					
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}
+		}
+		
+	}
+	
+	private class HandleMakeAccusationRequest extends OneShotBehaviour {
+
+		private static final long serialVersionUID = 5567671553350648269L;
+
+		ACLMessage request;
+		
+		public HandleMakeAccusationRequest(Agent a, ACLMessage request) {
+			super(a);
+			this.request = request;
+			myLogger.log(Logger.INFO, "GAME_MANAGER - RECEIVING ACCUSATION");
+		}
+		
+		@Override
+		public void action() {
+			if(request.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
+				try {
+					GameMessage message = (GameMessage) request.getContentObject();
+					CluedoSuggestion playerAccusation = (CluedoSuggestion) message.getObject(0);
+					
+					if(cluedo.isGameSolution(playerAccusation.getRoom(), playerAccusation.getSuspect(), playerAccusation.getWeapon())) {
+						myLogger.log(Logger.WARNING, "GAME_MANAGER - WINNER: "+playerAccusation.getPlayer());
+						myLogger.log(Logger.WARNING, "GAME_MANAGER - SOLUTION WAS: "+cluedo.getGameSolution());
+						gameOver();
+					} else {
+						// the player looses the game
+						GameMessage accusationWarning = new GameMessage(GameMessage.PLAYER_MADE_ACCUSATION);
+						accusationWarning.addObject(playerAccusation);
+						
+						for(AID agent: agents) {
+							if(!agent.getLocalName().equals(request.getSender().getLocalName())) {
+								sendGameMessage(accusationWarning, agent, ACLMessage.INFORM);
+							}
+						}
+						
+						// warns the agent that he has lost
+						cluedo.playerHasLost(request.getSender().getLocalName());
+						GameMessage wrongAccusation = new GameMessage(GameMessage.WRONG_ACCUSATION);
+						wrongAccusation.addObject(cluedo.getGameSolution());
+						sendGameMessage(wrongAccusation, request.getSender(), ACLMessage.INFORM);
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 					System.exit(-1);

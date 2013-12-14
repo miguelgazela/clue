@@ -521,4 +521,13 @@ public class SmartBotPlayer extends BotPlayerAgent {
 		suspectSolutionString = null;
 		weaponSolutionString = null;
 	}
+
+	public void handlePlayerAccusation(ACLMessage msg) {
+		// TODO Auto-generated method stub		
+	}
+
+	@Override
+	public void handleWrongAccusation(ACLMessage msg) {
+		// TODO Auto-generated method stub		
+	}
 }

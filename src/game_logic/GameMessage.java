@@ -26,6 +26,9 @@ public class GameMessage implements Serializable {
 	public static final String GAME_OVER = "GAME_OVER";
 	public static final String RESET = "RESET";
 	public static final String ACK_RESET = "ACK_RESET";
+	public static final String MAKE_ACCUSATION = "MAKE_ACCUSATION";
+	public static final String PLAYER_MADE_ACCUSATION = "PLAYER_MADE_ACCUSATION";
+	public static final String WRONG_ACCUSATION = "WRONG_ACCUSATION";
 	
 	private final String type;
 	private ArrayList<Object> objects = null;

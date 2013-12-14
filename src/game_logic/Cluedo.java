@@ -68,6 +68,20 @@ public class Cluedo implements Serializable{
 	}
 	
 	/**
+	 * removes the player that has lost from the game board
+	 * @param playerName
+	 */
+	public void playerHasLost(String playerName) {
+		for(CluedoPlayer player: players) {
+			if(player.getName().equals(playerName)) {
+				Coordinates currentPos = player.getPosOnBoard();
+				board.getTileAtPosition(currentPos).removePlayer();
+				player.setPosOnBoard(null);
+			}
+		}
+	}
+	
+	/**
 	 * returns the array with the players of this game
 	 * @return
 	 */
