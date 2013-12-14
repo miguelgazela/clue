@@ -77,7 +77,7 @@ public class GameManagerAgent extends GuiAgent {
 		// create and show the GUI
 		SLAnimator.start();
 		myGui = new UIGame(this);
-		myLogger.setLevel(Logger.SEVERE);
+		myLogger.setLevel(Logger.INFO);
 		numberOfGamesToMake = 1;
 		
 		gameState = GameState.Waiting_for_players;
@@ -285,6 +285,7 @@ public class GameManagerAgent extends GuiAgent {
 		public HandleMakeSuggestionRequest(Agent a, ACLMessage request) {
 			super(a);
 			this.request = request;
+			myLogger.log(Logger.INFO, "GAME_MANAGER - RECEIVING SUGGESTION");
 		}
 		
 		@Override
@@ -303,12 +304,11 @@ public class GameManagerAgent extends GuiAgent {
 					}
 					
 					if(cluedo.isGameSolution(playerSuggestion.getRoom(), playerSuggestion.getSuspect(), playerSuggestion.getWeapon())) {
-						System.out.println("WINNER: " + playerSuggestion.getPlayer());
-						System.out.println("SUGGESTION: "+sgst);
-						System.out.println("SOLUTION: "+cluedo.getGameSolution());
+						myLogger.log(Logger.INFO, "GAME_MANAGER - WINNER: "+playerSuggestion.getPlayer());
+						myLogger.log(Logger.INFO, "GAME_MANAGER - SUGGESTION: "+sgst);
+						myLogger.log(Logger.INFO, "GAME_MANAGER - SOLUTION WAS: "+cluedo.getGameSolution());
 						gameOver();
-					} else {
-						// somebody must have a card to contradict this suggestion
+					} else { // somebody must have a card to contradict this suggestion
 						
 						// warn other agents about the suggestion
 						GameMessage suggestionWarning = new GameMessage(GameMessage.PLAYER_MADE_SUGGESTION);
@@ -404,7 +404,7 @@ public class GameManagerAgent extends GuiAgent {
 		
 		@Override
 		public void action() {
-			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - RECEIVED REQUEST FOR DICE ROLL FROM " + request.getSender().getLocalName());
+//			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - RECEIVED REQUEST FOR DICE ROLL FROM " + request.getSender().getLocalName());
 			
 			// check if it's this player's turn
 			if(request.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
@@ -442,7 +442,7 @@ public class GameManagerAgent extends GuiAgent {
 	}
 	
 	public void gameOver() {
-		System.out.println("GAME OVER!");
+		myLogger.log(Logger.INFO, "GAME_MANAGER - GAMEOVER");
 		
 		numberTurnsList.add(new Integer(numberTurns));
 		numberTurns = 0;
@@ -466,10 +466,9 @@ public class GameManagerAgent extends GuiAgent {
 			}
 			
 			for(int i = 0; i < numberTurnsList.size(); i++) {
-				System.out.print("#TURNS: "+numberTurnsList.get(i));
-				System.out.print("#SUGGESTIONS: "+numberSuggestionsList.get(i));
-				System.out.print("#UNIQUE SUGGESTIONS: "+numberUniqueSuggestions.get(i));
-				System.out.println("");
+				myLogger.log(Logger.WARNING, "GAME_MANAGER - #TURNS: "+numberTurnsList.get(i));
+				myLogger.log(Logger.WARNING, "GAME_MANAGER - #SUGGESTIONS: "+numberSuggestionsList.get(i));
+				myLogger.log(Logger.WARNING, "GAME_MANAGER - #UNIQUE SUGGESTIONS: "+numberUniqueSuggestions.get(i));
 			}
 		}
 	}
@@ -497,7 +496,7 @@ public class GameManagerAgent extends GuiAgent {
 	 * sends a message to all agents with the name of the turn player
 	 */
 	private void notifyTurnPlayer() {
-		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NOTIFY PLAYERS ABOUT TURN PLAYER");
+//		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NOTIFY PLAYERS ABOUT TURN PLAYER");
 		String currentTurnPlayer = cluedo.getTurnPlayerName();
 		
 		for(int i = 0; i < agents.size(); i++) {
