@@ -83,7 +83,7 @@ public class GameManagerAgent extends GuiAgent {
 		myGui = new UIGame(this);
 
 		myLogger.setLevel(Logger.INFO);
-		numberOfGamesToMake = 1;
+		numberOfGamesToMake = 50;
 		
 		gameState = GameState.Waiting_for_players;
 
@@ -533,6 +533,7 @@ public class GameManagerAgent extends GuiAgent {
 			int avgNumberSuggestions = 0;
 			int avgNumberUniqueSugestions = 0;
 			int gameSize = numberTurnsList.size();
+			
 			PrintWriter writer = null;
 			try {
 				writer = new PrintWriter("gameStats.txt", "UTF-8");

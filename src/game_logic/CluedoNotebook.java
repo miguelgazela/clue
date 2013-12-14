@@ -20,7 +20,7 @@ public class CluedoNotebook implements Serializable {
 	private ArrayList<CluedoSuggestion> otherPlayersSuggestions;	
 	private HashMap<String, CluedoCard> cardsShownToOtherPlayers;
 	private HashMap<String, String> otherPlayersKnownCards;
-
+	private HashMap<String, ArrayList<String>> cardsNotOwnedByPlayer;
 	private Random r = new Random(System.currentTimeMillis());
 
 	public CluedoNotebook() {
@@ -28,6 +28,7 @@ public class CluedoNotebook implements Serializable {
 		otherPlayersSuggestions = new ArrayList<>();
 		cardsShownToOtherPlayers = new HashMap<>();
 		otherPlayersKnownCards = new HashMap<>();
+		cardsNotOwnedByPlayer = new HashMap<>();
 		initCardsState();
 	}
 
@@ -85,6 +86,16 @@ public class CluedoNotebook implements Serializable {
 	
 	public String getPlayerWhoHasCard(String card) {
 		return otherPlayersKnownCards.get(card);
+	}
+	
+	public void saveCardNotOwnedByPlayer(String card, String player) {
+		ArrayList<String> notOwnedCards = cardsNotOwnedByPlayer.get(player);
+		notOwnedCards.add(card);
+		cardsNotOwnedByPlayer.put(player,notOwnedCards);
+	}
+	
+	public ArrayList<String> getCardNotOwnedByPlayer(String player) {
+		return cardsNotOwnedByPlayer.get(player);
 	}
 
 	public boolean hasShownCardToPlayer(String player, CluedoCard card) {

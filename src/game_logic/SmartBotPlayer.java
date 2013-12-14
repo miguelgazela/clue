@@ -39,22 +39,25 @@ public class SmartBotPlayer extends BotPlayerAgent {
 				// In solution room.
 				if (currentTile.getRoom().equals(roomSolutionString)) {
 					// Make suggestion.
-					if (suspectSolutionString == null || weaponSolutionString == null)
+					if (suspectSolutionString == null || weaponSolutionString == null) {
 						makeBotSuggestionWithNotebook(currentTile);
-
-					// Make accusation.
-					else
+					} else { // make accusation
 						makeSuggestion(new CluedoSuggestion(roomSolutionString, suspectSolutionString, weaponSolutionString, getLocalName()));
+					}
 				}
 				// In other room. Needs to get out and try to reach solution room.
 				else {
 					buildPathFromRoomToRoom(roomSolutionString, currentTile);
-					askDiceRoll();
+					if(targetCoord != null)
+						askDiceRoll();
+					else
+						makeBotSuggestionWithNotebook(currentTile); //if room is blocked make another sugestion
 				}
 			}
 			// In the corridor
 			else {
 				buildPathFromCorridorToRoom(roomSolutionString, currentTile);
+
 				askDiceRoll();
 			}
 		}
@@ -83,6 +86,25 @@ public class SmartBotPlayer extends BotPlayerAgent {
 				}
 			}
 		}
+		if(targetCoord == null){ //if solution room is blocked, go to a near neighboor
+			for(Tile door: roomDoors) {
+				for(Tile neighboor: door.getNeighbours()) {
+					if(!neighboor.isOccupied()) {
+
+						ArrayList<Tile> path = gameState.board.djs(posOnBoard, neighboor.getCoordinates());
+						int dist = path.size();
+
+						if(dist < minDistance) {
+							targetRoom = dest;
+							minDistance = dist;
+							minimumPath = path;
+							targetCoord = neighboor.getCoordinates();
+						}
+					}
+				}
+			}
+		}
+
 	}
 
 	private void buildPathFromRoomToRoom(String dest, Tile currentTile) {
@@ -288,7 +310,9 @@ public class SmartBotPlayer extends BotPlayerAgent {
 			
 			if (!(myCardsString.contains(card) || 
 					(playerWhoHasTheCard != null &&
-					!playerWhoHasTheCard.equals(playerThatContradicted)))) {
+					!playerWhoHasTheCard.equals(playerThatContradicted)) ||					
+					checkOtherSugestionCards(suggestionCards,card,playerThatContradicted) // if the other two cards are known to not be owned by the player
+					)) {
 				
 				cardDeducted = card;
 				checkedCardsCounter++;
@@ -301,10 +325,25 @@ public class SmartBotPlayer extends BotPlayerAgent {
 		}
 	}
 
+	private boolean checkOtherSugestionCards(ArrayList<String> suggestionCards, String card, String player) {
+		boolean known = true;
+		for(String otherCard : suggestionCards){
+			if(!otherCard.equals(card))
+				if(!playerNotebook.getCardNotOwnedByPlayer(player).contains(otherCard))
+					known = false;
+		}
+		
+		return known;
+	}
 	@Override
 	public void handleNoCardToContradict(CluedoSuggestion playerSuggestion,
 			String playerThatContradicted) {
-		// TODO Auto-generated method stub
+		if(!playerNotebook.getCardNotOwnedByPlayer(playerThatContradicted).contains(playerSuggestion.getRoom()))
+			playerNotebook.saveCardNotOwnedByPlayer(playerSuggestion.getRoom(), playerThatContradicted);
+		if(!playerNotebook.getCardNotOwnedByPlayer(playerThatContradicted).contains(playerSuggestion.getSuspect()))
+			playerNotebook.saveCardNotOwnedByPlayer(playerSuggestion.getSuspect(), playerThatContradicted);
+		if(!playerNotebook.getCardNotOwnedByPlayer(playerThatContradicted).contains(playerSuggestion.getWeapon()))
+			playerNotebook.saveCardNotOwnedByPlayer(playerSuggestion.getWeapon(), playerThatContradicted);
 
 	}
 
@@ -320,7 +359,7 @@ public class SmartBotPlayer extends BotPlayerAgent {
 			for(CluedoCard card: myCards) {
 				String cardName = card.getName();
 
-				// i have one card to contradict, say yes to gamemanager and send card to the requester
+				// Ii have one card to contradict, say yes to gamemanager and send card to the requester
 				if(cardName.equals(playerSuggestion.getRoom()) 
 						|| cardName.equals(playerSuggestion.getSuspect()) 
 						|| cardName.equals(playerSuggestion.getWeapon())) {
