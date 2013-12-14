@@ -52,7 +52,7 @@ public class GameManagerAgent extends GuiAgent {
 	public boolean gameIsOver = false;
 	
 	// for statistics purposes
-	private HashMap<String, Integer> numberWins = new HashMap<>();
+	private String[] winners = null;
 	private ArrayList<String> suggestionsMade = new ArrayList<>();
 	private ArrayList<Integer> numberTurnsList = new ArrayList<>();
 	private ArrayList<Integer> numberSuggestionsList = new ArrayList<>();
@@ -84,8 +84,9 @@ public class GameManagerAgent extends GuiAgent {
 		SLAnimator.start();
 		myGui = new UIGame(this);
 
-		myLogger.setLevel(Logger.INFO);
-		numberOfGamesToMake = 1;
+		myLogger.setLevel(Logger.SEVERE);
+		numberOfGamesToMake = 2;
+		winners = new String[numberOfGamesToMake];
 		
 		gameState = GameState.Waiting_for_players;
 
@@ -525,11 +526,7 @@ public class GameManagerAgent extends GuiAgent {
 		numberSuggestionsList.add(new Integer(numberSuggestions));
 		numberUniqueSuggestions.add(new Integer(suggestionsMade.size()));
 		
-		if(numberWins.containsKey(cluedo.getTurnPlayerName())) {
-			numberWins.put(cluedo.getTurnPlayerName(), numberWins.get(cluedo.getTurnPlayerName()) + 1);
-		} else {
-			numberWins.put(cluedo.getTurnPlayerName(), 1);
-		}
+		winners[2 - (numberOfGamesToMake + 1)] = cluedo.getTurnPlayerName();
 		
 		if(numberOfGamesToMake > 0) { // reset and start another game
 			resetGame();
@@ -556,12 +553,15 @@ public class GameManagerAgent extends GuiAgent {
 			
 			
 			for(int i = 0; i < gameSize; i++) {
-				writer.println(numberTurnsList.get(i) + " " + numberSuggestionsList.get(i) + " " + numberUniqueSuggestions.get(i));
+				writer.println(numberTurnsList.get(i) + " " + numberSuggestionsList.get(i) + " " + numberUniqueSuggestions.get(i) + " " + winners[i]);
 				avgNumberTurns += numberTurnsList.get(i);
 				avgNumberSuggestions += numberSuggestionsList.get(i);
 				avgNumberUniqueSugestions += numberUniqueSuggestions.get(i);
 				
 			}
+			
+			// write number of wins
+			
 			writer.close();
 			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE TURNS: "+avgNumberTurns/gameSize);
 			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE SUGGESTIONS: "+avgNumberSuggestions/gameSize);
@@ -573,7 +573,6 @@ public class GameManagerAgent extends GuiAgent {
 		numberTurns = 0;
 		numberSuggestions = 0;
 		suggestionsMade.clear();
-		numberWins.clear();
 		
 		// send reset msg to all agents
 		for(AID agent: agents) {
