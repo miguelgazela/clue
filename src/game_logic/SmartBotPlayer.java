@@ -463,6 +463,11 @@ public class SmartBotPlayer extends BotPlayerAgent {
 				if(minimumPath.size() < diceResult) { // he can get to the room
 					enterRoom = true;
 				} else { // can't get to the room this turn, goes closer
+					if (playerNotebook.getNotCheckedRooms().contains(currentTile.getRoom())) {
+						makeBotSuggestionWithNotebook(currentTile);
+						return;
+					}
+					
 					Coordinates destTileCoords = minimumPath.get(diceResult - 1).getCoordinates(); // this time is - 1 because he needs to move to the first coord of the path
 					makeMove(destTileCoords.getX(), destTileCoords.getY());
 				}
