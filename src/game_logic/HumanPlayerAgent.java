@@ -183,6 +183,25 @@ public class HumanPlayerAgent extends PlayerAgent {
 						myGui.showGameOver(winner, solution);
 					}
 					break;
+					case GameMessage.RESET: // start another game
+					{
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - RESETTING GAME");
+						stillInGame = true;
+						myTurn = false;
+						pickingBoardMove = false;
+						madeBoardMove = false;
+						madeSuggestion = false;
+						diceResult = -1;
+						gameState = null; 
+						posOnBoard = null;
+						myCards = null;
+						myGui.reset();
+						
+						// send ack
+						GameMessage msg_ack = new GameMessage(GameMessage.ACK_RESET);
+						sendGameMessage(msg_ack, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
+					}
+					break;
 					default:
 					{
 						// should not get here!!!

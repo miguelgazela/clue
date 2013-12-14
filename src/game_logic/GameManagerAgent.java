@@ -22,7 +22,6 @@ import jade.wrapper.PlatformController;
 import jade.wrapper.StaleProxyException;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -220,7 +219,7 @@ public class GameManagerAgent extends GuiAgent {
 					}
 						break;
 					}
-				} catch (UnreadableException | InterruptedException e) {
+				} catch (UnreadableException e) {
 					e.printStackTrace();
 					System.exit(-1);
 				}
@@ -618,7 +617,7 @@ public class GameManagerAgent extends GuiAgent {
 		break;
 		case RESET_GAME:
 		{
-			
+			resetGame();
 		}
 		break;
 		default:

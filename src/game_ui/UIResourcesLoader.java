@@ -130,6 +130,7 @@ public class UIResourcesLoader{
 			v_cards_note_status[0] = ImageIO.read(new File("images/players/has_card.png"));
 			v_cards_note_status[1] = ImageIO.read(new File("images/players/not_solution.png"));
 			v_cards_note_status[2] = ImageIO.read(new File("images/players/possible_solution.png"));
+			confirmReset = new GameImage("images/backgrounds/confirmReset.png", 0, 0);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);

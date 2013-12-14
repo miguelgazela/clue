@@ -64,6 +64,7 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 		setResizable(false);
 //		setVisible(true);
 	}
+	
 	public void setGameState(GameState gameState) {
 		this.gameState = gameState;
 	}
@@ -80,6 +81,14 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 	public void updateReachablePos(ArrayList<Tile> reachablePos) {
 		this.reachable = reachablePos;
 		repaint();
+	}
+	
+	public void reset() {
+		this.notebook = new CluedoNotebook();
+		gameState = null;
+		reachable = null;
+		room = null;
+		diceResult = -1;
 	}
 	
 	public void showSuggestionPanel(String room) {

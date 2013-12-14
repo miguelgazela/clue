@@ -404,7 +404,6 @@ public class UIGame extends JFrame implements ActionListener {
 				graphics.drawImage(background, 0, 0, this);
 				
 				if(hasGameRunning) {
-					
 					// draw players on board
 					ArrayList<CluedoPlayer> players = gameManagerAgent.getCluedo().getPlayers();
 					
@@ -485,12 +484,6 @@ public class UIGame extends JFrame implements ActionListener {
 				if(!gameIsOver) {
 					if(!showingResetWarning) {
 							
-						
-						if(x >= 829 && y >= 20 && x <= 1221 && y <= 595) { // player dashboard
-							
-						}
-						// game loop here!
-						
 					} else { // it's showing the reset warning
 						if(x >= 499 && y >= 407 && x <= 593 && y <= 446) { // yes
 							resetGame();
