@@ -566,6 +566,7 @@ public class GameManagerAgent extends GuiAgent {
 			// write number of wins
 			
 			writer.close();
+			System.out.println("Game Over");
 			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE TURNS: "+avgNumberTurns/gameSize);
 			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE SUGGESTIONS: "+avgNumberSuggestions/gameSize);
 			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE UNIQUE SUGESTIONS: "+avgNumberUniqueSugestions/gameSize);

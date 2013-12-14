@@ -34,31 +34,31 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 		// Room is known.
 		if (roomSolutionString != null) {
+			if (suspectSolutionString != null && weaponSolutionString != null)
+				makeAccusation(new CluedoSuggestion(roomSolutionString, suspectSolutionString, weaponSolutionString, getLocalName()));
 
-			if (currentTile.isRoom()) {
+			else if (currentTile.isRoom()) {
 				// In solution room.
 				if (currentTile.getRoom().equals(roomSolutionString)) {
 					// Make suggestion.
-					if (suspectSolutionString == null || weaponSolutionString == null) {
-						makeBotSuggestionWithNotebook(currentTile);
-					} else { // make accusation
-						makeSuggestion(new CluedoSuggestion(roomSolutionString, suspectSolutionString, weaponSolutionString, getLocalName()));
-					}
+					makeBotSuggestionWithNotebook(currentTile);
 				}
 				// In other room. Needs to get out and try to reach solution room.
 				else {
 					buildPathFromRoomToRoom(roomSolutionString, currentTile);
-					if(targetCoord != null)
+					if (targetCoord != null)
 						askDiceRoll();
 					else
-						makeBotSuggestionWithNotebook(currentTile); //if room is blocked make another sugestion
+						makeBotSuggestionWithNotebook(currentTile);
 				}
 			}
 			// In the corridor
 			else {
 				buildPathFromCorridorToRoom(roomSolutionString, currentTile);
-
-				askDiceRoll();
+				if (targetCoord != null)
+					askDiceRoll();
+				else
+					endMyTurn();
 			}
 		}
 		// Room not known
@@ -69,6 +69,8 @@ public class SmartBotPlayer extends BotPlayerAgent {
 	private void buildPathFromCorridorToRoom(String dest, Tile currentTile) {
 		int minDistance = 9999;
 		targetCoord = null;
+		minimumPath = null;
+		targetRoom = null;
 
 		ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(dest);
 
@@ -111,6 +113,10 @@ public class SmartBotPlayer extends BotPlayerAgent {
 	private void buildPathFromRoomToRoom(String dest, Tile currentTile) {
 		ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(currentTile.getRoom());
 		int minDistance = 9999;
+		targetRoom = null;
+		targetCoord = null;
+		doorToExit = null;
+		minimumPath = null;
 
 		for(Tile door: roomDoors) {
 			if(!door.isOccupied()) {
@@ -176,21 +182,23 @@ public class SmartBotPlayer extends BotPlayerAgent {
 	private void calculateNewPathFromCorridor() {
 		int minDistance = 9999;
 		targetCoord = null;
-
+		minimumPath = null;
+		targetRoom = null;
+		
 		ArrayList<String> rooms = playerNotebook.getNotCheckedRooms();
-
+	
 		// Gets closest unchecked room
 		for (String room : rooms) {
-
+	
 			if(!room.equals("Corridor")) {
 				ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(room);
-
+	
 				for(Tile door: roomDoors) {
 					if(!door.isOccupied()) {
-
+	
 						ArrayList<Tile> path = gameState.board.djs(posOnBoard, door.getCoordinates());
 						int dist = path.size();
-
+	
 						if(dist < minDistance) {
 							targetRoom = room;
 							minDistance = dist;
@@ -220,7 +228,7 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 			} else {
 				calculateNewPathFromCorridor();
-				Board.printPath(minimumPath);
+
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING TO RANDOM ROOM: "+targetRoom);
 				askDiceRoll();
 			}
@@ -319,10 +327,9 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 			if (!(myCardsString.contains(card) || 
 					(playerWhoHasTheCard != null &&
-					!playerWhoHasTheCard.equals(playerThatContradicted)) ||					
-							checkOtherSugestionCards(suggestionCards,card,playerThatContradicted) // if the other two cards are known to not be owned by the player
+					!playerWhoHasTheCard.equals(playerThatContradicted)) 					
+							//|| checkOtherSugestionCards(suggestionCards,card,playerThatContradicted) // if the other two cards are known to not be owned by the player
 							)) {
-
 				cardDeducted = card;
 				checkedCardsCounter++;
 			}
@@ -460,7 +467,7 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 		} else {
 			calculateNewPathFromCorridor();
-			Board.printPath(minimumPath);
+
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING INSTEAD TO RANDOM ROOM: "+targetRoom);
 			askDiceRoll();
 		}
@@ -470,26 +477,17 @@ public class SmartBotPlayer extends BotPlayerAgent {
 	public void handleValidMoveMsg(ACLMessage msg) {
 		Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
 
-		if(currentTile.isRoom()) { // if he moved inside a room
+		if (roomSolutionString != null && suspectSolutionString != null && weaponSolutionString != null)
+			makeAccusation(new CluedoSuggestion(roomSolutionString, suspectSolutionString, weaponSolutionString, getLocalName()));
+
+		else if(currentTile.isRoom()) { // if he moved inside a room
 			targetRoom = null;
 			targetCoord = null;
 			minimumPath = null;
 
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - I'M INSIDE A ROOM. MAKING A SUGGESTION");
 
-			// Player is in solution room
-			if (roomSolutionString != null && roomSolutionString.equals(currentTile.getRoom())) {
-				if (suspectSolutionString == null || weaponSolutionString == null) {
-					makeBotSuggestionWithNotebook(currentTile);
-				}
-				// Make accusation.
-				else {
-					makeSuggestion(new CluedoSuggestion(roomSolutionString, suspectSolutionString, weaponSolutionString, getLocalName()));
-				}
-			}
-			// Make suggestion
-			else 
-				makeBotSuggestionWithNotebook(currentTile);
+			makeBotSuggestionWithNotebook(currentTile);
 
 		} else {
 			// delete the part of the path that he moved
@@ -566,11 +564,11 @@ public class SmartBotPlayer extends BotPlayerAgent {
 					}
 				}
 			}
-		} else {
-			// it shouldn't get here
-			System.out.println("No target coord after requesting a dice roll");
-			endMyTurn();
-		}
+		} else
+			{
+				System.out.println("No target coord after requesting a dice roll");
+				endMyTurn();
+			}
 	}
 
 	@Override

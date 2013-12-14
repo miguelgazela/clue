@@ -108,6 +108,7 @@ import jade.util.Logger;
 	 */
 	protected void makeAccusation(CluedoSuggestion playerAccusation) {
 		madeAccusation = true;
+		System.out.println("Agent "+getLocalName()+" - SENDING ACCUSATION.");
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - SENDING ACCUSATION.");
 		GameMessage msg = new GameMessage(GameMessage.MAKE_ACCUSATION);
 		msg.addObject(playerAccusation);
