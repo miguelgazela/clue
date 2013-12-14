@@ -515,4 +515,10 @@ public class SmartBotPlayer extends BotPlayerAgent {
 		}
 	}
 
+	@Override
+	public void resetState() {
+		roomSolutionString = null;
+		suspectSolutionString = null;
+		weaponSolutionString = null;
+	}
 }

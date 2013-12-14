@@ -47,12 +47,16 @@ public class NormalBotPlayer extends BotPlayerAgent {
 				// In other room. Needs to get out and try to reach solution room.
 				else {
 					buildPathFromRoomToRoom(roomSolutionString, currentTile);
-					askDiceRoll();
+					if(targetCoord != null)
+						askDiceRoll();
+					else
+						makeBotSuggestionWithNotebook(currentTile); //if room is blocked make another sugestion
 				}
 			}
 			// In the corridor
 			else {
 				buildPathFromCorridorToRoom(roomSolutionString, currentTile);
+
 				askDiceRoll();
 			}
 		}
@@ -81,6 +85,25 @@ public class NormalBotPlayer extends BotPlayerAgent {
 				}
 			}
 		}
+		if(targetCoord == null){ //if solution room is blocked, go to a near neighboor
+			for(Tile door: roomDoors) {
+				for(Tile neighboor: door.getNeighbours()) {
+					if(!neighboor.isOccupied()) {
+
+						ArrayList<Tile> path = gameState.board.djs(posOnBoard, neighboor.getCoordinates());
+						int dist = path.size();
+
+						if(dist < minDistance) {
+							targetRoom = dest;
+							minDistance = dist;
+							minimumPath = path;
+							targetCoord = neighboor.getCoordinates();
+						}
+					}
+				}
+			}
+		}
+
 	}
 
 	private void buildPathFromRoomToRoom(String dest, Tile currentTile) {
@@ -242,7 +265,6 @@ public class NormalBotPlayer extends BotPlayerAgent {
 	@Override
 	public void handleCardFromPlayer(ACLMessage msg, CluedoCard card) {
 		playerNotebook.updateCardState(card.getName(), CluedoNotebook.NOT_SOLUTION);
-
 		ArrayList<String> uncheckedSuspects = playerNotebook.getNotCheckedSuspects();
 		ArrayList<String> uncheckedWeapons = playerNotebook.getNotCheckedWeapons();
 		ArrayList<String> uncheckedRooms = playerNotebook.getNotCheckedRooms();
@@ -338,7 +360,6 @@ public class NormalBotPlayer extends BotPlayerAgent {
 			} else { // the player is blocked in the room
 				makeBotSuggestionWithNotebook(currentTile);
 			}
-
 		} else {
 			calculateNewPathFromCorridor();
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING INSTEAD TO RANDOM ROOM: "+targetRoom);
@@ -439,9 +460,16 @@ public class NormalBotPlayer extends BotPlayerAgent {
 				}
 			}
 		} else {
-			System.out.println("No target coord after requesting a dice roll");
+			System.out.println("Normal Bot: No target coord after requesting a dice roll " + roomSolutionString);
 			System.exit(-1);
 		}
+	}
+
+	@Override
+	public void resetState() {
+		roomSolutionString = null;
+		suspectSolutionString = null;
+		weaponSolutionString = null;
 	}
 
 }

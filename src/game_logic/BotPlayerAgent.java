@@ -157,7 +157,7 @@ public abstract class BotPlayerAgent extends PlayerAgent {
 						posOnBoard = null;
 						myCards = null;
 						playerNotebook = new CluedoNotebook();
-						
+						resetState();
 						// send ack
 						GameMessage msg_ack = new GameMessage(GameMessage.ACK_RESET);
 						sendGameMessage(msg_ack, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
@@ -199,4 +199,6 @@ public abstract class BotPlayerAgent extends PlayerAgent {
 	public abstract void handleValidMoveMsg(ACLMessage msg);
 
 	public abstract void handleDiceRollResult(ACLMessage msg, int diceResult);
+	
+	public abstract void resetState();
 }

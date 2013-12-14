@@ -335,4 +335,9 @@ public class RandomBotPlayer extends BotPlayerAgent {
 			askDiceRoll();
 		}
 	}
+	
+	@Override
+	public void resetState() {
+	}
 }
+

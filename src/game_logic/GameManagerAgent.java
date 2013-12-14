@@ -21,7 +21,10 @@ import jade.wrapper.ContainerController;
 import jade.wrapper.PlatformController;
 import jade.wrapper.StaleProxyException;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -79,7 +82,7 @@ public class GameManagerAgent extends GuiAgent {
 		SLAnimator.start();
 		myGui = new UIGame(this);
 		myLogger.setLevel(Logger.WARNING);
-		numberOfGamesToMake = 20;
+		numberOfGamesToMake = 100;
 		
 		gameState = GameState.Waiting_for_players;
 
@@ -310,7 +313,6 @@ public class GameManagerAgent extends GuiAgent {
 					if(!suggestionsMade.contains(sgst)) {
 						suggestionsMade.add(sgst);
 					}
-					
 					if(cluedo.isGameSolution(playerSuggestion.getRoom(), playerSuggestion.getSuspect(), playerSuggestion.getWeapon())) {
 						myLogger.log(Logger.WARNING, "GAME_MANAGER - WINNER: "+playerSuggestion.getPlayer());
 						myLogger.log(Logger.WARNING, "GAME_MANAGER - SUGGESTION: "+sgst);
@@ -470,12 +472,31 @@ public class GameManagerAgent extends GuiAgent {
 				msg.addObject(cluedo.getGameSolution());
 				sendGameMessage(msg, agent, ACLMessage.INFORM);
 			}
-			
-			for(int i = 0; i < numberTurnsList.size(); i++) {
-				myLogger.log(Logger.WARNING, "GAME_MANAGER - #TURNS: "+numberTurnsList.get(i));
-				myLogger.log(Logger.WARNING, "GAME_MANAGER - #SUGGESTIONS: "+numberSuggestionsList.get(i));
-				myLogger.log(Logger.WARNING, "GAME_MANAGER - #UNIQUE SUGGESTIONS: "+numberUniqueSuggestions.get(i));
+			int avgNumberTurns = 0;
+			int avgNumberSuggestions = 0;
+			int avgNumberUniqueSugestions = 0;
+			int gameSize = numberTurnsList.size();
+			PrintWriter writer = null;
+			try {
+				writer = new PrintWriter("gameStats.txt", "UTF-8");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
 			}
+			
+			
+			for(int i = 0; i < gameSize; i++) {
+				writer.println(numberTurnsList.get(i) + " " + numberSuggestionsList.get(i) + " " + numberUniqueSuggestions.get(i));
+				avgNumberTurns += numberTurnsList.get(i);
+				avgNumberSuggestions += numberSuggestionsList.get(i);
+				avgNumberUniqueSugestions += numberUniqueSuggestions.get(i);
+				
+			}
+			writer.close();
+			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE TURNS: "+avgNumberTurns/gameSize);
+			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE SUGGESTIONS: "+avgNumberSuggestions/gameSize);
+			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE UNIQUE SUGESTIONS: "+avgNumberUniqueSugestions/gameSize);
 		}
 	}
 	
