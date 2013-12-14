@@ -23,7 +23,7 @@ public class RandomBotPlayer extends BotPlayerAgent {
 	public void setup() {
 		super.setup();
 	}
-
+	
 	@Override
 	public void makePlay(ACLMessage msg) {
 		if(targetRoom == null) { // 
@@ -37,7 +37,6 @@ public class RandomBotPlayer extends BotPlayerAgent {
 					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 					askDiceRoll();
 				} else { // the player is blocked in the room
-//					System.out.println("BLOCKED IN ROOM!!!");
 					makeRandomSuggestion(currentTile);
 				}
 				
@@ -334,5 +333,15 @@ public class RandomBotPlayer extends BotPlayerAgent {
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING INSTEAD TO RANDOM ROOM: "+targetRoom);
 			askDiceRoll();
 		}
+	}
+
+	@Override
+	public void handlePlayerAccusation(ACLMessage msg) {
+		// ignore it 
+	}
+
+	@Override
+	public void handleWrongAccusation(ACLMessage msg) {
+		// ignore it
 	}
 }

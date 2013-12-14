@@ -108,6 +108,18 @@ public abstract class BotPlayerAgent extends PlayerAgent {
 						handlePlayerSuggestion(msg);
 					}
 					break;
+					case GameMessage.PLAYER_MADE_ACCUSATION:
+					{
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received accusation warning");
+						handlePlayerAccusation(msg);
+					}
+					break;
+					case GameMessage.WRONG_ACCUSATION:
+					{
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - my accusation was wrong");
+						handleWrongAccusation(msg);
+					}
+					break;
 					case GameMessage.CONTRADICT_SUGGESTION: 
 					{
 						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received request to contradict a suggestion");
@@ -199,4 +211,8 @@ public abstract class BotPlayerAgent extends PlayerAgent {
 	public abstract void handleValidMoveMsg(ACLMessage msg);
 
 	public abstract void handleDiceRollResult(ACLMessage msg, int diceResult);
+	
+	public abstract void handlePlayerAccusation(ACLMessage msg);
+	
+	public abstract void handleWrongAccusation(ACLMessage msg);
 }

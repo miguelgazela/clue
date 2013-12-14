@@ -411,12 +411,15 @@ public class UIGame extends JFrame implements ActionListener {
 						UICoord c = uiResourcesLoader.board_source_coord_main_ui;
 						Coordinates pos = players.get(i).getPosOnBoard();
 						
-						graphics.drawImage(
-								uiResourcesLoader.getPlayerToken(i), 
-								c.x + pos.getX()*uiResourcesLoader.BOARD_POS_DIF, 
-								c.y + pos.getY()*uiResourcesLoader.BOARD_POS_DIF,
-								this
-						);
+						
+						if(pos != null) {
+							graphics.drawImage(
+									uiResourcesLoader.getPlayerToken(i), 
+									c.x + pos.getX()*uiResourcesLoader.BOARD_POS_DIF, 
+									c.y + pos.getY()*uiResourcesLoader.BOARD_POS_DIF,
+									this
+							);
+						}
 						
 						// draw sidebar names
 						c = uiResourcesLoader.sidebar_name_coord;
@@ -426,11 +429,6 @@ public class UIGame extends JFrame implements ActionListener {
 								c.y + i*50,
 								this
 						);
-					}
-					
-					// draw turn player stuff
-					if(turnPlayer != null) {
-						
 					}
 					
 					if(showingResetWarning) {

@@ -96,6 +96,14 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 		new UISuggestion(room);
 	}
 	
+	public void showAccusationPanel() {
+		new UIAccusation();
+	}
+	
+	public void showWrongAccusation(String solution) {
+		JOptionPane.showMessageDialog(null, "Your accusation was wrong. The solution was: "+solution,"", JOptionPane.OK_OPTION);
+	}
+	
 	public void showCardContradict(String cardName, String fromPlayer) {
 		JOptionPane.showMessageDialog(null, "Player "+fromPlayer+" has the card "+cardName+". Your suggestion is wrong.","", JOptionPane.OK_OPTION);
 	}
@@ -194,10 +202,10 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 				
 				// draw the players cards
 				for (Map.Entry entry : notebook.getCardsState().entrySet()) {
-					if((int)entry.getValue() == CluedoNotebook.HAS_CARD) { // if the player has this card
+					if((int)entry.getValue() == CluedoNotebook.HAS_CARD || (int)entry.getValue() == CluedoNotebook.NOT_SOLUTION) { // if the player has this card or is marked as not
 						c = UIResourcesLoader.getInstanceLoader().suggestion_card_coords.get((String)entry.getKey());
 						
-						if(c != null) { // because of the corridor
+						if(c != null) { 
 							g.drawImage(
 									UIResourcesLoader.getInstanceLoader().getCardNoteStatus(CluedoNotebook.NOT_SOLUTION),
 									c.x, 
@@ -248,6 +256,179 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 						GuiEvent ge = new GuiEvent(this, HumanPlayerAgent.MAKE_SUGGESTION);
 						ge.addParameter(suspect);
 						ge.addParameter(weapon);
+						agent.postGuiEvent(ge);
+						dispose();
+					}
+				}
+				repaint();
+			}
+
+			@Override public void mousePressed(MouseEvent e) {}
+			@Override public void mouseReleased(MouseEvent e) {}
+			@Override public void mouseEntered(MouseEvent e) {}
+			@Override public void mouseExited(MouseEvent e) {}
+		}
+		
+		@Override public void actionPerformed(ActionEvent e) {}
+	}
+
+	private class UIAccusation extends JFrame implements ActionListener {
+
+		private static final long serialVersionUID = 4900469373293641686L;
+		private UIAccusationPanel uiAccusationPanel;
+		protected String room = null;
+		protected String suspect = null;
+		protected String weapon = null;
+		
+		public UIAccusation() {
+			super();
+			
+			uiAccusationPanel = new UIAccusationPanel();
+			uiAccusationPanel.addMouseListener(uiAccusationPanel);
+			getContentPane().add(uiAccusationPanel);
+			
+			pack();
+			setLocationRelativeTo(null);
+			setResizable(false);
+			//setUndecorated(true);
+			setVisible(true);
+		}
+		
+		private class UIAccusationPanel extends JPanel implements MouseListener {
+			
+			private static final long serialVersionUID = 2120428337532585982L;
+			transient private BufferedImage background;
+			
+			public UIAccusationPanel() {
+				background = UIResourcesLoader.getInstanceLoader().accusation;
+			}
+			
+			private void writeObject(ObjectOutputStream out) throws IOException {
+		        out.defaultWriteObject();
+		        ImageIO.write(background, "png", out);
+		    }
+
+		    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		        in.defaultReadObject();
+		        background = ImageIO.read(in);
+		    }
+			
+			@Override
+			public Dimension getPreferredSize() {
+				if (background != null) {
+					int width = background.getWidth();
+					int height = background.getHeight();
+					return new Dimension(width, height);
+				}
+				return super.getPreferredSize();
+			}
+			
+			@Override
+			protected void paintComponent(Graphics g) {
+				super.paintComponent(g); // clear off-screen bitmap
+				if (background != null) {
+					g.drawImage(background, 0, 0, this);
+				}
+				
+				UICoord c = null;
+				
+				// draw suspect, weapon and room
+				if(suspect != null) {
+					c = UIResourcesLoader.getInstanceLoader().suggestion_card_coords.get(suspect);
+					g.drawImage(UIResourcesLoader.getInstanceLoader().getCardNoteStatus(CluedoNotebook.HAS_CARD),
+							c.x, c.y, this
+					);
+				}
+				
+				if(weapon != null) {
+					c = UIResourcesLoader.getInstanceLoader().suggestion_card_coords.get(weapon);
+					g.drawImage(UIResourcesLoader.getInstanceLoader().getCardNoteStatus(CluedoNotebook.HAS_CARD),
+							c.x, c.y, this
+					);
+				}
+				
+				if(room != null) {
+					c = UIResourcesLoader.getInstanceLoader().suggestion_card_coords.get(room);
+					g.drawImage(UIResourcesLoader.getInstanceLoader().getCardNoteStatus(CluedoNotebook.HAS_CARD),
+							c.x, c.y, this
+					);
+				}
+				
+				// draw the players cards
+				for (Map.Entry entry : notebook.getCardsState().entrySet()) {
+					if((int)entry.getValue() == CluedoNotebook.HAS_CARD) { // if the player has this card
+						c = UIResourcesLoader.getInstanceLoader().suggestion_card_coords.get((String)entry.getKey());
+						
+						if(c != null) { // because of the corridor
+							g.drawImage(
+									UIResourcesLoader.getInstanceLoader().getCardNoteStatus(CluedoNotebook.NOT_SOLUTION),
+									c.x, 
+									c.y,
+									this
+							);
+						}
+					}
+				}
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int x = e.getX();
+				int y = e.getY();
+				
+				if(x >= 34 && x <= (34 + 17)) { // first column
+					if(y >= 47 && y <= (47+17)) {
+						suspect = "Miss Scarlett";
+					} else if(y >= 68 && y <= (68+17)) {
+						suspect = "Colonel Mustard";
+					} else if(y >= 89 && y <= (89+17)) {
+						suspect = "Mrs. White";
+					} else if(y >= 164 && y <= (164+17)) {
+						weapon = "Candlestick";
+					} else if(y >= 185 && y <= (185+17)) {
+						weapon = "Dagger";
+					} else if(y >= 206 && y <= (206+17)) {
+						weapon = "Lead pipe";
+					} else if(y >= 281 && y <= (281+17)) {
+						room = "Kitchen";
+					} else if(y >= 302 && y <= (302+17)) {
+						room = "Ballroom";
+					} else if(y >= 323 && y <= (323+17)) {
+						room = "Conservatory";
+					} else if(y >= 344 && y <= (344+17)) {
+						room = "Dining Room";
+					} else if(y >= 365 && y <= (365+17)) {
+						room = "Lounge";
+					}
+				}else if(x >= 185 && x <= (185 + 17)) { // second column
+					if(y >= 47 && y <= (47+17)) {
+						suspect = "Reverend Green";
+					} else if(y >= 68 && y <= (68+17)) {
+						suspect = "Mrs. Peacock";
+					} else if(y >= 89 && y <= (89+17)) {
+						suspect = "Professor Plum";
+					} else if(y >= 164 && y <= (164+17)) {
+						weapon = "Revolver";
+					} else if(y >= 185 && y <= (185+17)) {
+						weapon = "Rope";
+					} else if(y >= 206 && y <= (206+17)) {
+						weapon = "Wrench";
+					} else if(y >= 281 && y <= (281+17)) {
+						room = "Hall";
+					} else if(y >= 302 && y <= (302+17)) {
+						room = "Study";
+					} else if(y >= 323 && y <= (323+17)) {
+						room = "Library";
+					} else if(y >= 344 && y <= (344+17)) {
+						room = "Billiard Room";
+					}
+				} else if(x >= 52 && x <= 277 && y >= 430 && y <= 460) { // make accusation
+					if(weapon != null && suspect != null && room != null) {
+						GuiEvent ge = new GuiEvent(this, HumanPlayerAgent.MAKE_ACCUSATION);
+						ge.addParameter(suspect);
+						ge.addParameter(weapon);
+						ge.addParameter(room);
 						agent.postGuiEvent(ge);
 						dispose();
 					}
@@ -399,7 +580,8 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 		}
 		
 		private void makeAccusation() {
-			
+			GuiEvent ge = new GuiEvent(this, HumanPlayerAgent.SHOW_ACCUSATION);
+			agent.postGuiEvent(ge);
 		}
 		
 		@Override

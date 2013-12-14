@@ -41,6 +41,7 @@ import jade.util.Logger;
 	protected boolean pickingBoardMove = false;
 	protected boolean madeBoardMove = false;
 	protected boolean madeSuggestion = false;
+	protected boolean madeAccusation = false;
 	protected int diceResult = -1;
 	
 	protected GameState gameState = null; 
@@ -96,6 +97,20 @@ import jade.util.Logger;
 		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - SENDING SUGGESTION.");
 		GameMessage msg = new GameMessage(GameMessage.MAKE_SUGGESTION);
 		msg.addObject(playerSuggestion);
+		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
+	}
+	
+	/**
+	 * sends the game maneger an accusation for the game solution
+	 * @param room
+	 * @param suspect
+	 * @param weapon
+	 */
+	protected void makeAccusation(CluedoSuggestion playerAccusation) {
+		madeAccusation = true;
+		myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - SENDING ACCUSATION.");
+		GameMessage msg = new GameMessage(GameMessage.MAKE_ACCUSATION);
+		msg.addObject(playerAccusation);
 		sendGameMessage(msg, new AID("host", AID.ISLOCALNAME), ACLMessage.INFORM);
 	}
 	

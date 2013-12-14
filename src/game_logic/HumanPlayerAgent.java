@@ -24,6 +24,8 @@ public class HumanPlayerAgent extends PlayerAgent {
 	public static final int END_TURN = 3;
 	public static final int SHOW_SUGGESTION = 4;
 	public static final int MAKE_SUGGESTION = 5;
+	public static final int SHOW_ACCUSATION = 6;
+	public static final int MAKE_ACCUSATION = 7;
 	
 	private ArrayList<String> messagesToShow = new ArrayList<>();
 	
@@ -71,13 +73,17 @@ public class HumanPlayerAgent extends PlayerAgent {
 						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - RECEIVED TURN PLAYER "+turnPlayerName);
 						
 						if(turnPlayerName.equals(myAgent.getLocalName())) {
-							myTurn = true;
-							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - MY TURN");
-							myGui.setVisible(true);
-							myGui.repaint();
-							
-							if(messagesToShow.size() > 0) {
-								myGui.showMessages(messagesToShow);
+							if(stillInGame) {
+								myTurn = true;
+								myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - MY TURN");
+								myGui.setVisible(true);
+								myGui.repaint();
+
+								if(messagesToShow.size() > 0) {
+									myGui.showMessages(messagesToShow);
+								}
+							} else { // i'm no longer playing
+								endMyTurn();
 							}
 						} else {
 							myTurn = false;
@@ -159,6 +165,24 @@ public class HumanPlayerAgent extends PlayerAgent {
 						
 					}
 					break;
+					case GameMessage.PLAYER_MADE_ACCUSATION:
+					{
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received accusation warning");
+						CluedoSuggestion accusationMade = (CluedoSuggestion) message.getObject(0);
+						String newMessage = accusationMade.getPlayer()+" made accusation: "+accusationMade.getSuspect()+" - "+accusationMade.getWeapon()+" - "+accusationMade.getRoom();
+						messagesToShow.add(newMessage);
+					}
+					break;
+					case GameMessage.WRONG_ACCUSATION:
+					{
+						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - my accusation was wrong");
+						String solution = (String) message.getObject(0);
+						stillInGame = false;
+						myGui.showWrongAccusation(solution);
+						myGui.setVisible(false);
+						endMyTurn();
+					}
+					break;
 					case GameMessage.CONTRADICT_SUGGESTION: 
 					{
 						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - RECEIVED REQUEST TO CONTRADICT SUGGESTION");
@@ -211,6 +235,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 						gameState = null; 
 						posOnBoard = null;
 						myCards = null;
+						messagesToShow.clear();
 						myGui.reset();
 						
 						// send ack
@@ -307,7 +332,7 @@ public class HumanPlayerAgent extends PlayerAgent {
 		break;
 		case END_TURN:
 		{
-			if(madeBoardMove || madeSuggestion) {
+			if(madeBoardMove || madeSuggestion || madeAccusation) {
 				madeBoardMove = false;
 				messagesToShow.clear();
 				endMyTurn();
@@ -333,6 +358,23 @@ public class HumanPlayerAgent extends PlayerAgent {
 				String suspect = (String)ge.getParameter(0);
 				String weapon = (String)ge.getParameter(1);
 				makeSuggestion(new CluedoSuggestion(room, suspect, weapon, getLocalName()));
+			}
+		}
+		break;
+		case SHOW_ACCUSATION:
+		{
+			if(!madeAccusation && !madeSuggestion) {
+				myGui.showAccusationPanel();
+			}
+		}
+		break;
+		case MAKE_ACCUSATION:
+		{
+			if(!madeAccusation) {
+				String suspect = (String)ge.getParameter(0);
+				String weapon = (String)ge.getParameter(1);
+				String room = (String)ge.getParameter(2);
+				makeAccusation(new CluedoSuggestion(room, suspect, weapon, getLocalName()));
 			}
 		}
 		break;
