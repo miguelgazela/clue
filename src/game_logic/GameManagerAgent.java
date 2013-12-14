@@ -84,8 +84,9 @@ public class GameManagerAgent extends GuiAgent {
 		SLAnimator.start();
 		myGui = new UIGame(this);
 
+
 		myLogger.setLevel(Logger.SEVERE);
-		numberOfGamesToMake = 2;
+		numberOfGamesToMake = 1000;
 //		winners = new String[numberOfGamesToMake];
 		
 		gameState = GameState.Waiting_for_players;
@@ -517,7 +518,7 @@ public class GameManagerAgent extends GuiAgent {
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - GAMEOVER");
 		gameIsOver = true;
 		myGui.repaint();
-		
+
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - #TURNS: "+numberTurns);
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - #SUGGESTIONS: "+numberSuggestions);
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - #UNIQUE SUGGESTIONS: "+suggestionsMade.size());
@@ -542,6 +543,7 @@ public class GameManagerAgent extends GuiAgent {
 			int avgNumberSuggestions = 0;
 			int avgNumberUniqueSugestions = 0;
 			int gameSize = numberTurnsList.size();
+			
 			PrintWriter writer = null;
 			try {
 				writer = new PrintWriter("gameStats.txt", "UTF-8");
@@ -564,6 +566,7 @@ public class GameManagerAgent extends GuiAgent {
 			// write number of wins
 			
 			writer.close();
+			System.out.println("Game Over");
 			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE TURNS: "+avgNumberTurns/gameSize);
 			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE SUGGESTIONS: "+avgNumberSuggestions/gameSize);
 			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE UNIQUE SUGESTIONS: "+avgNumberUniqueSugestions/gameSize);

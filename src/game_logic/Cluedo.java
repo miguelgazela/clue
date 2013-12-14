@@ -157,9 +157,9 @@ public class Cluedo implements Serializable{
 				cards.remove(card);
 			}
 		}
-		myLogger.log(Logger.INFO, "Cluedo - The murderer is: "+murderer.getName());
-		myLogger.log(Logger.INFO, "Cluedo - The weapon used was: "+weapon.getName());
-		myLogger.log(Logger.INFO, "Cluedo - The room was: "+room.getName());
+		//myLogger.log(Logger.INFO, "Cluedo - The murderer is: "+murderer.getName());
+		//myLogger.log(Logger.INFO, "Cluedo - The weapon used was: "+weapon.getName());
+		//myLogger.log(Logger.INFO, "Cluedo - The room was: "+room.getName());
 	}
 	
 	/**
@@ -192,7 +192,7 @@ public class Cluedo implements Serializable{
 		
 		// adds players to arraylist
 		for(int i = 0; i < numberPlayers; i++) {
-			myLogger.log(Logger.INFO, "Cluedo - Initiating player: "+suspects[i]);
+			//myLogger.log(Logger.INFO, "Cluedo - Initiating player: "+suspects[i]);
 			players.add(new CluedoPlayer(suspects[i], board.getPlayerStartingPos(suspects[i])));
 		}
 		
@@ -206,7 +206,7 @@ public class Cluedo implements Serializable{
 				}
 			}
 		}
-		myLogger.log(Logger.INFO, "Cluedo - All cards were distributed among the "+numberPlayers+" players");
+		//myLogger.log(Logger.INFO, "Cluedo - All cards were distributed among the "+numberPlayers+" players");
 	}
 	
 	/**
@@ -314,7 +314,7 @@ public class Cluedo implements Serializable{
 		}
 		
 		setSuggestionContradictor();
-		myLogger.log(Logger.INFO, "Cluedo - Player that goes first: "+suspects[turnPlayerIndex]);
+		//myLogger.log(Logger.INFO, "Cluedo - Player that goes first: "+suspects[turnPlayerIndex]);
 	}
 	
 	public class GameState implements Serializable {

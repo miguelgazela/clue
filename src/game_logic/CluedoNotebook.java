@@ -20,7 +20,7 @@ public class CluedoNotebook implements Serializable {
 	private ArrayList<CluedoSuggestion> otherPlayersSuggestions;	
 	private HashMap<String, CluedoCard> cardsShownToOtherPlayers;
 	private HashMap<String, String> otherPlayersKnownCards;
-
+	private HashMap<String, ArrayList<String>> cardsNotOwnedByPlayer;
 	private Random r = new Random(System.currentTimeMillis());
 
 	public CluedoNotebook() {
@@ -28,6 +28,7 @@ public class CluedoNotebook implements Serializable {
 		otherPlayersSuggestions = new ArrayList<>();
 		cardsShownToOtherPlayers = new HashMap<>();
 		otherPlayersKnownCards = new HashMap<>();
+		cardsNotOwnedByPlayer = new HashMap<>();
 		initCardsState();
 	}
 
@@ -82,11 +83,32 @@ public class CluedoNotebook implements Serializable {
 	public void saveOtherPlayerCard(String card, String player) {		
 		otherPlayersKnownCards.put(card, player);
 	}
-	
+
 	public String getPlayerWhoHasCard(String card) {
 		return otherPlayersKnownCards.get(card);
 	}
 
+	public void saveCardNotOwnedByPlayer(String card, String player) {
+		ArrayList<String> notOwnedCards = cardsNotOwnedByPlayer.get(player);
+		if(notOwnedCards == null)
+			notOwnedCards = new ArrayList<String>();
+		
+		notOwnedCards.add(card);	
+		
+		cardsNotOwnedByPlayer.put(player,notOwnedCards);
+	}
+
+	public ArrayList<String> getCardNotOwnedByPlayer(String player) {
+		return cardsNotOwnedByPlayer.get(player);
+	}
+
+	public void updateCardNotOwnedByPlayer(String player, String card) {
+
+		for(String otherPlayer :cardsNotOwnedByPlayer.keySet()){
+			if(!otherPlayer.equals(player))		
+				saveCardNotOwnedByPlayer(card,otherPlayer);						
+		}
+	}
 	public boolean hasShownCardToPlayer(String player, CluedoCard card) {
 		return cardsShownToOtherPlayers.containsKey(player) &&
 				cardsShownToOtherPlayers.containsValue(card);
