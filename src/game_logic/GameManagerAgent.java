@@ -86,7 +86,7 @@ public class GameManagerAgent extends GuiAgent {
 
 
 		myLogger.setLevel(Logger.SEVERE);
-		numberOfGamesToMake = 2;
+		numberOfGamesToMake = 1000;
 //		winners = new String[numberOfGamesToMake];
 		
 		gameState = GameState.Waiting_for_players;
@@ -518,7 +518,7 @@ public class GameManagerAgent extends GuiAgent {
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - GAMEOVER");
 		gameIsOver = true;
 		myGui.repaint();
-		
+
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - #TURNS: "+numberTurns);
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - #SUGGESTIONS: "+numberSuggestions);
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - #UNIQUE SUGGESTIONS: "+suggestionsMade.size());
