@@ -90,11 +90,7 @@ public class Cluedo implements Serializable{
 	 * @return
 	 */
 	public boolean isGameSolution(String room, String suspect, String weapon) {
-		String suggestion = room+"-"+suspect+"-"+weapon;
-		String solution = this.room.getName()+"-"+murderer.getName()+"-"+this.weapon.getName();
-		
-		return suggestion.equals(solution);
-		//return (this.room.getName().equals(room) && this.murderer.getName().equals(suspect) && this.weapon.getName().equals(weapon));
+		return (this.room.getName().equals(room) && this.murderer.getName().equals(suspect) && this.weapon.getName().equals(weapon));
 	}
 	
 	/**
@@ -142,7 +138,7 @@ public class Cluedo implements Serializable{
 			} else if(weapon == null && card.getType() == CluedoCard.WEAPON) {
 				weapon = card;
 				cards.remove(card);
-			} else if(room == null && card.getType() == CluedoCard.ROOM) {
+			} else if(room == null && card.getType() == CluedoCard.ROOM && !card.getName().equals("Corridor")) {
 				room = card;
 				cards.remove(card);
 			}

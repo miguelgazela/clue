@@ -25,6 +25,8 @@ public class HumanPlayerAgent extends PlayerAgent {
 	public static final int SHOW_SUGGESTION = 4;
 	public static final int MAKE_SUGGESTION = 5;
 	
+	private ArrayList<String> messagesToShow = new ArrayList<>();
+	
 	protected UIHumanPlayer myGui;
 
 	public void setup() {
@@ -67,15 +69,21 @@ public class HumanPlayerAgent extends PlayerAgent {
 					{
 						String turnPlayerName = (String) message.getObject(0);
 						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - RECEIVED TURN PLAYER "+turnPlayerName);
-
+						
 						if(turnPlayerName.equals(myAgent.getLocalName())) {
 							myTurn = true;
 							myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - MY TURN");
 							myGui.setVisible(true);
+							myGui.repaint();
+							
+							if(messagesToShow.size() > 0) {
+								myGui.showMessages(messagesToShow);
+							}
 						} else {
 							myTurn = false;
-							myGui.setVisible(false);
+							//myGui.setVisible(false);
 						}
+						myGui.repaint();
 					}
 					break;
 					case GameMessage.RSLT_DICE_ROLL: // receiving the result of the dice roll
@@ -145,6 +153,10 @@ public class HumanPlayerAgent extends PlayerAgent {
 					case GameMessage.PLAYER_MADE_SUGGESTION:
 					{
 						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received suggestion warning");
+						CluedoSuggestion suggestionMade = (CluedoSuggestion) message.getObject(0);
+						String newMessage = suggestionMade.getPlayer()+" suggested: "+suggestionMade.getSuspect()+" - "+suggestionMade.getWeapon()+" - "+suggestionMade.getRoom();
+						messagesToShow.add(newMessage);
+						
 					}
 					break;
 					case GameMessage.CONTRADICT_SUGGESTION: 
@@ -158,6 +170,8 @@ public class HumanPlayerAgent extends PlayerAgent {
 						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received a NO contradiction to suggestion");
 						String playerThatContradicted = (String)message.getObject(0); 
 						CluedoSuggestion playerSuggestion = (CluedoSuggestion) message.getObject(1);
+						String newMessage = playerThatContradicted+" had no card to contradict "+playerSuggestion.getPlayer();
+						messagesToShow.add(newMessage);
 					}
 					break;
 					case GameMessage.HAVE_CONTRADICTION_CARD: // some player had a card to contradict another player's suggestion
@@ -165,6 +179,8 @@ public class HumanPlayerAgent extends PlayerAgent {
 						myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - received contradiction to suggestion");
 						String playerThatContradicted = (String)message.getObject(0); 
 						CluedoSuggestion playerSuggestion = (CluedoSuggestion) message.getObject(1);
+						String newMessage = playerThatContradicted+" had at least one card to contradict "+playerSuggestion.getPlayer();
+						messagesToShow.add(newMessage);
 					}
 					break;
 					case GameMessage.CONTRADICT_CARD: // a card to contradict our suggestion
@@ -249,6 +265,9 @@ public class HumanPlayerAgent extends PlayerAgent {
 					GameMessage contradictionCard = new GameMessage(GameMessage.CONTRADICT_CARD);
 					contradictionCard.addObject(card);
 					sendGameMessage(contradictionCard, new AID(playerSuggestion.getPlayer(), AID.ISLOCALNAME), ACLMessage.INFORM);
+					
+					String newMessage = "You contradicted "+playerSuggestion.getPlayer()+" with the card "+card.getName();
+					messagesToShow.add(newMessage);
 					return;
 				}
 			}
@@ -290,8 +309,9 @@ public class HumanPlayerAgent extends PlayerAgent {
 		{
 			if(madeBoardMove || madeSuggestion) {
 				madeBoardMove = false;
+				messagesToShow.clear();
 				endMyTurn();
-				myGui.setVisible(false);
+				//myGui.setVisible(false);
 			}
 		}
 		break;

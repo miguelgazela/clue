@@ -67,6 +67,7 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 	
 	public void setGameState(GameState gameState) {
 		this.gameState = gameState;
+		repaint();
 	}
 	
 	public void updatePlayerCards(ArrayList<CluedoCard> cards) {
@@ -97,6 +98,14 @@ public class UIHumanPlayer extends JFrame implements ActionListener {
 	
 	public void showCardContradict(String cardName, String fromPlayer) {
 		JOptionPane.showMessageDialog(null, "Player "+fromPlayer+" has the card "+cardName+". Your suggestion is wrong.","", JOptionPane.OK_OPTION);
+	}
+	
+	public void showMessages(ArrayList<String> messages) {
+		String fullMessage = "";
+		for(String message: messages) {
+			fullMessage += (message+"\n");
+		}
+		JOptionPane.showMessageDialog(null, fullMessage,"", JOptionPane.OK_OPTION);
 	}
 	
 	public void showGameOver(String winner, String solution) {
