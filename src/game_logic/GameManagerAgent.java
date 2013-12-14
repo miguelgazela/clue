@@ -57,6 +57,7 @@ public class GameManagerAgent extends GuiAgent {
 	private int numberTurns = 0;
 	private int numberSuggestions = 0;
 	private int numberOfGamesToMake = 0;
+	private final int limitTurns = 3500;
 	
 	public static void main(String args[]) throws StaleProxyException {
 		Boot.main(new String[]{"-gui"});
@@ -78,8 +79,8 @@ public class GameManagerAgent extends GuiAgent {
 		// create and show the GUI
 		SLAnimator.start();
 		myGui = new UIGame(this);
-		myLogger.setLevel(Logger.INFO);
-		numberOfGamesToMake = 1;
+		myLogger.setLevel(Logger.WARNING);
+		numberOfGamesToMake = 20;
 		
 		gameState = GameState.Waiting_for_players;
 
@@ -201,7 +202,14 @@ public class GameManagerAgent extends GuiAgent {
 							myAgent.addBehaviour(new UpdateGameStateOfAllAgents());
 							cluedo.updateTurnPlayer();
 							numberTurns++;
-							notifyTurnPlayer();
+							
+							if(numberTurns > limitTurns) {
+								myLogger.log(Logger.WARNING, "Agent "+getLocalName()+" - IT'S OVER "+limitTurns+" turns!!!");
+								myLogger.log(Logger.WARNING, "GAME_MANAGER - #UNIQUE SUGGESTIONS: "+suggestionsMade.size());
+								resetGame();
+							} else {
+								notifyTurnPlayer();
+							}
 						}
 					}
 					break;
@@ -212,7 +220,7 @@ public class GameManagerAgent extends GuiAgent {
 					}
 						break;
 					}
-				} catch (UnreadableException e) {
+				} catch (UnreadableException | InterruptedException e) {
 					e.printStackTrace();
 					System.exit(-1);
 				}
@@ -305,9 +313,9 @@ public class GameManagerAgent extends GuiAgent {
 					}
 					
 					if(cluedo.isGameSolution(playerSuggestion.getRoom(), playerSuggestion.getSuspect(), playerSuggestion.getWeapon())) {
-						myLogger.log(Logger.INFO, "GAME_MANAGER - WINNER: "+playerSuggestion.getPlayer());
-						myLogger.log(Logger.INFO, "GAME_MANAGER - SUGGESTION: "+sgst);
-						myLogger.log(Logger.INFO, "GAME_MANAGER - SOLUTION WAS: "+cluedo.getGameSolution());
+						myLogger.log(Logger.WARNING, "GAME_MANAGER - WINNER: "+playerSuggestion.getPlayer());
+						myLogger.log(Logger.WARNING, "GAME_MANAGER - SUGGESTION: "+sgst);
+						myLogger.log(Logger.WARNING, "GAME_MANAGER - SOLUTION WAS: "+cluedo.getGameSolution());
 						gameOver();
 					} else { // somebody must have a card to contradict this suggestion
 						
@@ -443,7 +451,11 @@ public class GameManagerAgent extends GuiAgent {
 	}
 	
 	public void gameOver() {
-		myLogger.log(Logger.INFO, "GAME_MANAGER - GAMEOVER");
+		myLogger.log(Logger.WARNING, "GAME_MANAGER - GAMEOVER");
+		
+		myLogger.log(Logger.WARNING, "GAME_MANAGER - #TURNS: "+numberTurns);
+		myLogger.log(Logger.WARNING, "GAME_MANAGER - #SUGGESTIONS: "+numberSuggestions);
+		myLogger.log(Logger.WARNING, "GAME_MANAGER - #UNIQUE SUGGESTIONS: "+suggestionsMade.size());
 		
 		numberTurnsList.add(new Integer(numberTurns));
 		numberSuggestionsList.add(new Integer(numberSuggestions));

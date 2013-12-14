@@ -90,7 +90,11 @@ public class Cluedo implements Serializable{
 	 * @return
 	 */
 	public boolean isGameSolution(String room, String suspect, String weapon) {
-		return (this.room.getName().equals(room) && this.murderer.getName().equals(suspect) && this.weapon.getName().equals(weapon));
+		String suggestion = room+"-"+suspect+"-"+weapon;
+		String solution = this.room.getName()+"-"+murderer.getName()+"-"+this.weapon.getName();
+		
+		return suggestion.equals(solution);
+		//return (this.room.getName().equals(room) && this.murderer.getName().equals(suspect) && this.weapon.getName().equals(weapon));
 	}
 	
 	/**
