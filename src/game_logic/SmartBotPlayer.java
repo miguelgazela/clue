@@ -569,7 +569,7 @@ public class SmartBotPlayer extends BotPlayerAgent {
 				System.out.println("No target coord after requesting a dice roll");
 				endMyTurn();
 			}
-	}
+		} 
 
 	@Override
 	public void resetState() {
