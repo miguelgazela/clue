@@ -3,12 +3,15 @@ package game_ui;
 import game_logic.CluedoPlayer;
 import game_logic.Coordinates;
 import game_logic.GameManagerAgent;
+import game_logic.Tile;
 import jade.core.Agent;
 import jade.core.Runtime;
 import jade.gui.GuiEvent;
 import jade.wrapper.AgentController;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -420,6 +423,17 @@ public class UIGame extends JFrame implements ActionListener {
 									this
 							);
 						}
+						
+						turnPlayer = gameManagerAgent.getCluedo().getTurnPlayerName();
+						Color oldColor = g.getColor(); // saves the old color
+						// draw turn player name
+						if(turnPlayer != null) {
+							Font font = new Font("Verdana", Font.BOLD, 24);
+							g.setFont(font);
+							g.setColor(UIResourcesLoader.getInstanceLoader().player_colors.get(turnPlayer));
+							g.drawString(turnPlayer, 280, 696);
+						}
+						g.setColor(oldColor);
 						
 						// draw sidebar names
 						c = uiResourcesLoader.sidebar_name_coord;

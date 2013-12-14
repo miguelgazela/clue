@@ -49,8 +49,10 @@ public class GameManagerAgent extends GuiAgent {
 	
 	private Cluedo cluedo;
 	private GameState gameState;
+	public boolean gameIsOver = false;
 	
 	// for statistics purposes
+	private String[] winners = null;
 	private ArrayList<String> suggestionsMade = new ArrayList<>();
 	private ArrayList<Integer> numberTurnsList = new ArrayList<>();
 	private ArrayList<Integer> numberSuggestionsList = new ArrayList<>();
@@ -82,8 +84,10 @@ public class GameManagerAgent extends GuiAgent {
 		SLAnimator.start();
 		myGui = new UIGame(this);
 
-		myLogger.setLevel(Logger.INFO);
-		numberOfGamesToMake = 50;
+
+		myLogger.setLevel(Logger.SEVERE);
+		numberOfGamesToMake = 2;
+//		winners = new String[numberOfGamesToMake];
 		
 		gameState = GameState.Waiting_for_players;
 
@@ -212,6 +216,7 @@ public class GameManagerAgent extends GuiAgent {
 							myAgent.addBehaviour(new UpdateGameStateOfAllAgents());
 							cluedo.updateTurnPlayer();
 							numberTurns++;
+							myGui.repaint();
 							
 							if(numberTurns > limitTurns) {
 								myLogger.log(Logger.WARNING, "Agent "+getLocalName()+" - IT'S OVER "+limitTurns+" turns!!!");
@@ -489,6 +494,7 @@ public class GameManagerAgent extends GuiAgent {
 	 */
 	public void startGame() {
 		numberOfGamesToMake--;
+		gameIsOver = false;
 		try {
 			cluedo = new Cluedo(agents.size());
 			
@@ -510,6 +516,8 @@ public class GameManagerAgent extends GuiAgent {
 	
 	public void gameOver() {
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - GAMEOVER");
+		gameIsOver = true;
+		myGui.repaint();
 		
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - #TURNS: "+numberTurns);
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - #SUGGESTIONS: "+numberSuggestions);
@@ -518,6 +526,8 @@ public class GameManagerAgent extends GuiAgent {
 		numberTurnsList.add(new Integer(numberTurns));
 		numberSuggestionsList.add(new Integer(numberSuggestions));
 		numberUniqueSuggestions.add(new Integer(suggestionsMade.size()));
+		
+//		winners[2 - (numberOfGamesToMake + 1)] = cluedo.getTurnPlayerName();
 		
 		if(numberOfGamesToMake > 0) { // reset and start another game
 			resetGame();
@@ -546,11 +556,15 @@ public class GameManagerAgent extends GuiAgent {
 			
 			for(int i = 0; i < gameSize; i++) {
 				writer.println(numberTurnsList.get(i) + " " + numberSuggestionsList.get(i) + " " + numberUniqueSuggestions.get(i));
+//				writer.println(numberTurnsList.get(i) + " " + numberSuggestionsList.get(i) + " " + numberUniqueSuggestions.get(i) + " " + winners[i]);
 				avgNumberTurns += numberTurnsList.get(i);
 				avgNumberSuggestions += numberSuggestionsList.get(i);
 				avgNumberUniqueSugestions += numberUniqueSuggestions.get(i);
 				
 			}
+			
+			// write number of wins
+			
 			writer.close();
 			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE TURNS: "+avgNumberTurns/gameSize);
 			myLogger.log(Logger.WARNING, "GAME_MANAGER - #AVERAGE SUGGESTIONS: "+avgNumberSuggestions/gameSize);
