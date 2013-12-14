@@ -36,6 +36,7 @@ public class GameManagerAgent extends GuiAgent {
 	public static final int CREATE_GAME = 1;
 	public static final int HUMAN = 2;
 	public static final int BOT = 3;
+	public static final int RESET_GAME = 4;
 	
 	private UIGame myGui;
 	
@@ -445,17 +446,11 @@ public class GameManagerAgent extends GuiAgent {
 		myLogger.log(Logger.INFO, "GAME_MANAGER - GAMEOVER");
 		
 		numberTurnsList.add(new Integer(numberTurns));
-		numberTurns = 0;
 		numberSuggestionsList.add(new Integer(numberSuggestions));
-		numberSuggestions = 0;
 		numberUniqueSuggestions.add(new Integer(suggestionsMade.size()));
-		suggestionsMade.clear();
 		
 		if(numberOfGamesToMake > 0) { // reset and start another game
-			for(AID agent: agents) {
-				GameMessage msg = new GameMessage(GameMessage.RESET);
-				sendGameMessage(msg, agent, ACLMessage.INFORM);
-			}
+			resetGame();
 		} else {
 			// send all players that the game is over
 			for(AID agent: agents) {
@@ -470,6 +465,18 @@ public class GameManagerAgent extends GuiAgent {
 				myLogger.log(Logger.WARNING, "GAME_MANAGER - #SUGGESTIONS: "+numberSuggestionsList.get(i));
 				myLogger.log(Logger.WARNING, "GAME_MANAGER - #UNIQUE SUGGESTIONS: "+numberUniqueSuggestions.get(i));
 			}
+		}
+	}
+	
+	private void resetGame() {
+		numberTurns = 0;
+		numberSuggestions = 0;
+		suggestionsMade.clear();
+		
+		// send reset msg to all agents
+		for(AID agent: agents) {
+			GameMessage msg = new GameMessage(GameMessage.RESET);
+			sendGameMessage(msg, agent, ACLMessage.INFORM);
 		}
 	}
 
@@ -597,7 +604,11 @@ public class GameManagerAgent extends GuiAgent {
 			}
 		}
 		break;
-
+		case RESET_GAME:
+		{
+			
+		}
+		break;
 		default:
 			// should not get here
 			break;

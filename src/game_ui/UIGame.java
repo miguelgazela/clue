@@ -369,7 +369,6 @@ public class UIGame extends JFrame implements ActionListener {
 		private Graphics graphics;
 		private boolean gameIsOver = false;
 		private boolean showingResetWarning = false;
-		private int game_type = -1;
 		
 		public UIGamePanel() {
 			uiResourcesLoader = UIResourcesLoader.getInstanceLoader();
@@ -386,7 +385,6 @@ public class UIGame extends JFrame implements ActionListener {
 			hasGameRunning = false;
 			gameIsOver = false;
 			showingResetWarning = false;
-			game_type = -1;
 		}
 
 		@Override
@@ -463,8 +461,9 @@ public class UIGame extends JFrame implements ActionListener {
 		}
 		
 		private void resetGame() {
-			//clearPossibleGame();
-			//startGame();
+			clearPossibleGame();
+			GuiEvent ge = new GuiEvent(this, GameManagerAgent.RESET_GAME);
+			gameManagerAgent.postGuiEvent(ge);
 		}
 		
 		@Override
