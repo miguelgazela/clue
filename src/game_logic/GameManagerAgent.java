@@ -56,6 +56,7 @@ public class GameManagerAgent extends GuiAgent {
 	private int numberTurns = 0;
 	private int numberSuggestions = 0;
 	private int numberOfGamesToMake = 0;
+	private int limitTurns = 2000;
 	
 	public static void main(String args[]) throws StaleProxyException {
 		Boot.main(new String[]{"-gui"});
