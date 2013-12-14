@@ -38,12 +38,11 @@ public class NormalBotPlayer extends BotPlayerAgent {
 				// In solution room.
 				if (currentTile.getRoom().equals(roomSolutionString)) {
 					// Make suggestion.
-					if (suspectSolutionString == null || weaponSolutionString == null)
+					if (suspectSolutionString == null || weaponSolutionString == null) {
 						makeBotSuggestionWithNotebook(currentTile);
-
-					// Make accusation.
-					else
+					} else { // make accusation
 						makeSuggestion(new CluedoSuggestion(roomSolutionString, suspectSolutionString, weaponSolutionString, getLocalName()));
+					}
 				}
 				// In other room. Needs to get out and try to reach solution room.
 				else {
@@ -199,13 +198,11 @@ public class NormalBotPlayer extends BotPlayerAgent {
 					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 					askDiceRoll();
 				} else { // the player is blocked in the room
-					//					System.out.println("BLOCKED IN ROOM!!!");
 					makeBotSuggestionWithNotebook(currentTile);
 				}
 
 			} else {
 				calculateNewPathFromCorridor();
-				Board.printPath(minimumPath);
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING TO RANDOM ROOM: "+targetRoom);
 				askDiceRoll();
 			}
@@ -239,7 +236,6 @@ public class NormalBotPlayer extends BotPlayerAgent {
 				break;
 			}
 		}
-
 		makeSuggestion(new CluedoSuggestion(current.getRoom(), suspect, weapon, getLocalName()));
 	}
 
@@ -331,8 +327,6 @@ public class NormalBotPlayer extends BotPlayerAgent {
 
 	@Override
 	public void handleInvalidMoveMsg(ACLMessage msg) {
-		// 
-		//		System.out.println("I MADE AN INVALID MOVE. SOME TILE IN THE PATH MUST BE OCCUPIED NOW");
 		Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
 
 		if(currentTile.isRoom()) {
@@ -347,7 +341,6 @@ public class NormalBotPlayer extends BotPlayerAgent {
 
 		} else {
 			calculateNewPathFromCorridor();
-			Board.printPath(minimumPath);
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING INSTEAD TO RANDOM ROOM: "+targetRoom);
 			askDiceRoll();
 		}
@@ -390,10 +383,6 @@ public class NormalBotPlayer extends BotPlayerAgent {
 
 				it.remove();
 			}
-
-			System.out.println("New minimum path after removing moved tiles");
-			Board.printPath(minimumPath);
-
 			endMyTurn();
 		}
 	}
@@ -415,7 +404,6 @@ public class NormalBotPlayer extends BotPlayerAgent {
 			} else {
 
 				if(minimumPath.size() <= diceResult) { // he can get to the room
-					// TODO needs to check if the room door is still free
 					enterRoom = true;
 				} else {
 
@@ -451,8 +439,8 @@ public class NormalBotPlayer extends BotPlayerAgent {
 				}
 			}
 		} else {
-			// it shouldn't get here
-			//			System.out.println("No target coord after requesting a dice roll");
+			System.out.println("No target coord after requesting a dice roll");
+			System.exit(-1);
 		}
 	}
 
