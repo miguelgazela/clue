@@ -1,7 +1,6 @@
 package game_logic;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.Random;
 
@@ -162,6 +161,8 @@ public class SmartBotPlayer extends BotPlayerAgent {
 	private void calculateNewPathFromCorridor() {
 		int minDistance = 9999;
 		targetCoord = null;
+		minimumPath = null;
+		targetRoom = null;
 
 		ArrayList<String> rooms = playerNotebook.getNotCheckedRooms();
 
@@ -207,7 +208,6 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 			} else {
 				calculateNewPathFromCorridor();
-				Board.printPath(minimumPath);
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING TO RANDOM ROOM: "+targetRoom);
 				askDiceRoll();
 			}
@@ -410,7 +410,6 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 		} else {
 			calculateNewPathFromCorridor();
-			Board.printPath(minimumPath);
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING INSTEAD TO RANDOM ROOM: "+targetRoom);
 			askDiceRoll();
 		}
@@ -444,10 +443,6 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 				it.remove();
 			}
-
-			System.out.println("New minimum path after removing moved tiles");
-			Board.printPath(minimumPath);
-
 			endMyTurn();
 		}
 	}
@@ -509,12 +504,19 @@ public class SmartBotPlayer extends BotPlayerAgent {
 					}
 				}
 			}
-		} else 
-			System.out.println("No target coord after requesting a dice roll");
+		} else {
+//			System.out.println("No target coord after requesting a dice roll");
+			endMyTurn();
+		}
 	}
 
 	@Override
 	public void resetState() {
+		playerNotebook = new CluedoNotebook();
+		targetCoord = null;
+		minimumPath = null;
+		targetRoom = null;
+
 		roomSolutionString = null;
 		suspectSolutionString = null;
 		weaponSolutionString = null;

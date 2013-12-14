@@ -33,16 +33,14 @@ public class NormalBotPlayer extends BotPlayerAgent {
 
 		// Room is known.
 		if (roomSolutionString != null) {
+			if (suspectSolutionString != null && weaponSolutionString != null)
+				makeAccusation(new CluedoSuggestion(roomSolutionString, suspectSolutionString, weaponSolutionString, getLocalName()));
 
-			if (currentTile.isRoom()) {
+			else if (currentTile.isRoom()) {
 				// In solution room.
 				if (currentTile.getRoom().equals(roomSolutionString)) {
 					// Make suggestion.
-					if (suspectSolutionString == null || weaponSolutionString == null) {
-						makeBotSuggestionWithNotebook(currentTile);
-					} else { // make accusation
-						makeSuggestion(new CluedoSuggestion(roomSolutionString, suspectSolutionString, weaponSolutionString, getLocalName()));
-					}
+					makeBotSuggestionWithNotebook(currentTile);
 				}
 				// In other room. Needs to get out and try to reach solution room.
 				else {
@@ -56,8 +54,10 @@ public class NormalBotPlayer extends BotPlayerAgent {
 			// In the corridor
 			else {
 				buildPathFromCorridorToRoom(roomSolutionString, currentTile);
-
-				askDiceRoll();
+				if (targetCoord != null)
+					askDiceRoll();
+				else
+					endMyTurn();
 			}
 		}
 		// Room not known
@@ -68,6 +68,8 @@ public class NormalBotPlayer extends BotPlayerAgent {
 	private void buildPathFromCorridorToRoom(String dest, Tile currentTile) {
 		int minDistance = 9999;
 		targetCoord = null;
+		minimumPath = null;
+		targetRoom = null;
 
 		ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(dest);
 
@@ -109,6 +111,10 @@ public class NormalBotPlayer extends BotPlayerAgent {
 	private void buildPathFromRoomToRoom(String dest, Tile currentTile) {
 		ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(currentTile.getRoom());
 		int minDistance = 9999;
+		targetRoom = null;
+		targetCoord = null;
+		doorToExit = null;
+		minimumPath = null;
 
 		for(Tile door: roomDoors) {
 			if(!door.isOccupied()) {
@@ -181,6 +187,8 @@ public class NormalBotPlayer extends BotPlayerAgent {
 	private void calculateNewPathFromCorridor() {
 		int minDistance = 9999;
 		targetCoord = null;
+		minimumPath = null;
+		targetRoom = null;
 
 		while(true) {
 			String randomRoom = playerNotebook.getNotCheckedRooms().get(r.nextInt(playerNotebook.getNotCheckedRooms().size()));;
@@ -265,6 +273,7 @@ public class NormalBotPlayer extends BotPlayerAgent {
 	@Override
 	public void handleCardFromPlayer(ACLMessage msg, CluedoCard card) {
 		playerNotebook.updateCardState(card.getName(), CluedoNotebook.NOT_SOLUTION);
+		
 		ArrayList<String> uncheckedSuspects = playerNotebook.getNotCheckedSuspects();
 		ArrayList<String> uncheckedWeapons = playerNotebook.getNotCheckedWeapons();
 		ArrayList<String> uncheckedRooms = playerNotebook.getNotCheckedRooms();
@@ -371,26 +380,17 @@ public class NormalBotPlayer extends BotPlayerAgent {
 	public void handleValidMoveMsg(ACLMessage msg) {
 		Tile currentTile = gameState.board.getTileAtPosition(posOnBoard);
 
-		if(currentTile.isRoom()) { // if he moved inside a room
+		if (roomSolutionString != null && suspectSolutionString != null && weaponSolutionString != null)
+			makeAccusation(new CluedoSuggestion(roomSolutionString, suspectSolutionString, weaponSolutionString, getLocalName()));
+
+		else if(currentTile.isRoom()) { // if he moved inside a room
 			targetRoom = null;
 			targetCoord = null;
 			minimumPath = null;
 
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - I'M INSIDE A ROOM. MAKING A SUGGESTION");
 
-			// Player is in solution room
-			if (roomSolutionString != null && roomSolutionString.equals(currentTile.getRoom())) {
-				if (suspectSolutionString == null || weaponSolutionString == null) {
-					makeBotSuggestionWithNotebook(currentTile);
-				}
-				// Make accusation.
-				else {
-					makeSuggestion(new CluedoSuggestion(roomSolutionString, suspectSolutionString, weaponSolutionString, getLocalName()));
-				}
-			}
-			// Make suggestion
-			else 
-				makeBotSuggestionWithNotebook(currentTile);
+			makeBotSuggestionWithNotebook(currentTile);
 
 		} else {
 			// delete the part of the path that he moved
@@ -460,13 +460,18 @@ public class NormalBotPlayer extends BotPlayerAgent {
 				}
 			}
 		} else {
-			System.out.println("Normal Bot: No target coord after requesting a dice roll " + roomSolutionString);
-			System.exit(-1);
+			// System.out.println("Normal Bot: No target coord after requesting a dice roll " + roomSolutionString);
+			endMyTurn();
 		}
 	}
 
 	@Override
 	public void resetState() {
+		playerNotebook = new CluedoNotebook();
+		targetCoord = null;
+		minimumPath = null;
+		targetRoom = null;
+
 		roomSolutionString = null;
 		suspectSolutionString = null;
 		weaponSolutionString = null;
