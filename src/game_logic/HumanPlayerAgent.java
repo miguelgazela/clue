@@ -9,6 +9,7 @@ import java.util.ListIterator;
 
 import jade.core.AID;
 import jade.core.ContainerID;
+import jade.core.Location;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
@@ -106,20 +107,14 @@ public class HumanPlayerAgent extends PlayerAgent {
 								gameState.board.buildReachableTiles(currentTile.getNeighbours(), reachablePos, diceResult-1);
 							} else {
 								ArrayList<Tile> room_doors = gameState.board.getRoomDoors(currentTile.getRoom());
-
-								ListIterator<Tile> it = room_doors.listIterator();
-								while(true) {
-									if(it.hasNext()) {
-										Tile door = it.next();
-										if(door.isOccupied()) {
-											it.remove();
-										}
-									} else {
-										break;
+								ArrayList<Tile> freeDoors = new ArrayList<>();
+								
+								for(Tile door: room_doors) {
+									if(!door.isOccupied()) {
+										freeDoors.add(door);
 									}
 								}
-
-								gameState.board.buildReachableTiles(room_doors, reachablePos, diceResult-1);
+								gameState.board.buildReachableTiles(freeDoors, reachablePos, diceResult-1);
 							}
 							myGui.updateReachablePos(reachablePos);
 						}
@@ -135,9 +130,8 @@ public class HumanPlayerAgent extends PlayerAgent {
 							myGui.repaint();
 							
 							if(gameState.board.getTileAtPosition(posOnBoard).isRoom()) {
-								// move the player to that room here?
 //								ContainerID cid = new ContainerID(gameState.board.getTileAtPosition(posOnBoard).getRoom(), null);
-//								doMove(cid);
+//								myAgent.doMove((Location)cid);
 							}
 						}
 					}

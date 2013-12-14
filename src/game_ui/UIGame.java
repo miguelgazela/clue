@@ -425,15 +425,30 @@ public class UIGame extends JFrame implements ActionListener {
 						}
 						
 						turnPlayer = gameManagerAgent.getCluedo().getTurnPlayerName();
-						Color oldColor = g.getColor(); // saves the old color
-						// draw turn player name
-						if(turnPlayer != null) {
+						if(gameManagerAgent.gameIsOver) {
+							Color oldColor = g.getColor(); // saves the old color
 							Font font = new Font("Verdana", Font.BOLD, 24);
 							g.setFont(font);
-							g.setColor(UIResourcesLoader.getInstanceLoader().player_colors.get(turnPlayer));
-							g.drawString(turnPlayer, 280, 696);
+							g.setColor(Color.WHITE);
+							
+							if(turnPlayer != null) {
+								g.drawString("GAME OVER. THE WINNER IS "+turnPlayer, 280, 696);
+							} else {
+								g.drawString("GAME OVER!", 280, 696);
+							}
+							
+							g.setColor(oldColor);
+						} else {
+							Color oldColor = g.getColor(); // saves the old color
+							// draw turn player name
+							if(turnPlayer != null) {
+								Font font = new Font("Verdana", Font.BOLD, 24);
+								g.setFont(font);
+								g.setColor(UIResourcesLoader.getInstanceLoader().player_colors.get(turnPlayer));
+								g.drawString(turnPlayer, 280, 696);
+							}
+							g.setColor(oldColor);
 						}
-						g.setColor(oldColor);
 						
 						// draw sidebar names
 						c = uiResourcesLoader.sidebar_name_coord;

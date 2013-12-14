@@ -85,8 +85,8 @@ public class GameManagerAgent extends GuiAgent {
 		myGui = new UIGame(this);
 
 
-		myLogger.setLevel(Logger.SEVERE);
-		numberOfGamesToMake = 1000;
+		myLogger.setLevel(Logger.INFO);
+		numberOfGamesToMake = 1;
 //		winners = new String[numberOfGamesToMake];
 		
 		gameState = GameState.Waiting_for_players;
@@ -176,6 +176,7 @@ public class GameManagerAgent extends GuiAgent {
 					case GameMessage.ASK_DICE_ROLL:
 					{
 						if(gameState == GameState.Waiting_for_play) { // waiting for a player to do something
+							myLogger.log(Logger.INFO, "GAME_MANAGER - RECEIVED ASK DICE ROLL REQUEST");
 							addBehaviour(new HandleDiceRollRequest(myAgent, msg));
 						}
 					}
@@ -183,6 +184,7 @@ public class GameManagerAgent extends GuiAgent {
 					case GameMessage.MAKE_MOVE:
 					{
 						if(gameState == GameState.Waiting_for_play) {
+							myLogger.log(Logger.INFO, "GAME_MANAGER - RECEIVED MAKE MOVE REQUEST");
 							addBehaviour(new HandleMakeMoveRequest(myAgent, msg));
 						}
 					}
@@ -190,6 +192,7 @@ public class GameManagerAgent extends GuiAgent {
 					case GameMessage.MAKE_SUGGESTION:
 					{
 						if(gameState == GameState.Waiting_for_play) {
+							myLogger.log(Logger.INFO, "GAME_MANAGER - RECEIVED MAKE SUGGESTION");
 							addBehaviour(new HandleMakeSuggestionRequest(myAgent, msg));
 						}
 					}
@@ -205,6 +208,7 @@ public class GameManagerAgent extends GuiAgent {
 					case GameMessage.HAVE_CONTRADICTION_CARD:
 					{
 						if(gameState == GameState.Waiting_for_play) {
+							myLogger.log(Logger.INFO, "GAME_MANAGER - RECEIVED SUGGESTION CONTRADICTION");
 							addBehaviour(new HandleSuggestionContradiction(myAgent, msg));
 						}
 					}
@@ -213,6 +217,7 @@ public class GameManagerAgent extends GuiAgent {
 					{
 						// check if it's this player's turn
 						if(msg.getSender().getLocalName().equals(cluedo.getTurnPlayerName())) {
+							myLogger.log(Logger.INFO, "GAME_MANAGER - RECEIVED END TURN REQUEST");
 							myAgent.addBehaviour(new UpdateGameStateOfAllAgents());
 							cluedo.updateTurnPlayer();
 							numberTurns++;
@@ -577,6 +582,7 @@ public class GameManagerAgent extends GuiAgent {
 		numberTurns = 0;
 		numberSuggestions = 0;
 		suggestionsMade.clear();
+		gameIsOver = false;
 		
 		// send reset msg to all agents
 		for(AID agent: agents) {
@@ -677,9 +683,11 @@ public class GameManagerAgent extends GuiAgent {
 					agentType.put(Cluedo.suspects[i], new Integer(BOT));
 				}
 				
-				guest.start();
-				AID aid = new AID(Cluedo.suspects[i], AID.ISLOCALNAME);
-				agents.add(aid);
+				if(guest != null) {
+					guest.start();
+					AID aid = new AID(Cluedo.suspects[i], AID.ISLOCALNAME);
+					agents.add(aid);
+				}
 			}
 		}
 		catch (Exception e) {
