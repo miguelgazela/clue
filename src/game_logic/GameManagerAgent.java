@@ -303,6 +303,7 @@ public class GameManagerAgent extends GuiAgent {
 					}
 					
 					if(cluedo.isGameSolution(playerSuggestion.getRoom(), playerSuggestion.getSuspect(), playerSuggestion.getWeapon())) {
+						System.out.println("WINNER: " + playerSuggestion.getPlayer());
 						System.out.println("SUGGESTION: "+sgst);
 						System.out.println("SOLUTION: "+cluedo.getGameSolution());
 						gameOver();
