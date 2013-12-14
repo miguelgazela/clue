@@ -49,6 +49,7 @@ public class GameManagerAgent extends GuiAgent {
 	
 	private Cluedo cluedo;
 	private GameState gameState;
+	public boolean gameIsOver = false;
 	
 	// for statistics purposes
 	private ArrayList<String> suggestionsMade = new ArrayList<>();
@@ -212,6 +213,7 @@ public class GameManagerAgent extends GuiAgent {
 							myAgent.addBehaviour(new UpdateGameStateOfAllAgents());
 							cluedo.updateTurnPlayer();
 							numberTurns++;
+							myGui.repaint();
 							
 							if(numberTurns > limitTurns) {
 								myLogger.log(Logger.WARNING, "Agent "+getLocalName()+" - IT'S OVER "+limitTurns+" turns!!!");
@@ -489,6 +491,7 @@ public class GameManagerAgent extends GuiAgent {
 	 */
 	public void startGame() {
 		numberOfGamesToMake--;
+		gameIsOver = false;
 		try {
 			cluedo = new Cluedo(agents.size());
 			
@@ -510,6 +513,8 @@ public class GameManagerAgent extends GuiAgent {
 	
 	public void gameOver() {
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - GAMEOVER");
+		gameIsOver = true;
+		myGui.repaint();
 		
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - #TURNS: "+numberTurns);
 		myLogger.log(Logger.WARNING, "GAME_MANAGER - #SUGGESTIONS: "+numberSuggestions);
