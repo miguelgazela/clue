@@ -509,9 +509,8 @@ public class SmartBotPlayer extends BotPlayerAgent {
 					}
 				}
 			}
-		} else
+		} else 
 			System.out.println("No target coord after requesting a dice roll");
-			endMyTurn();
 	}
 
 	@Override
