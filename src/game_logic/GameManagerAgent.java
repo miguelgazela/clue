@@ -86,7 +86,7 @@ public class GameManagerAgent extends GuiAgent {
 
 		myLogger.setLevel(Logger.SEVERE);
 		numberOfGamesToMake = 2;
-		winners = new String[numberOfGamesToMake];
+//		winners = new String[numberOfGamesToMake];
 		
 		gameState = GameState.Waiting_for_players;
 
@@ -526,7 +526,7 @@ public class GameManagerAgent extends GuiAgent {
 		numberSuggestionsList.add(new Integer(numberSuggestions));
 		numberUniqueSuggestions.add(new Integer(suggestionsMade.size()));
 		
-		winners[2 - (numberOfGamesToMake + 1)] = cluedo.getTurnPlayerName();
+//		winners[2 - (numberOfGamesToMake + 1)] = cluedo.getTurnPlayerName();
 		
 		if(numberOfGamesToMake > 0) { // reset and start another game
 			resetGame();
@@ -553,7 +553,8 @@ public class GameManagerAgent extends GuiAgent {
 			
 			
 			for(int i = 0; i < gameSize; i++) {
-				writer.println(numberTurnsList.get(i) + " " + numberSuggestionsList.get(i) + " " + numberUniqueSuggestions.get(i) + " " + winners[i]);
+				writer.println(numberTurnsList.get(i) + " " + numberSuggestionsList.get(i) + " " + numberUniqueSuggestions.get(i));
+//				writer.println(numberTurnsList.get(i) + " " + numberSuggestionsList.get(i) + " " + numberUniqueSuggestions.get(i) + " " + winners[i]);
 				avgNumberTurns += numberTurnsList.get(i);
 				avgNumberSuggestions += numberSuggestionsList.get(i);
 				avgNumberUniqueSugestions += numberUniqueSuggestions.get(i);
