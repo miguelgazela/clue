@@ -52,6 +52,7 @@ public class GameManagerAgent extends GuiAgent {
 	public boolean gameIsOver = false;
 	
 	// for statistics purposes
+	private HashMap<String, Integer> numberWins = new HashMap<>();
 	private ArrayList<String> suggestionsMade = new ArrayList<>();
 	private ArrayList<Integer> numberTurnsList = new ArrayList<>();
 	private ArrayList<Integer> numberSuggestionsList = new ArrayList<>();
@@ -524,6 +525,12 @@ public class GameManagerAgent extends GuiAgent {
 		numberSuggestionsList.add(new Integer(numberSuggestions));
 		numberUniqueSuggestions.add(new Integer(suggestionsMade.size()));
 		
+		if(numberWins.containsKey(cluedo.getTurnPlayerName())) {
+			numberWins.put(cluedo.getTurnPlayerName(), numberWins.get(cluedo.getTurnPlayerName()) + 1);
+		} else {
+			numberWins.put(cluedo.getTurnPlayerName(), 1);
+		}
+		
 		if(numberOfGamesToMake > 0) { // reset and start another game
 			resetGame();
 		} else {
@@ -566,6 +573,7 @@ public class GameManagerAgent extends GuiAgent {
 		numberTurns = 0;
 		numberSuggestions = 0;
 		suggestionsMade.clear();
+		numberWins.clear();
 		
 		// send reset msg to all agents
 		for(AID agent: agents) {
