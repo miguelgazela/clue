@@ -16,10 +16,18 @@ public class CluedoNotebook implements Serializable {
 	public static final int POSSIBLE_SOLUTION = 2;
 
 	private HashMap<String, Integer> cards_state;
+
+	private ArrayList<CluedoSuggestion> otherPlayersSuggestions;	
+	private HashMap<String, CluedoCard> cardsShownToOtherPlayers;
+	private HashMap<String, String> otherPlayersKnownCards;
+
 	private Random r = new Random(System.currentTimeMillis());
 
 	public CluedoNotebook() {
 		cards_state = new HashMap<>();
+		otherPlayersSuggestions = new ArrayList<>();
+		cardsShownToOtherPlayers = new HashMap<>();
+		otherPlayersKnownCards = new HashMap<>();
 		initCardsState();
 	}
 
@@ -50,6 +58,42 @@ public class CluedoNotebook implements Serializable {
 
 	public HashMap<String, Integer> getCardsState() {
 		return cards_state;
+	}
+
+	public ArrayList<CluedoSuggestion> getOtherPlayerSuggestions() {
+		return otherPlayersSuggestions;
+	}
+
+	public void addOtherPlayerSuggestion(CluedoSuggestion suggestion) {
+		otherPlayersSuggestions.add(suggestion);
+	}
+
+	public void updateCheckedCardsWithSuggestions() {
+
+	}
+
+	/**
+	 * Saves the card contradicted and the player who made the contradiction,
+	 * so this player can later make deductions from other players plays
+	 * 
+	 * @param player
+	 * @param card
+	 */
+	public void saveOtherPlayerCard(String card, String player) {		
+		otherPlayersKnownCards.put(card, player);
+	}
+	
+	public String getPlayerWhoHasCard(String card) {
+		return otherPlayersKnownCards.get(card);
+	}
+
+	public boolean hasShownCardToPlayer(String player, CluedoCard card) {
+		return cardsShownToOtherPlayers.containsKey(player) &&
+				cardsShownToOtherPlayers.containsValue(card);
+	}
+
+	public void addCardShownToPlayer(String player, CluedoCard card) {
+		cardsShownToOtherPlayers.put(player, card);
 	}
 
 	public ArrayList<String> getNotCheckedRooms() {

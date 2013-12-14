@@ -39,7 +39,7 @@ public class NormalBotPlayer extends BotPlayerAgent {
 				if (currentTile.getRoom().equals(roomSolutionString)) {
 					// Make suggestion.
 					if (suspectSolutionString == null || weaponSolutionString == null)
-						makeNormalBotSuggestion(currentTile);
+						makeBotSuggestionWithNotebook(currentTile);
 
 					// Make accusation.
 					else
@@ -200,7 +200,7 @@ public class NormalBotPlayer extends BotPlayerAgent {
 					askDiceRoll();
 				} else { // the player is blocked in the room
 					//					System.out.println("BLOCKED IN ROOM!!!");
-					makeNormalBotSuggestion(currentTile);
+					makeBotSuggestionWithNotebook(currentTile);
 				}
 
 			} else {
@@ -215,7 +215,7 @@ public class NormalBotPlayer extends BotPlayerAgent {
 		}
 	}
 
-	private void makeNormalBotSuggestion(Tile current) {
+	private void makeBotSuggestionWithNotebook(Tile current) {
 
 		String suspect = null, weapon = null;
 		ArrayList<String> uncheckedSuspects = playerNotebook.getNotCheckedSuspects();
@@ -342,7 +342,7 @@ public class NormalBotPlayer extends BotPlayerAgent {
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 				askDiceRoll();
 			} else { // the player is blocked in the room
-				makeNormalBotSuggestion(currentTile);
+				makeBotSuggestionWithNotebook(currentTile);
 			}
 
 		} else {
@@ -367,7 +367,7 @@ public class NormalBotPlayer extends BotPlayerAgent {
 			// Player is in solution room
 			if (roomSolutionString != null && roomSolutionString.equals(currentTile.getRoom())) {
 				if (suspectSolutionString == null || weaponSolutionString == null) {
-					makeNormalBotSuggestion(currentTile);
+					makeBotSuggestionWithNotebook(currentTile);
 				}
 				// Make accusation.
 				else {
@@ -376,7 +376,7 @@ public class NormalBotPlayer extends BotPlayerAgent {
 			}
 			// Make suggestion
 			else 
-				makeNormalBotSuggestion(currentTile);
+				makeBotSuggestionWithNotebook(currentTile);
 
 		} else {
 			// delete the part of the path that he moved
