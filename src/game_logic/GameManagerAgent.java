@@ -84,7 +84,6 @@ public class GameManagerAgent extends GuiAgent {
 		SLAnimator.start();
 		myGui = new UIGame(this);
 
-
 		myLogger.setLevel(Logger.INFO);
 		numberOfGamesToMake = 1;
 //		winners = new String[numberOfGamesToMake];

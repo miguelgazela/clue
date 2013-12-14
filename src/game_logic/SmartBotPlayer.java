@@ -1,7 +1,6 @@
 package game_logic;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.Random;
 
@@ -88,26 +87,6 @@ public class SmartBotPlayer extends BotPlayerAgent {
 				}
 			}
 		}
-
-		if(targetCoord == null){ //if solution room is blocked, go to a near neighboor
-			for(Tile door: roomDoors) {
-				for(Tile neighboor: door.getNeighbours()) {
-					if(!neighboor.isOccupied()) {
-
-						ArrayList<Tile> path = gameState.board.djs(posOnBoard, neighboor.getCoordinates());
-						int dist = path.size();
-
-						if(dist < minDistance) {
-							targetRoom = dest;
-							minDistance = dist;
-							minimumPath = path;
-							targetCoord = neighboor.getCoordinates();
-						}
-					}
-				}
-			}
-		}
-
 	}
 
 	private void buildPathFromRoomToRoom(String dest, Tile currentTile) {
@@ -184,21 +163,21 @@ public class SmartBotPlayer extends BotPlayerAgent {
 		targetCoord = null;
 		minimumPath = null;
 		targetRoom = null;
-		
+
 		ArrayList<String> rooms = playerNotebook.getNotCheckedRooms();
-	
+
 		// Gets closest unchecked room
 		for (String room : rooms) {
-	
+
 			if(!room.equals("Corridor")) {
 				ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(room);
-	
+
 				for(Tile door: roomDoors) {
 					if(!door.isOccupied()) {
-	
+
 						ArrayList<Tile> path = gameState.board.djs(posOnBoard, door.getCoordinates());
 						int dist = path.size();
-	
+
 						if(dist < minDistance) {
 							targetRoom = room;
 							minDistance = dist;
@@ -223,12 +202,12 @@ public class SmartBotPlayer extends BotPlayerAgent {
 					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 					askDiceRoll();
 				} else { // the player is blocked in the room
+					//					System.out.println("BLOCKED IN ROOM!!!");
 					makeBotSuggestionWithNotebook(currentTile);
 				}
 
 			} else {
 				calculateNewPathFromCorridor();
-
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING TO RANDOM ROOM: "+targetRoom);
 				askDiceRoll();
 			}
@@ -247,18 +226,10 @@ public class SmartBotPlayer extends BotPlayerAgent {
 		while(true) {
 			int cardsOwnedByPlayer = 0;
 
-			int nSuspects,nWeapons;
 			// pick a random unchecked suspect
-			if((nSuspects = uncheckedSuspects.size())>0)
-				suspect = uncheckedSuspects.get(r.nextInt(nSuspects));
-			else
-				suspect = Cluedo.suspects[r.nextInt(Cluedo.suspects.length)];
-
-			// pick a random unchecked weapon			
-			if((nWeapons = uncheckedWeapons.size())>0)
-				weapon = uncheckedWeapons.get(r.nextInt(nWeapons));
-			else
-				weapon = Cluedo.weapons[r.nextInt(Cluedo.weapons.length)];
+			suspect = uncheckedSuspects.get(r.nextInt(uncheckedSuspects.size()));
+			// pick a random unchecked weapon
+			weapon = uncheckedWeapons.get(r.nextInt(uncheckedWeapons.size()));
 
 			for(CluedoCard card: myCards) {
 				if(card.getName().equals(suspect) || card.getName().equals(weapon)) {
@@ -278,7 +249,6 @@ public class SmartBotPlayer extends BotPlayerAgent {
 	public void handleCardFromPlayer(ACLMessage msg, CluedoCard card) {
 		playerNotebook.updateCardState(card.getName(), CluedoNotebook.NOT_SOLUTION);		
 		playerNotebook.saveOtherPlayerCard(card.getName(), msg.getSender().getLocalName());
-		playerNotebook.updateCardNotOwnedByPlayer(card.getName(),msg.getSender().getLocalName());
 
 		ArrayList<String> uncheckedSuspects = playerNotebook.getNotCheckedSuspects();
 		ArrayList<String> uncheckedWeapons = playerNotebook.getNotCheckedWeapons();
@@ -327,9 +297,8 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 			if (!(myCardsString.contains(card) || 
 					(playerWhoHasTheCard != null &&
-					!playerWhoHasTheCard.equals(playerThatContradicted)) 					
-							//|| checkOtherSugestionCards(suggestionCards,card,playerThatContradicted) // if the other two cards are known to not be owned by the player
-							)) {
+					!playerWhoHasTheCard.equals(playerThatContradicted)))) {
+
 				cardDeducted = card;
 				checkedCardsCounter++;
 			}
@@ -338,40 +307,14 @@ public class SmartBotPlayer extends BotPlayerAgent {
 		// Made a deduction
 		if (checkedCardsCounter == 1) {
 			playerNotebook.updateCardState(cardDeducted, CluedoNotebook.NOT_SOLUTION);
-			playerNotebook.saveOtherPlayerCard(cardDeducted, playerThatContradicted);
-			playerNotebook.updateCardNotOwnedByPlayer(cardDeducted, playerThatContradicted);
 		}
 	}
 
-	private boolean checkOtherSugestionCards(ArrayList<String> suggestionCards, String card, String player) {
-
-		boolean known = true;
-		for(String otherCard : suggestionCards){
-			if(!otherCard.equals(card)){
-				ArrayList<String> cards = playerNotebook.getCardNotOwnedByPlayer(player);
-				if(cards != null && !cards.contains(otherCard))
-					known = false;
-			}
-		}
-
-		return known;
-	}
 	@Override
 	public void handleNoCardToContradict(CluedoSuggestion playerSuggestion,
 			String playerThatContradicted) {
-		ArrayList<String> cards = playerNotebook.getCardNotOwnedByPlayer(playerThatContradicted);
-		if(cards == null) {
-			playerNotebook.saveCardNotOwnedByPlayer(playerSuggestion.getRoom(), playerThatContradicted);
-			playerNotebook.saveCardNotOwnedByPlayer(playerSuggestion.getSuspect(), playerThatContradicted);
-			playerNotebook.saveCardNotOwnedByPlayer(playerSuggestion.getWeapon(), playerThatContradicted);
-		} else {
-			if(!cards.contains(playerSuggestion.getRoom()))
-				playerNotebook.saveCardNotOwnedByPlayer(playerSuggestion.getRoom(), playerThatContradicted);
-			if(!cards.contains(playerSuggestion.getSuspect()))
-				playerNotebook.saveCardNotOwnedByPlayer(playerSuggestion.getSuspect(), playerThatContradicted);
-			if(!cards.contains(playerSuggestion.getWeapon()))
-				playerNotebook.saveCardNotOwnedByPlayer(playerSuggestion.getWeapon(), playerThatContradicted);
-		}
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
@@ -386,7 +329,7 @@ public class SmartBotPlayer extends BotPlayerAgent {
 			for(CluedoCard card: myCards) {
 				String cardName = card.getName();
 
-				// Ii have one card to contradict, say yes to gamemanager and send card to the requester
+				// i have one card to contradict, say yes to gamemanager and send card to the requester
 				if(cardName.equals(playerSuggestion.getRoom()) 
 						|| cardName.equals(playerSuggestion.getSuspect()) 
 						|| cardName.equals(playerSuggestion.getWeapon())) {
@@ -467,7 +410,6 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 		} else {
 			calculateNewPathFromCorridor();
-
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING INSTEAD TO RANDOM ROOM: "+targetRoom);
 			askDiceRoll();
 		}
@@ -491,7 +433,6 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 		} else {
 			// delete the part of the path that he moved
-
 			ListIterator<Tile> it = minimumPath.listIterator();
 			while(it.hasNext()) {
 				Tile current = it.next();
@@ -502,7 +443,6 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 				it.remove();
 			}
-
 			endMyTurn();
 		}
 	}
@@ -564,15 +504,19 @@ public class SmartBotPlayer extends BotPlayerAgent {
 					}
 				}
 			}
-		} else
-			{
-				System.out.println("No target coord after requesting a dice roll");
-				endMyTurn();
-			}
-		} 
+		} else {
+//			System.out.println("No target coord after requesting a dice roll");
+			endMyTurn();
+		}
+	}
 
 	@Override
 	public void resetState() {
+		playerNotebook = new CluedoNotebook();
+		targetCoord = null;
+		minimumPath = null;
+		targetRoom = null;
+
 		roomSolutionString = null;
 		suspectSolutionString = null;
 		weaponSolutionString = null;
