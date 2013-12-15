@@ -16,19 +16,25 @@ public class CluedoNotebook implements Serializable {
 	public static final int POSSIBLE_SOLUTION = 2;
 
 	private HashMap<String, Integer> cards_state;
-
-	private ArrayList<CluedoSuggestion> otherPlayersSuggestions;	
+	
 	private HashMap<String, CluedoCard> cardsShownToOtherPlayers;
 	private HashMap<String, String> otherPlayersKnownCards;
 	private HashMap<String, ArrayList<String>> cardsNotOwnedByPlayer;
+	
+	// Have both the unchecked cards and the suggested cards 
+	// duplicated when they also have not been checked yet
+	private ArrayList<String> suspectsSuggestedByOthers;
+	private ArrayList<String> weaponsSuggestedByOthers;
+	
 	private Random r = new Random(System.currentTimeMillis());
 
 	public CluedoNotebook() {
 		cards_state = new HashMap<>();
-		otherPlayersSuggestions = new ArrayList<>();
 		cardsShownToOtherPlayers = new HashMap<>();
 		otherPlayersKnownCards = new HashMap<>();
 		cardsNotOwnedByPlayer = new HashMap<>();
+		suspectsSuggestedByOthers = new ArrayList<>();
+		weaponsSuggestedByOthers = new ArrayList<>();
 		initCardsState();
 	}
 
@@ -36,6 +42,11 @@ public class CluedoNotebook implements Serializable {
 		for(CluedoCard card: cards) {
 			cards_state.put(card.getName(), HAS_CARD);
 		}
+		
+		for(String card : getNotCheckedSuspects())
+			suspectsSuggestedByOthers.add(card);
+		for(String card : getNotCheckedWeapons())
+			weaponsSuggestedByOthers.add(card);
 	}
 
 	public void updateCardState(String card) {
@@ -55,24 +66,37 @@ public class CluedoNotebook implements Serializable {
 	public void updateCardState(String card, int state) {
 		if (cards_state.containsKey(card))
 			cards_state.put(card, state);
+
+		if (Arrays.asList(Cluedo.suspects).contains(card))
+			while (suspectsSuggestedByOthers.contains(card))
+				suspectsSuggestedByOthers.remove(card);
+		else if (Arrays.asList(Cluedo.weapons).contains(card))
+			while (weaponsSuggestedByOthers.contains(card))
+				weaponsSuggestedByOthers.remove(card);
 	}
 
 	public HashMap<String, Integer> getCardsState() {
 		return cards_state;
 	}
-
-	public ArrayList<CluedoSuggestion> getOtherPlayerSuggestions() {
-		return otherPlayersSuggestions;
+	
+	public void addSuspectSuggestedByOtherPlayer(String card) {
+		if (suspectsSuggestedByOthers.contains(card))
+			suspectsSuggestedByOthers.add(card);
 	}
-
-	public void addOtherPlayerSuggestion(CluedoSuggestion suggestion) {
-		otherPlayersSuggestions.add(suggestion);
+	
+	public void addWeaponSuggestedByOtherPlayer(String card) {
+		if (weaponsSuggestedByOthers.contains(card))
+			weaponsSuggestedByOthers.add(card);
 	}
-
-	public void updateCheckedCardsWithSuggestions() {
-
+	
+	public String getMostProbableSolutionSuspect() {
+		return suspectsSuggestedByOthers.get(r.nextInt(suspectsSuggestedByOthers.size()));
 	}
-
+	
+	public String getMostProbableSolutionWeapon() {
+		return weaponsSuggestedByOthers.get(r.nextInt(weaponsSuggestedByOthers.size()));
+	}
+	
 	/**
 	 * Saves the card contradicted and the player who made the contradiction,
 	 * so this player can later make deductions from other players plays
@@ -104,7 +128,7 @@ public class CluedoNotebook implements Serializable {
 
 	public void updateCardNotOwnedByPlayer(String player, String card) {
 
-		for(String otherPlayer :cardsNotOwnedByPlayer.keySet()){
+		for(String otherPlayer : cardsNotOwnedByPlayer.keySet()){
 			if(!otherPlayer.equals(player))		
 				saveCardNotOwnedByPlayer(card,otherPlayer);						
 		}

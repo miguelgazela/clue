@@ -87,6 +87,24 @@ public class SmartBotPlayer extends BotPlayerAgent {
 				}
 			}
 		}
+		if(targetCoord == null){ //if solution room is blocked, go to a near neighboor
+			for(Tile door: roomDoors) {
+				for(Tile neighboor: door.getNeighbours()) {
+					if(!neighboor.isOccupied()) {
+
+						ArrayList<Tile> path = gameState.board.djs(posOnBoard, neighboor.getCoordinates());
+						int dist = path.size();
+
+						if(dist < minDistance) {
+							targetRoom = dest;
+							minDistance = dist;
+							minimumPath = path;
+							targetCoord = neighboor.getCoordinates();
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void buildPathFromRoomToRoom(String dest, Tile currentTile) {
@@ -97,10 +115,10 @@ public class SmartBotPlayer extends BotPlayerAgent {
 		doorToExit = null;
 		minimumPath = null;
 
+		ArrayList<Tile> roomDoors_2 = gameState.board.getRoomDoors(dest);
+
 		for(Tile door: roomDoors) {
 			if(!door.isOccupied()) {
-				ArrayList<Tile> roomDoors_2 = gameState.board.getRoomDoors(dest);
-
 				for(Tile door_2: roomDoors_2) {
 					if(!door_2.isOccupied()) {
 						ArrayList<Tile> path = gameState.board.djs(door.getCoordinates(), door_2.getCoordinates());
@@ -116,7 +134,29 @@ public class SmartBotPlayer extends BotPlayerAgent {
 					}
 				}
 			}
-		}	
+		}
+		if(targetCoord == null) {
+			for(Tile door: roomDoors) {
+				if(!door.isOccupied()) {
+					for(Tile door_2: roomDoors_2) {
+						for(Tile neighboor: door.getNeighbours()) {
+							if(!door_2.isOccupied()) {
+								ArrayList<Tile> path = gameState.board.djs(door.getCoordinates(), neighboor.getCoordinates());
+								int dist = path.size();
+
+								if(dist < minDistance) {
+									targetRoom = dest;
+									minDistance = dist;
+									minimumPath = path;
+									targetCoord = door_2.getCoordinates();
+									doorToExit = door;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void calculateNewPathFromRoom(Tile currentTile) {
@@ -220,27 +260,9 @@ public class SmartBotPlayer extends BotPlayerAgent {
 	private void makeBotSuggestionWithNotebook(Tile current) {
 
 		String suspect = null, weapon = null;
-		ArrayList<String> uncheckedSuspects = playerNotebook.getNotCheckedSuspects();
-		ArrayList<String> uncheckedWeapons = playerNotebook.getNotCheckedWeapons();
 
-		while(true) {
-			int cardsOwnedByPlayer = 0;
-
-			// pick a random unchecked suspect
-			suspect = uncheckedSuspects.get(r.nextInt(uncheckedSuspects.size()));
-			// pick a random unchecked weapon
-			weapon = uncheckedWeapons.get(r.nextInt(uncheckedWeapons.size()));
-
-			for(CluedoCard card: myCards) {
-				if(card.getName().equals(suspect) || card.getName().equals(weapon)) {
-					cardsOwnedByPlayer++;
-				}
-			}
-
-			if(cardsOwnedByPlayer < 2) {
-				break;
-			}
-		}
+		suspect = playerNotebook.getMostProbableSolutionSuspect();
+		weapon = playerNotebook.getMostProbableSolutionWeapon();
 
 		makeSuggestion(new CluedoSuggestion(current.getRoom(), suspect, weapon, getLocalName()));
 	}
@@ -266,8 +288,11 @@ public class SmartBotPlayer extends BotPlayerAgent {
 
 	@Override
 	public void handleHasCardToContradict(CluedoSuggestion playerSuggestion,
-			String playerThatContradicted) {		
+			String playerThatContradicted) {
 		tryToDeductContradictedCard(playerSuggestion, playerThatContradicted);
+		
+		playerNotebook.addSuspectSuggestedByOtherPlayer(playerSuggestion.getSuspect());
+		playerNotebook.addWeaponSuggestedByOtherPlayer(playerSuggestion.getWeapon());
 	}
 
 	/**
@@ -505,7 +530,7 @@ public class SmartBotPlayer extends BotPlayerAgent {
 				}
 			}
 		} else {
-//			System.out.println("No target coord after requesting a dice roll");
+			//			System.out.println("No target coord after requesting a dice roll");
 			endMyTurn();
 		}
 	}
