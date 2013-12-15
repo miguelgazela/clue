@@ -116,10 +116,10 @@ public class NormalBotPlayer extends BotPlayerAgent {
 		doorToExit = null;
 		minimumPath = null;
 
+		ArrayList<Tile> roomDoors_2 = gameState.board.getRoomDoors(dest);
+		
 		for(Tile door: roomDoors) {
 			if(!door.isOccupied()) {
-				ArrayList<Tile> roomDoors_2 = gameState.board.getRoomDoors(dest);
-
 				for(Tile door_2: roomDoors_2) {
 					if(!door_2.isOccupied()) {
 						ArrayList<Tile> path = gameState.board.djs(door.getCoordinates(), door_2.getCoordinates());
@@ -135,7 +135,29 @@ public class NormalBotPlayer extends BotPlayerAgent {
 					}
 				}
 			}
-		}	
+		}
+		if(targetCoord == null) {
+			for(Tile door: roomDoors) {
+				if(!door.isOccupied()) {
+					for(Tile door_2: roomDoors_2) {
+						for(Tile neighboor: door.getNeighbours()) {
+							if(!door_2.isOccupied()) {
+								ArrayList<Tile> path = gameState.board.djs(door.getCoordinates(), neighboor.getCoordinates());
+								int dist = path.size();
+
+								if(dist < minDistance) {
+									targetRoom = dest;
+									minDistance = dist;
+									minimumPath = path;
+									targetCoord = door_2.getCoordinates();
+									doorToExit = door;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void calculateNewPathFromRoom(Tile currentTile) {
@@ -146,13 +168,15 @@ public class NormalBotPlayer extends BotPlayerAgent {
 		targetCoord = null;
 		doorToExit = null;
 		minimumPath = null;
-
+		
+		ArrayList<String> uncheckedRooms = new ArrayList<String> (playerNotebook.getNotCheckedRooms()); 
+		
 		for(Tile door: roomDoors) {
 			if(!door.isOccupied()) {
-
-				while(true) {					
-					String randomRoom = playerNotebook.getNotCheckedRooms().get(r.nextInt(playerNotebook.getNotCheckedRooms().size()));
-
+				while (!uncheckedRooms.isEmpty()) {
+					String randomRoom = uncheckedRooms.get(r.nextInt(uncheckedRooms.size()));
+					uncheckedRooms.remove(randomRoom);
+					
 					if(!randomRoom.equals(currentTile.getRoom())) {
 						ArrayList<Tile> roomDoors_2 = gameState.board.getRoomDoors(randomRoom);
 
@@ -170,14 +194,9 @@ public class NormalBotPlayer extends BotPlayerAgent {
 								}
 							}
 						}
-					}
-
-					if(targetRoom != null) {
-						//						System.out.println("Trying to go to room"+targetRoom);
-						//						System.out.println("Current posOnBoard: "+posOnBoard.toString());
-						//						System.out.println("Trying to reach coord: "+targetCoord.toString());
-						//						System.out.println("Leaving through door at: "+doorToExit.getCoordinates().toString());
-						break;
+						
+						if(targetRoom != null && targetCoord != null)
+							break;
 					}
 				}
 			}
@@ -190,8 +209,12 @@ public class NormalBotPlayer extends BotPlayerAgent {
 		minimumPath = null;
 		targetRoom = null;
 
-		while(true) {
-			String randomRoom = playerNotebook.getNotCheckedRooms().get(r.nextInt(playerNotebook.getNotCheckedRooms().size()));;
+		ArrayList<String> uncheckedRooms = new ArrayList<String> (playerNotebook.getNotCheckedRooms()); 
+		
+		while(!uncheckedRooms.isEmpty()) {
+			String randomRoom = uncheckedRooms.get(r.nextInt(uncheckedRooms.size()));
+			uncheckedRooms.remove(randomRoom);
+			
 			if(!randomRoom.equals("Corridor")) {
 				ArrayList<Tile> roomDoors = gameState.board.getRoomDoors(randomRoom);
 
@@ -210,9 +233,8 @@ public class NormalBotPlayer extends BotPlayerAgent {
 					}
 				}
 
-				if(targetRoom != null && targetCoord != null) {
+				if(targetRoom != null && targetCoord != null)
 					break;
-				}
 			}
 		}
 	}
@@ -225,7 +247,7 @@ public class NormalBotPlayer extends BotPlayerAgent {
 			if(currentTile.isRoom()) {
 				calculateNewPathFromRoom(currentTile);
 
-				if(targetRoom != null) {
+				if(targetRoom != null && targetCoord != null) {
 					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 					askDiceRoll();
 				} else { // the player is blocked in the room
@@ -235,11 +257,18 @@ public class NormalBotPlayer extends BotPlayerAgent {
 			} else {
 				calculateNewPathFromCorridor();
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING TO RANDOM ROOM: "+targetRoom);
-				askDiceRoll();
+
+				if(targetRoom != null && targetCoord != null)
+					askDiceRoll();
+				else
+					endMyTurn();
 			}
 		} else {
 			// TODO has to do different things?
-			askDiceRoll();
+			if(targetRoom != null && targetCoord != null)
+				askDiceRoll();
+			else
+				endMyTurn();
 		}
 	}
 
@@ -249,31 +278,18 @@ public class NormalBotPlayer extends BotPlayerAgent {
 		ArrayList<String> uncheckedSuspects = playerNotebook.getNotCheckedSuspects();
 		ArrayList<String> uncheckedWeapons = playerNotebook.getNotCheckedWeapons();
 
-		while(true) {
-			int cardsOwnedByPlayer = 0;
-
-			// pick a random unchecked suspect
-			suspect = uncheckedSuspects.get(r.nextInt(uncheckedSuspects.size()));
-			// pick a random unchecked weapon
-			weapon = uncheckedWeapons.get(r.nextInt(uncheckedWeapons.size()));
-
-			for(CluedoCard card: myCards) {
-				if(card.getName().equals(suspect) || card.getName().equals(weapon)) {
-					cardsOwnedByPlayer++;
-				}
-			}
-
-			if(cardsOwnedByPlayer < 2) {
-				break;
-			}
-		}
+		// pick a random unchecked suspect
+		suspect = uncheckedSuspects.get(r.nextInt(uncheckedSuspects.size()));
+		// pick a random unchecked weapon
+		weapon = uncheckedWeapons.get(r.nextInt(uncheckedWeapons.size()));
+		
 		makeSuggestion(new CluedoSuggestion(current.getRoom(), suspect, weapon, getLocalName()));
 	}
 
 	@Override
 	public void handleCardFromPlayer(ACLMessage msg, CluedoCard card) {
 		playerNotebook.updateCardState(card.getName(), CluedoNotebook.NOT_SOLUTION);
-		
+
 		ArrayList<String> uncheckedSuspects = playerNotebook.getNotCheckedSuspects();
 		ArrayList<String> uncheckedWeapons = playerNotebook.getNotCheckedWeapons();
 		ArrayList<String> uncheckedRooms = playerNotebook.getNotCheckedRooms();
@@ -363,7 +379,7 @@ public class NormalBotPlayer extends BotPlayerAgent {
 		if(currentTile.isRoom()) {
 			calculateNewPathFromRoom(currentTile);
 
-			if(targetRoom != null) {
+			if(targetRoom != null && targetCoord != null) {
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 				askDiceRoll();
 			} else { // the player is blocked in the room
@@ -372,7 +388,10 @@ public class NormalBotPlayer extends BotPlayerAgent {
 		} else {
 			calculateNewPathFromCorridor();
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING INSTEAD TO RANDOM ROOM: "+targetRoom);
-			askDiceRoll();
+			if(targetRoom != null && targetCoord != null)
+				askDiceRoll();
+			else
+				endMyTurn();
 		}
 	}
 
@@ -479,7 +498,7 @@ public class NormalBotPlayer extends BotPlayerAgent {
 
 	public void handlePlayerAccusation(ACLMessage msg) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
