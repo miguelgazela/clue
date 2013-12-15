@@ -85,7 +85,7 @@ public class GameManagerAgent extends GuiAgent {
 		myGui = new UIGame(this);
 
 		myLogger.setLevel(Logger.INFO);
-		numberOfGamesToMake = 1;
+		numberOfGamesToMake = 1000;
 //		winners = new String[numberOfGamesToMake];
 		
 		gameState = GameState.Waiting_for_players;

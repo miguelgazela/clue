@@ -238,7 +238,7 @@ public class SmartBotPlayer extends BotPlayerAgent {
 			if(currentTile.isRoom()) {
 				calculateNewPathFromRoom(currentTile);
 
-				if(targetRoom != null) {
+				if(targetRoom != null && targetCoord != null) {
 					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 					askDiceRoll();
 				} else { // the player is blocked in the room
@@ -249,12 +249,16 @@ public class SmartBotPlayer extends BotPlayerAgent {
 			} else {
 				calculateNewPathFromCorridor();
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING TO RANDOM ROOM: "+targetRoom);
-				askDiceRoll();
+				if (targetCoord != null && targetRoom != null)
+					askDiceRoll();
+				else
+					endMyTurn();
 			}
-		} else {
-			// TODO has to do different things?
-			askDiceRoll();
-		}
+		} else 
+			if (targetCoord != null)
+				askDiceRoll();
+			else
+				endMyTurn();
 	}
 
 	private void makeBotSuggestionWithNotebook(Tile current) {
@@ -426,7 +430,7 @@ public class SmartBotPlayer extends BotPlayerAgent {
 		if(currentTile.isRoom()) {
 			calculateNewPathFromRoom(currentTile);
 
-			if(targetRoom != null) {
+			if(targetRoom != null && targetCoord != null) {
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 				askDiceRoll();
 			} else { // the player is blocked in the room
@@ -436,7 +440,10 @@ public class SmartBotPlayer extends BotPlayerAgent {
 		} else {
 			calculateNewPathFromCorridor();
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING INSTEAD TO RANDOM ROOM: "+targetRoom);
-			askDiceRoll();
+			if (targetRoom != null && targetCoord != null)
+				askDiceRoll();
+			else
+				endMyTurn();
 		}
 	}
 
