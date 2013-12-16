@@ -1,32 +1,48 @@
 package game_logic;
 
+import jade.util.leap.Set;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Tile {
-	private int x;
-	private int y;
+/**
+ * 
+ *
+ */
+public class Tile implements Serializable {
 	
-	private List<Coordinates> validNeighbours;
+	private static final long serialVersionUID = 1010908308279299799L;
+	
+	//instance variables
+	private Coordinates pos;
+	
+	private List<Tile> validNeighbours;
 	private String playerOccupying;
 	private boolean isOccupied;
 	private boolean valid;
 	private boolean isDoor;
+	private boolean isSecretPassage;
 	private String room;
 	
+	// for the shortest path algorithm
+	public boolean visited = false;
+	public int distance;
+	public Tile previous = null;
+	
 	public Tile(int xPos, int yPos) {
-		x = xPos;
-		y = yPos;
+		pos = new Coordinates(xPos, yPos);
 		valid = true;
 		playerOccupying = "";
 		isOccupied=false;
 		isDoor = false;
+		isSecretPassage = false;
 		room = "";
-		validNeighbours = new ArrayList<Coordinates>();
+		validNeighbours = new ArrayList<Tile>();
 	}
 	
 	public Coordinates getCoordinates() {
-		return new Coordinates(x,y);
+		return pos;
 	}
 	public boolean isOccupied() {
 		return isOccupied;
@@ -40,15 +56,33 @@ public class Tile {
 		return valid;
 	}
 	
+	public boolean isSecretPassage() {
+		return isSecretPassage;
+	}
+	
+	public Tile setSecretPassage(boolean state) {
+		isSecretPassage = state;
+		return this;
+	}
+	
 	public String getRoom() {
 		return room;
 	}
 	
-	public List<Coordinates> getNeighbours() {
+	public void setRoom(String room) {
+		this.room = room;
+	}
+	
+	public boolean isRoom() {
+		return !room.equals("");
+	}
+	
+	public List<Tile> getNeighbours() {
 		return validNeighbours;
 	}
-	public void setValid(boolean state) {
+	public Tile setValid(boolean state) {
 		valid = state;
+		return this;
 	}
 	public void setOccupied(String player) {
 		playerOccupying = player;
@@ -60,14 +94,13 @@ public class Tile {
 		isOccupied = false;
 	}
 	
-	public void setDoor(String room) {
-		valid = true;
-		isDoor=true;
-		this.room = room;
+	public Tile setDoor(String room) {
+		isDoor = true;
+		return this;
 	}
 	
-	public void addNeighbour(Coordinates coord) {
-		validNeighbours.add(coord);
+	public void addNeighbour(Tile tile) {
+		validNeighbours.add(tile);
 	}
 	
 	public void printTile() {
@@ -78,5 +111,18 @@ public class Tile {
 			type = "^";
 		
 		System.out.print("["+type+"]");
+	}
+	
+	@Override
+	public int hashCode() {
+		return (pos.getX() * 31) ^ pos.getY();
+	}
+	@Override
+	public boolean equals(Object o){
+		if (o instanceof Tile) {
+			Tile other = (Tile) o;
+			return (pos.getX() == other.getCoordinates().getX() && pos.getY() == other.getCoordinates().getY());
+		}
+		return false;
 	}
 }
