@@ -33,7 +33,7 @@ public class RandomBotPlayer extends BotPlayerAgent {
 			if(currentTile.isRoom()) {
 				calculateNewPathFromRoom(currentTile);
 				
-				if(targetRoom != null) {
+				if(targetRoom != null && targetCoord != null) {
 					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 					askDiceRoll();
 				} else { // the player is blocked in the room
@@ -43,11 +43,15 @@ public class RandomBotPlayer extends BotPlayerAgent {
 			} else {
 				calculateNewPathFromCorridor();
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING TO RANDOM ROOM: "+targetRoom);
-				askDiceRoll();
+				if (targetCoord != null)
+					askDiceRoll();
+				else endMyTurn();
 			}
 		} else {
 			// TODO has to do different things?
-			askDiceRoll();
+			if (targetCoord != null)
+				askDiceRoll();
+			else endMyTurn();
 		}
 	}
 	
@@ -321,7 +325,7 @@ public class RandomBotPlayer extends BotPlayerAgent {
 		if(currentTile.isRoom()) {
 			calculateNewPathFromRoom(currentTile);
 			
-			if(targetRoom != null) {
+			if(targetRoom != null && targetCoord != null) {
 				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - NEXT RANDOM ROOM IS: "+targetRoom);
 				askDiceRoll();
 			} else { // the player is blocked in the room
@@ -331,13 +335,17 @@ public class RandomBotPlayer extends BotPlayerAgent {
 		} else {
 			calculateNewPathFromCorridor();
 			myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - GOING INSTEAD TO RANDOM ROOM: "+targetRoom);
-			askDiceRoll();
+			if (targetCoord != null)
+				askDiceRoll();
+			else endMyTurn();
 		}
 	}
 	
 	@Override
 	public void resetState() {
-
+		targetCoord = null;
+		minimumPath = null;
+		targetRoom = null;
 	}
 	@Override
 	public void handlePlayerAccusation(ACLMessage msg) {
